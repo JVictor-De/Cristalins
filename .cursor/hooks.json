@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "cmd.exe /c \".cursor\\hooks\\run_hook.cmd\" gate_shell.py",
+        "failClosed": true
+      }
+    ],
+    "beforeReadFile": [
+      {
+        "command": "cmd.exe /c \".cursor\\hooks\\run_hook.cmd\" gate_secrets.py",
+        "failClosed": true
+      }
+    ],
+    "beforeTabFileRead": [
+      {
+        "command": "cmd.exe /c \".cursor\\hooks\\run_hook.cmd\" gate_secrets.py",
+        "failClosed": true
+      }
+    ],
+    "beforeMCPExecution": [
+      {
+        "command": "cmd.exe /c \".cursor\\hooks\\run_hook.cmd\" gate_coolify.py",
+        "failClosed": true
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "cmd.exe /c \".cursor\\hooks\\run_hook.cmd\" remind_flutter_tests.py",
+        "failClosed": false
+      }
+    ]
+  }
+}

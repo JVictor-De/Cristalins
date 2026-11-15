@@ -1,0 +1,17 @@
+---
+description: Coolify MCP — leitura livre no diagnóstico; write via card/hook (sem segundo sim)
+alwaysApply: true
+---
+
+# Coolify MCP
+
+## Leitura
+
+Tools de inspeção (`list_*`, `get_*`, `search_*`, `coolify_help`, overview, unhealthy) podem seguir quando o usuário pediu diagnóstico. Não despejar valores de secret; resumir o erro.
+
+## Write / lifecycle (deploy, control, cancel, env, delete)
+
+1. Só chamar se o usuário pediu a ação (ou claramente pediu deploy/restart/etc.).
+2. Antes da tool: dizer **qual recurso** e **o que muda** (sem colar secret no chat).
+3. A aprovação é o **card do Cursor / hook** (`gate_coolify`). **Não** exigir um segundo “sim” no chat depois que o card passou.
+4. Se o card for negado ou a tool falhar, parar — não insistir em loop.

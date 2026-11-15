@@ -1,0 +1,48 @@
+---
+description: Workflow spec-driven — 3 passos por mini-fase visão computacional
+globs: doc/prompts/visao_producao/**
+alwaysApply: false
+---
+
+# Workflow — visão por mini-fase
+
+## Ordem MVP (vertical slice)
+
+**1.5 → 1.6 → 4.5 → 0–3 → 4.12 → 5** (ver `ORQUESTRADOR.md`).
+
+## Modo automático (Agent CLI)
+
+Quando o usuário pedir execução sequencial sem intervenção ou rodar o runner:
+
+```powershell
+python doc/prompts/run_visao_producao_prompts_cursor.py --auto
+```
+
+- Execute **todos** os ids da fila em ordem, **sem perguntar** "posso continuar?".
+- Encadeie passos 1→2→3 **na mesma sessão** (exceção ao modo manual).
+- Siga `doc/prompts/visao_producao/MODO_AUTOMATICO.md`.
+- Retome de `VISAO_TRACKER.md` se houver passos `[x]`.
+
+Slash commands `/visao-*` foram removidos; não os invente.
+
+## Modo manual (três passos por fase)
+
+| Passo | Foco | Done quando |
+|-------|------|-------------|
+| **1** | Modelo, migration, contrato API ou schema | Código compila; testes podem ainda estar skip |
+| **2** | Wire: pipeline, endpoints, Flutter models | Integração mínima funcional |
+| **3** | Testes N.1 verdes, relatório, tracker | pytest/script da fase passa |
+
+## Ao terminar cada passo
+
+1. Rodar teste da fase (ou subset do passo).
+2. Gravar relatório: `doc/prompts/visao_producao/relatorios/YYYYMMDD-HHMMSS_<id>.md`.
+3. Atualizar `VISAO_TRACKER.md` (marcar passo, data, comando pytest).
+4. Responder com veredito curto + próximo id da fila.
+
+## Proibido
+
+- Commit / push (salvo pedido).
+- **Modo manual:** implementar passo 2 ou 3 no mesmo turno que passo 1 (salvo pedido explícito).
+- **Modo automático:** parar entre passos para pedir confirmação.
+- Pular tracker ou relatório.

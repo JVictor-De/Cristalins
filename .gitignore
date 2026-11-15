@@ -1,0 +1,153 @@
+# --- Secrets / env ---
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.p12
+*.key
+credentials.json
+service-account*.json
+secrets/
+.secrets/
+
+# --- Node / NestJS (api/) ---
+node_modules/
+dist/
+build/
+.tmp/
+.temp/
+.turbo/
+.nx/
+*.tsbuildinfo
+.eslintcache
+.npm
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+logs/
+*.log
+
+# --- Coverage / tests ---
+coverage/
+.nyc_output/
+*.lcov
+TEST-results.xml
+.failed-tests
+test-results/
+playwright-report/
+.jest/
+
+# --- Prisma ---
+# migrations e schema ficam versionados; só artefatos gerados
+prisma/*.db
+prisma/*.db-journal
+**/prisma/generated/
+
+# --- Flutter / Dart (app/) ---
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+.flutter-tools/
+.flutter-plugins
+.flutter-plugins-dependencies
+**/doc/api/
+**/ios/Flutter/.last_build_id
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/ServiceDefinitions.json
+**/macos/Flutter/ephemeral/
+**/linux/flutter/ephemeral/
+**/windows/flutter/ephemeral/
+**/android/.gradle/
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.*
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/key.properties
+**/*.jks
+**/*.keystore
+**/app.*.symbols
+**/app.*.map.json
+.melos_tool/
+.idea/libraries/
+.idea/workspace.xml
+.idea/tasks.xml
+*.iml
+*.ipr
+*.iws
+
+# --- Uploads / mídia gerada ---
+uploads/
+training_data/
+*.mp4
+*.mov
+!docs/prints/**
+
+# --- Python (hooks locais) ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Docker / local data ---
+docker-data/
+postgres-data/
+minio-data/
+*.sql.gz
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# --- IDEs / editores ---
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*~
+
+# --- Claude / Cursor locais (não versionar) ---
+.claude/settings.local.json
+.cursor/hooks/__pycache__/
+
+# --- Prompts (não versionar) ---
+# Super prompt / anexo
+super-prompt-cristalins.md
+docs/SUPER_PROMPT.md
+docs/ANEXO.md
+doc/Assinatura Cristalins Water Protein — Rio de Janeiro.md
+# Fila nova (passo_*.md, ORQUESTRADOR, TRACKER, HANDOFF, fila.json, logs, etc.)
+doc/prompts/
+scripts/*_run_auto.ps1
+.cristalins_assinatura_prompts_state.json
+.onda_paralela.json
+GATE_APROVADO.md
+
+# --- Misc ---
+*.bak
+*.tmp
+*.temp
+.cache/

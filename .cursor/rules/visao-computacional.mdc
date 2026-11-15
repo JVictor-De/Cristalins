@@ -1,0 +1,42 @@
+---
+description: Visão computacional Peladeiros — nomenclatura §0.6, escopo, modo auto ou manual
+globs: app/services/visao/**,scripts/visao_*,tests/test_visao_*,tests/test_gols_lista_contrato.py,tests/test_bot_gol_detectado.py,flutter_app/lib/**/gol_*
+alwaysApply: false
+---
+
+# Visão computacional — regras do agente
+
+## Escopo (não confundir)
+
+1. **Visão** — `app/services/visao/`, `scripts/visao_*.py`, endpoints `/visao/`, gols detectados.
+2. **SAC** (`sac/`) — suporte; **não** usar prompts/tools do SAC aqui.
+3. **Bot de produto** (`app/bot/whatsapp.py`) — só na Fase 4.9; ver `.cursor/rules/sac-vs-bot-produto.mdc`.
+
+## Spec obrigatória
+
+- Plano: `doc/05_FEATURES/VISAO_COMPUTACIONAL/PLANO_PRODUCAO_VPS_STREAM_COPY.md` (§0.6 nomenclatura).
+- Prompt do passo: `doc/prompts/visao_producao/prompts/`.
+- Progresso: `doc/prompts/visao_producao/VISAO_TRACKER.md`.
+
+## Nomenclatura (§0.6)
+
+| Usar | Não usar |
+|------|----------|
+| `criar_gol_detectado_partida()` | `criar_gol_automatico()`, `criar_gol_detectado()` |
+| `POST /api/v1/gols/{gol_id}/reivindicar` | `/visao/eventos-gol/...` |
+| `build_visao_config_from_camera()` | config global único por clube |
+| `GolMergeService` em `gol_merge_service.py` | lógica PTZ no core |
+
+PTZ: módulo `app/services/visao/ptz/` deletável; `VISAO_PTZ_ENABLED=false` por default. **Proibido** `if is_ptz` em `pipeline.py` / `detector.py`.
+
+## Workflow
+
+- **Modo automático:** Agent CLI — `python doc/prompts/run_visao_producao_prompts_cursor.py --auto` (`MODO_AUTOMATICO.md`). Slash `/visao-*` removidos.
+- **Modo manual:** **Uma mini-fase por sessão** — abrir o prompt em `doc/prompts/visao_producao/prompts/`.
+- Não avance para a próxima fase sem teste auto da matriz `MATRIZ_N1.md` passando.
+- Minimize escopo; não refatore fora do prompt.
+- Sem commit/push salvo pedido explícito.
+
+## Teste antes de marcar done
+
+Consulte `doc/prompts/visao_producao/MATRIZ_N1.md` e rode o pytest/script da fase.

@@ -1,0 +1,84 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+
+      "Bash(pytest *)",
+      "Bash(python -m pytest *)",
+      "PowerShell(pytest *)",
+      "PowerShell(python -m pytest *)",
+
+      "Bash(alembic *)",
+      "Bash(python -m alembic *)",
+      "PowerShell(alembic *)",
+      "PowerShell(python -m alembic *)",
+
+      "Bash(pip install *)",
+      "Bash(python -m pip install *)",
+      "PowerShell(pip install *)",
+
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "PowerShell(npm *)",
+      "PowerShell(npx *)",
+
+      "Bash(flutter *)",
+      "Bash(dart *)",
+      "PowerShell(flutter *)",
+      "PowerShell(dart *)",
+
+      "Bash(python *)",
+      "PowerShell(python *)",
+
+      "Bash(.venv/Scripts/python.exe *)",
+      "Bash(.venv/Scripts/pytest.exe *)",
+      "Bash(.venv/bin/python *)",
+      "Bash(.venv/bin/pytest *)",
+      "PowerShell(.venv\\Scripts\\python.exe *)",
+      "PowerShell(.venv\\Scripts\\pytest.exe *)",
+      "PowerShell(.venv/Scripts/python.exe *)",
+      "PowerShell(& .venv\\Scripts\\python.exe *)",
+
+      "Bash(cd *)",
+      "Bash(grep *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(find *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(echo *)",
+      "PowerShell(Get-Content *)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Select-String *)",
+      "PowerShell(Test-Path *)",
+
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git branch*)",
+      "Bash(git rev-parse*)",
+      "Bash(git ls-files*)",
+      "Bash(git add *)",
+      "PowerShell(git status*)",
+      "PowerShell(git diff*)",
+      "PowerShell(git log*)",
+      "PowerShell(git branch*)"
+    ],
+    "deny": [
+      "Bash(git push*)",
+      "Bash(git reset --hard*)",
+      "Bash(git checkout -- *)",
+      "Bash(git clean*)",
+      "Bash(rm -rf *)",
+      "PowerShell(git push*)",
+      "PowerShell(git reset --hard*)",
+      "PowerShell(git clean*)",
+      "PowerShell(Remove-Item -Recurse -Force *)"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+---
+description: Distingue SAC (atendimento) do bot WhatsApp de produto Peladeiros
+alwaysApply: true
+---
+
+# Peladeiros — dois agentes WhatsApp
+
+Não confundir:
+
+1. **SAC** (`sac/`) — atendente de suporte (login, conta, dúvidas de uso, Chatwoot).
+2. **Bot de produto** (`app/bot/whatsapp.py`) — interface do jogador (`gol`, `estatisticas`, `partidas`, `ranking`).
+
+Ao trabalhar em `sac/**`, seguir `sac/.cursor/rules/sac-agent.mdc` e `sac/docs/PROMPTS.md`.  
+Ao trabalhar em `app/bot/**` ou webhooks de produto, não aplicar prompts/tools do SAC.

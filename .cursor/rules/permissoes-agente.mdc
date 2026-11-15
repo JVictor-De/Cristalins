@@ -1,0 +1,34 @@
+---
+description: O que o agente pode e não pode fazer neste projeto (Peladeiros)
+alwaysApply: true
+---
+
+# Permissões do agente — Projeto P (Peladeiros)
+
+Complementa `.cursor/permissions.json` (allowlist / Auto-review). Este arquivo orienta o comportamento; o `permissions.json` reduz prompts de aprovação no Cursor. O enforcement técnico (bloquear shell perigoso, secrets e Coolify write) está em `.cursor/hooks/`.
+
+## Pode fazer (sem pedir de novo)
+
+- Ler, editar, criar e copiar código em: `app/`, `sac/`, `admin_frontend/`, `flutter_app/`, `conteudo_automation/`, `scripts/`, `tests/`, `doc/`, `kits/`, `migrations/`, `alembic/`, `laddingPage/`.
+- Rodar inspeção local: `git status|diff|log`, testes (`pytest`), scripts Python, builds/dev de frontend e Flutter.
+- Instalar deps locais (`pip`, `npm`/`pnpm`, `flutter pub get`) e subir Docker **local** do projeto.
+- Atualizar docs do repo quando fizer parte da tarefa.
+- Usar GitHub MCP em modo leitura; criar PR/issue só se o usuário pedir.
+- Coolify MCP **leitura** (`list_*` / `get_*` / `search_*` / help) se o usuário pediu diagnóstico.
+- Commit **somente** se o usuário pedir explicitamente.
+
+## Não pode fazer (pedir aprovação / não executar sozinho)
+
+- Ler ou editar `.env`, secrets, tokens, chaves, credenciais, `.ssh`.
+- `git push` (card/hook ask); `git push --force`, `reset --hard`, `clean -fd`, alterar `git config` (deny/hook).
+- Deploy, SSH/VPS/produção, migrations em banco de produção.
+- Coolify **write/deploy/restart/stop/delete** (leitura ok se pediu diagnóstico). Enforcement: allowlist + hook/card — não tratar list/get como “pedir sim”.
+- Apagar pastas grandes (`node_modules`, `.venv`, `uploads`, `training_data`, vídeos).
+- Publicar em redes sociais / WhatsApp / e-mail real (fora de dry-run/mock) sem pedido explícito.
+- Confundir SAC (`sac/`) com bot de produto (`app/bot/`) — ver regra `sac-vs-bot-produto`.
+
+## Como ativar no Cursor
+
+1. **Settings → Agents → Run Mode**: preferir **Allowlist** (ou Allowlist with Sandbox) enquanto houver `terminalAllowlist`/`mcpAllowlist` nos `permissions.json`.
+2. Espelho do usuário: `~/.cursor/permissions.json` deve refletir o do repo (inclui `claude`/`claude:*`, `agent`/`agent:*`, `scripts/*_run_auto.ps1`) — o Cursor às vezes ignora só a allowlist por projeto.
+3. Reinicie o Cursor se a allowlist não atualizar.
