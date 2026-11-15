@@ -1,8 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiServiceUnavailableResponse, ApiTags } from '@nestjs/swagger';
+import { Publico } from '../auth/decorators';
 import { HealthService, StatusSaude } from './health.service';
 
 @ApiTags('health')
+@Publico()
 @Controller('health')
 export class HealthController {
   constructor(private readonly health: HealthService) {}
