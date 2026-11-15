@@ -33,3 +33,12 @@
 | `/health` sem banco | 503 no formato de erro | Compose e Uptime Kuma enxergam a queda do banco |
 | Conexão do Prisma | Sob demanda (sem `$connect` no boot) | API sobe mesmo com o banco fora; o health mostra o estado |
 | Versões | NestJS 11, Jest 30, ESLint 9, `@types/node` 22 | Node 22 da stack |
+
+## 2026-11-15 — Deploy (`cr-4-deploy`)
+
+| Dúvida | Decisão | Motivo |
+| --- | --- | --- |
+| Trust proxy | `app.set('trust proxy', 1)` em `main.ts` | Atrás do Coolify, `req.ip` sem trust junta todo mundo no throttle do login (CT19) |
+| Health no container | `/api/v1/health` (não `/health`) | Prefixo real da API; compose e Uptime usam o mesmo path |
+| Prisma no runtime | `npm prune --omit=dev` + `prisma@7.10.1` no stage build | CLI fica em devDependencies; `migrate deploy` no entrypoint precisa dela |
+| Push de imagem no CI | Só comentário em `docs/DEPLOY.md` | Fase não altera workflow; João pede depois |

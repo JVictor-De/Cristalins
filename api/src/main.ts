@@ -9,11 +9,14 @@ carregarEnv({ path: path.resolve(process.cwd(), '..', '.env'), quiet: true });
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { configurarApp, PREFIXO_API } from './configurar-app';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // Coolify / reverse proxy: IP real do cliente (throttle login / CT19). Só 1 hop confiável.
+  app.set('trust proxy', 1);
   app.enableShutdownHooks();
   const origens = process.env.CORS_ORIGINS?.split(',').map((o) => o.trim()).filter(Boolean);
   if (origens?.length) app.enableCors({ origin: origens });
