@@ -1,0 +1,12 @@
+# Análise estática do app (flutter analyze). Regras base: flutter_lints.
+include: package:flutter_lints/flutter.yaml
+
+formatter:
+  page_width: 100
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    prefer_const_constructors: true
+    prefer_final_locals: true
+    avoid_print: true
