@@ -1,5 +1,11 @@
 import { Module } from '@nestjs/common';
+import { PrecosModule } from '../precos/precos.module';
+import { RecomendacaoService } from './recomendacao.service';
+import { RecomendacoesController } from './recomendacoes.controller';
 
-// Módulo vazio criado em cr-0-api; controllers e services chegam nas fases seguintes.
-@Module({})
+@Module({
+  imports: [PrecosModule],
+  controllers: [RecomendacoesController],
+  providers: [RecomendacaoService],
+})
 export class RecomendacoesModule {}

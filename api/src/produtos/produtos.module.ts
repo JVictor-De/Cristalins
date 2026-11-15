@@ -1,5 +1,10 @@
 import { Module } from '@nestjs/common';
+import { ProdutosController } from './produtos.controller';
+import { ProdutosService } from './produtos.service';
 
-// Módulo vazio criado em cr-0-api; controllers e services chegam nas fases seguintes.
-@Module({})
+@Module({
+  controllers: [ProdutosController],
+  providers: [ProdutosService],
+  exports: [ProdutosService],
+})
 export class ProdutosModule {}

@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
+import { KitsController } from './kits.controller';
+import { KitsService } from './kits.service';
 
-// Módulo vazio criado em cr-0-api; controllers e services chegam nas fases seguintes.
-@Module({})
+@Module({
+  controllers: [KitsController],
+  providers: [KitsService],
+})
 export class KitsModule {}
