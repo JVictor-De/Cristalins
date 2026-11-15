@@ -27,3 +27,11 @@ Auth, preço, ciclo, Pix, telas 2–8 e deploy ficam em `cr-1-*` em diante.
 - Migração inicial `api/prisma/migrations/20261114230000_init` (gerada com `prisma migrate diff --from-empty`)
 - Seed idempotente: 8 produtos, 4 kits, 5 zonas com bairros de exemplo, 7 fatores (volume, compromisso, fidelidade, verão +5% de 01/12/2026 a 31/03/2027), 1 admin, 2 clientes com endereço (`lat`/`lng` nulos), cupom `BEMVINDO10`
 - `api/package.json` mínimo — `cr-0-api` completa o projeto Nest
+
+## Esta etapa (`cr-0-api`)
+
+- NestJS 11 em `api/src/`: `main.ts` (TZ padrão `America/Sao_Paulo`, CORS por `CORS_ORIGINS`), `configurar-app.ts` (prefixo `/api/v1`, `ValidationPipe`, filtro global, Swagger em `/docs` com Bearer e uma tag por módulo)
+- `common/`: `ClockService`, `RegraNegocioException`, `FiltroExcecao` (`{ codigo, mensagem, campo? }`), `PrismaService` (adaptador pg), `CommonModule` global
+- `health/`: `GET /api/v1/health` com `SELECT 1` no banco (200 `ok` ou 503 `SERVICO_INDISPONIVEL`)
+- 16 módulos vazios na árvore do Anexo
+- Jest (unitário + e2e com Supertest), ESLint 9 flat config, `nest build` → `dist/src/main.js`
