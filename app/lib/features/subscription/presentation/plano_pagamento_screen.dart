@@ -15,6 +15,7 @@ import '../../../core/widgets/secao_agrupada.dart';
 import '../../../core/widgets/tela_titulo_grande.dart';
 import '../../quiz/domain/quiz.dart';
 import '../domain/assinatura.dart';
+import 'aguardando_pagamento_screen.dart';
 import 'plano_pagamento_controller.dart';
 
 /// Tela 7 — Plano e pagamento. Pix só; o QR Code chega em `cr-3-tela`.
@@ -61,7 +62,12 @@ class _ConteudoState extends State<_Conteudo> {
       );
       return;
     }
-    HapticFeedback.mediumImpact();
+    // Com Pix: tela de espera (QR + copia e cola) até a API ativar; o mediumImpact fica para a ativação.
+    if (criada.pix != null) {
+      mostrarAviso(context, 'Assinatura criada. Falta só o pagamento por Pix.');
+      Navigator.of(context).pushAndRemoveUntil(rotaAguardandoPagamento(criada), (_) => false);
+      return;
+    }
     mostrarAviso(
       context,
       'Assinatura criada. Primeira entrega prevista para ${Datas.curta(criada.dataEntrega)}, depois do pagamento por Pix.',

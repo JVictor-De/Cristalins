@@ -11,6 +11,7 @@ import 'package:cristalins_assinatura/features/catalog/domain/catalogo.dart';
 import 'package:cristalins_assinatura/features/quiz/data/recomendacao_repository.dart';
 import 'package:cristalins_assinatura/features/quiz/domain/quiz.dart';
 import 'package:cristalins_assinatura/features/subscription/data/assinatura_repository.dart';
+import 'package:cristalins_assinatura/features/subscription/domain/assinatura.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -81,6 +82,7 @@ void registrarFallbacks() {
   registerFallbackValue(const RespostasQuiz());
   registerFallbackValue(const NovoEndereco(cep: '', numero: ''));
   registerFallbackValue(<ItemCesta>[]);
+  registerFallbackValue(const PedidoAssinatura(itens: []));
 }
 
 /// 360 × 780 dp e datas em pt-BR, como nos demais testes de tela.

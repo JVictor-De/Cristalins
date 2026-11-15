@@ -141,14 +141,33 @@ class Cancelamento {
   final Dinheiro diferencaCompromisso;
 }
 
+/// Pix do 1º ciclo, como a API devolve em `ciclo.pix` (cr-3-gateway). O app só exibe.
+class PixCobranca {
+  const PixCobranca({required this.copiaECola, required this.qrCodeBase64});
+
+  final String copiaECola;
+
+  /// PNG em base64 (Asaas). No `ASAAS_MODE=fake` não é imagem: a tela mostra só o copia e cola.
+  final String qrCodeBase64;
+
+  /// O `FakeGateway` da API gera códigos `…FAKE-PIX-…`: é confirmação de demonstração, não Pix real.
+  bool get demonstracao => copiaECola.contains('FAKE-PIX');
+}
+
 /// Resultado de `POST /assinaturas`.
 class AssinaturaCriada {
   const AssinaturaCriada({
     required this.id,
     required this.valorPrimeiroCiclo,
     required this.dataEntrega,
+    this.vencimento,
+    this.pix,
   });
   final String id;
   final Dinheiro valorPrimeiroCiclo;
   final String dataEntrega;
+  final String? vencimento;
+
+  /// Ausente quando a API não gerou a cobrança (ex.: forma diferente de Pix).
+  final PixCobranca? pix;
 }

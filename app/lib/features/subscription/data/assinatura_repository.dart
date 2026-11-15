@@ -72,10 +72,18 @@ class AssinaturaRepository {
           },
         );
         final ciclo = r.data!['ciclo'] as Map<String, dynamic>;
+        final pix = ciclo['pix'] as Map<String, dynamic>?;
         return AssinaturaCriada(
           id: r.data!['id'] as String,
           valorPrimeiroCiclo: Dinheiro.daApi(ciclo['valor'] as num),
           dataEntrega: ciclo['dataEntrega'] as String,
+          vencimento: ciclo['vencimento'] as String?,
+          pix: pix == null
+              ? null
+              : PixCobranca(
+                  copiaECola: pix['copiaECola'] as String,
+                  qrCodeBase64: pix['qrCodeBase64'] as String,
+                ),
         );
       });
 
