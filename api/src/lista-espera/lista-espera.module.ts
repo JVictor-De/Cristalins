@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ListaEsperaController } from './lista-espera.controller';
+import { ListaEsperaService } from './lista-espera.service';
 
-// Módulo vazio criado em cr-0-api; controllers e services chegam nas fases seguintes.
-@Module({})
+@Module({
+  controllers: [ListaEsperaController],
+  providers: [ListaEsperaService],
+})
 export class ListaEsperaModule {}

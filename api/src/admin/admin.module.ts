@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
+import { AdminController } from './admin.controller';
+import { AdminService } from './admin.service';
 
-// Módulo vazio criado em cr-0-api; controllers e services chegam nas fases seguintes.
-@Module({})
+@Module({
+  controllers: [AdminController],
+  providers: [AdminService],
+})
 export class AdminModule {}

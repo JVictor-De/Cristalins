@@ -5,6 +5,7 @@ import { Papeis } from '../../src/auth/decorators';
 import { ClockService } from '../../src/common/clock.service';
 import { PrismaService } from '../../src/common/prisma.service';
 import { configurarApp } from '../../src/configurar-app';
+import { ViaCepClient } from '../../src/enderecos/viacep.client';
 import { PrismaFake } from './prisma-fake';
 
 /** 14/11/2026 12:00 em São Paulo. */
@@ -18,6 +19,22 @@ export class ClockFixo extends ClockService {
 
   override agora(): Date {
     return new Date(this.instante);
+  }
+}
+
+/** Relógio que o teste avança (ex.: passar do corte D-2). */
+export class RelogioAjustavel extends ClockService {
+  constructor(public instante: Date = AGORA_FIXA) {
+    super();
+  }
+
+  override agora(): Date {
+    return new Date(this.instante);
+  }
+
+  /** Vai para AAAA-MM-DD às HH:mm de São Paulo. */
+  irPara(data: string, hora = '12:00'): void {
+    this.instante = new Date(`${data}T${hora}:00.000-03:00`);
   }
 }
 
@@ -36,7 +53,14 @@ export interface AppDeTeste {
   prisma: PrismaFake;
 }
 
-export async function criarAppDeTeste(): Promise<AppDeTeste> {
+export interface OpcoesAppDeTeste {
+  /** Relógio injetado (padrão: ClockFixo em 14/11/2026 12:00 SP). */
+  relogio?: ClockService;
+  /** Substitui o ViaCEP real (rede) por um fake. */
+  viaCep?: Pick<ViaCepClient, 'buscar'>;
+}
+
+export async function criarAppDeTeste(opcoes: OpcoesAppDeTeste = {}): Promise<AppDeTeste> {
   const prisma = new PrismaFake();
   const modulo = await Test.createTestingModule({
     imports: [AppModule],
@@ -45,7 +69,9 @@ export async function criarAppDeTeste(): Promise<AppDeTeste> {
     .overrideProvider(PrismaService)
     .useValue(prisma)
     .overrideProvider(ClockService)
-    .useValue(new ClockFixo())
+    .useValue(opcoes.relogio ?? new ClockFixo())
+    .overrideProvider(ViaCepClient)
+    .useValue(opcoes.viaCep ?? { buscar: async () => { throw new Error('ViaCEP não configurado no teste'); } })
     .compile();
   const app = modulo.createNestApplication();
   configurarApp(app);
