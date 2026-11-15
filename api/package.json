@@ -1,0 +1,27 @@
+{
+  "name": "cristalins-api",
+  "version": "0.0.1",
+  "private": true,
+  "description": "API da assinatura Cristalins (NestJS + Prisma). package.json mínimo da fase cr-0-prisma; cr-0-api completa o projeto Nest.",
+  "scripts": {
+    "prisma:validate": "prisma validate",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "prisma db seed"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "bcrypt": "6.0.0",
+    "dotenv": "18.0.10",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "6.0.0",
+    "@types/node": "26.6.6",
+    "@types/pg": "8.23.1",
+    "prisma": "7.10.1",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}

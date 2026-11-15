@@ -19,3 +19,11 @@
 ## Fora da Fase 0
 
 Auth, preço, ciclo, Pix, telas 2–8 e deploy ficam em `cr-1-*` em diante.
+
+## Esta etapa (`cr-0-prisma`)
+
+- `api/prisma/schema.prisma`: 20 entidades do Anexo, 14 enums (status de assinatura/ciclo, plano, frequência, janela, forma e status de pagamento, ocorrência etc.), `@map`/`@@map` snake_case, dinheiro `Decimal(10,2)`
+- Prisma 7.10.1 (generator `prisma-client`, saída `api/prisma/generated/prisma`, adaptador `@prisma/adapter-pg`), `api/prisma.config.ts` com seed `tsx prisma/seed.ts`
+- Migração inicial `api/prisma/migrations/20261114230000_init` (gerada com `prisma migrate diff --from-empty`)
+- Seed idempotente: 8 produtos, 4 kits, 5 zonas com bairros de exemplo, 7 fatores (volume, compromisso, fidelidade, verão +5% de 01/12/2026 a 31/03/2027), 1 admin, 2 clientes com endereço (`lat`/`lng` nulos), cupom `BEMVINDO10`
+- `api/package.json` mínimo — `cr-0-api` completa o projeto Nest
