@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable, Optional } from '@nestjs/common';
 import {
   dataCorte,
   dataIso,
@@ -12,11 +12,13 @@ import {
 import { ClockService } from '../common/clock.service';
 import { PrismaService } from '../common/prisma.service';
 import { RegraNegocioException } from '../common/regra-negocio.exception';
+import { CobrancaService } from '../asaas/cobranca.service';
 import { dinheiro, PrecoService } from '../precos/preco.service';
 import { dec, Dec } from '../precos/preco.tipos';
 import { SimulacaoResponse } from '../precos/dto/simulacao.response';
 import {
   DiaSemana,
+  FormaPagamento,
   Frequencia,
   Janela,
   Plano,
@@ -79,11 +81,12 @@ export class AssinaturasService {
     private readonly preco: PrecoService,
     private readonly maquina: MaquinaEstadosService,
     private readonly clock: ClockService,
+    @Optional() @Inject(forwardRef(() => CobrancaService)) private readonly cobranca?: CobrancaService,
   ) {}
 
   // ---------- Criar e consultar ----------
 
-  /** POST /assinaturas: grava AGUARDANDO_PAGAMENTO, o 1º ciclo e o cálculo. A cobrança Pix nasce em cr-3. */
+  /** POST /assinaturas: grava AGUARDANDO_PAGAMENTO, o 1º ciclo, o cálculo e cobrança Pix (cr-3). */
   async criar(clienteId: string, dto: CriarAssinaturaDto): Promise<AssinaturaCriadaResponse> {
     await this.garantirSemCobrancaVencida(clienteId);
     const endereco = await this.enderecoDoCliente(clienteId, dto.enderecoId);
@@ -128,6 +131,11 @@ export class AssinaturasService {
 
     const resposta = await this.buscar(clienteId, assinaturaId);
     const ciclo = await this.prisma.ciclo.findUnique({ where: { id: cicloId } });
+    let pix: { copiaECola: string; qrCodeBase64: string } | undefined;
+    if (dto.formaPagamento === FormaPagamento.PIX && this.cobranca) {
+      const cobrado = await this.cobranca.cobrarCicloPix(cicloId);
+      pix = { copiaECola: cobrado.copiaECola, qrCodeBase64: cobrado.qrCodeBase64 };
+    }
     return {
       ...resposta,
       ciclo: {
@@ -137,6 +145,7 @@ export class AssinaturasService {
         vencimento: hoje,
         dataEntrega,
         dataCorte: ciclo!.dataCorte.toISOString(),
+        ...(pix ? { pix } : {}),
       },
       detalhePreco: simulacao.detalhePreco,
     };

@@ -1,5 +1,12 @@
 import { Module } from '@nestjs/common';
+import { AsaasModule } from '../asaas/asaas.module';
+import { WebhooksController } from './webhooks.controller';
+import { WebhooksService } from './webhooks.service';
 
-// Módulo vazio criado em cr-0-api; controllers e services chegam nas fases seguintes.
-@Module({})
+@Module({
+  imports: [AsaasModule],
+  controllers: [WebhooksController],
+  providers: [WebhooksService],
+  exports: [WebhooksService],
+})
 export class WebhooksModule {}

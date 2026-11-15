@@ -100,6 +100,7 @@ const UNICOS: Record<string, string[][]> = {
   itemAssinatura: [['assinaturaId', 'produtoId']],
   fatorPreco: [['chave', 'ativoDe']],
   pagamento: [['asaasPaymentId']],
+  eventoWebhook: [['idEvento']],
 };
 
 /** Campos Decimal: gravados como decimal.js, como o Prisma devolve. */
@@ -168,6 +169,8 @@ function padroes(modelo: string): Linha {
       return { ...comuns, creditos: new Decimal(0), criadoEm: agora };
     case 'pagamento':
       return { ...comuns, asaasPaymentId: null, linkPagamento: null, status: 'PENDENTE', pagoEm: null, criadoEm: agora, atualizadoEm: agora };
+    case 'eventoWebhook':
+      return { ...comuns, processadoEm: null, erro: null, recebidoEm: agora };
     case 'recomendacao':
     case 'listaEspera':
       return { ...comuns, criadoEm: agora };
@@ -196,6 +199,7 @@ export class PrismaFake {
   itensCiclo: Linha[] = [];
   calculos: Linha[] = [];
   pagamentos: Linha[] = [];
+  eventosWebhook: Linha[] = [];
   filaEspera: Linha[] = [];
 
   $queryRaw = jest.fn().mockResolvedValue([{ '?column?': 1 }]);
@@ -217,6 +221,7 @@ export class PrismaFake {
       itemCiclo: 'itensCiclo',
       calculoPreco: 'calculos',
       pagamento: 'pagamentos',
+      eventoWebhook: 'eventosWebhook',
       listaEspera: 'filaEspera',
     };
     return this[mapa[modelo]] as unknown as Linha[];
@@ -483,6 +488,7 @@ export class PrismaFake {
   itemCiclo = this.delegado('itemCiclo');
   calculoPreco = this.delegado('calculoPreco');
   pagamento = this.delegado('pagamento');
+  eventoWebhook = this.delegado('eventoWebhook');
   listaEspera = this.delegado('listaEspera');
 }
 

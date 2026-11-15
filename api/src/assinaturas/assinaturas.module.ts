@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
+import { AsaasModule } from '../asaas/asaas.module';
 import { PrecosModule } from '../precos/precos.module';
 import { AssinaturasController } from './assinaturas.controller';
 import { AssinaturasService } from './assinaturas.service';
@@ -6,10 +7,10 @@ import { MaquinaEstadosService } from './maquina-estados.service';
 
 /**
  * Assinaturas, ciclos e a máquina de estados. Preço só pelo `PrecoService` (sem regra duplicada).
- * `cr-3-gateway` importa este módulo para usar `MaquinaEstadosService`, `congelarCiclo` e `proximoCicloAberto`.
+ * Cobrança Pix via `AsaasModule` (`cr-3-gateway`).
  */
 @Module({
-  imports: [PrecosModule],
+  imports: [PrecosModule, forwardRef(() => AsaasModule)],
   controllers: [AssinaturasController],
   providers: [AssinaturasService, MaquinaEstadosService],
   exports: [AssinaturasService, MaquinaEstadosService],

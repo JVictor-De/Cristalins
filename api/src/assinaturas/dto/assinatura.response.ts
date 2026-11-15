@@ -58,16 +58,23 @@ export class AssinaturaResponse {
   fimCompromisso: string | null;
 }
 
+export class PixResponse {
+  @ApiProperty({ example: '00020126...' }) copiaECola: string;
+  @ApiProperty({ example: 'iVBOR...' }) qrCodeBase64: string;
+}
+
 export class CicloCriado {
   @ApiProperty() id: string;
   @ApiProperty({ example: 1 }) numero: number;
   @ApiProperty({ example: 213.19 }) valor: number;
-  @ApiProperty({ example: '2026-11-14', description: 'Cobrança do 1º ciclo: hoje (Pix em cr-3-gateway)' }) vencimento: string;
+  @ApiProperty({ example: '2026-11-14', description: 'Cobrança do 1º ciclo: hoje' }) vencimento: string;
   @ApiProperty({ example: '2026-11-16', description: 'Estimativa; recalculada na confirmação do pagamento (RN08)' }) dataEntrega: string;
   @ApiProperty({ example: '2026-11-15T02:59:59.999Z' }) dataCorte: string;
+  @ApiPropertyOptional({ type: PixResponse, description: 'Presente quando formaPagamento=PIX (cr-3-gateway)' })
+  pix?: PixResponse;
 }
 
-/** Exemplo do Anexo (CT02), sem `ciclo.pix` nesta fase. */
+/** Exemplo do Anexo (CT02), com `ciclo.pix` quando PIX. */
 export class AssinaturaCriadaResponse extends AssinaturaResponse {
   @ApiProperty({ type: CicloCriado }) ciclo: CicloCriado;
   @ApiProperty({

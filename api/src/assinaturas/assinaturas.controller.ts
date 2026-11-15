@@ -33,7 +33,7 @@ export class AssinaturasController {
   @Post()
   @ApiCreatedResponse({
     type: AssinaturaCriadaResponse,
-    description: 'Status AGUARDANDO_PAGAMENTO, 1º ciclo e cálculo (CT02: 213,19). O Pix entra em cr-3-gateway.',
+    description: 'Status AGUARDANDO_PAGAMENTO, 1º ciclo, cálculo (CT02: 213,19) e ciclo.pix (QR + copia-e-cola).',
   })
   @ApiUnprocessableEntityResponse({ description: 'CESTA_*, EMBALAGEM_INVALIDA, CUPOM_INVALIDO, COBRANCA_VENCIDA (RN26)' })
   criar(@UsuarioAtual() u: UsuarioToken, @Body() dto: CriarAssinaturaDto): Promise<AssinaturaCriadaResponse> {
