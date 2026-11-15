@@ -64,10 +64,12 @@ void main() {
     await tester.tap(find.text('Começar'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Entrar'), findsWidgets);
-    expect(find.text('Esta tela ainda está em construção.'), findsOneWidget);
+    // Tela 2 (cr-2-telas): cadastro e login.
+    expect(find.text('Criar conta'), findsWidgets);
+    expect(find.text('Já tenho conta'), findsOneWidget);
 
-    await tester.tap(find.text('Voltar'));
+    // Botão/gesto de voltar do Android
+    await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     expect(find.text('Começar'), findsOneWidget);
   });

@@ -18,8 +18,19 @@ abstract final class AppSpacing {
   static const toqueMinimo = 48.0; // Android exige mais que os 44 pt do iOS
 
   static const icone = 24.0;
+  static const iconePequeno = 18.0;
   static const iconeEstadoVazio = 48.0;
+  static const iconeProduto = 40.0;
   static const divisoria = 0.5;
+
+  /// Seletor de quantidade: botões circulares de 32 dp (área de toque de 48 dp em volta).
+  static const botaoCircular = 32.0;
+  static const raioSelo = 6.0;
+  static const imagemProduto = 72.0;
+  static const alturaFolhaPicker = 300.0;
+  static const alturaItemPicker = 40.0;
+  static const barraProgresso = 4.0;
+  static const larguraRotuloCampo = 104.0;
 
   static const larguraTelaLarga = 600.0;
 }
