@@ -64,7 +64,11 @@ class BotaoVoltar extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(CupertinoIcons.chevron_left, color: AppColors.azul800, size: AppSpacing.icone),
+            const Icon(
+              CupertinoIcons.chevron_left,
+              color: AppColors.azul800,
+              size: AppSpacing.icone,
+            ),
             Text('Voltar', style: AppTypography.body.copyWith(color: AppColors.azul800)),
           ],
         ),

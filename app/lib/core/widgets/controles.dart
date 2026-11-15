@@ -100,8 +100,10 @@ class SeletorQuantidade extends StatelessWidget {
         ),
         ConstrainedBox(
           constraints: const BoxConstraints(minWidth: AppSpacing.toqueMinimo),
+          // Só o rótulo completo: sem excludeSemantics o leitor de tela repete o número.
           child: Semantics(
             label: '$quantidade unidades de $rotulo',
+            excludeSemantics: true,
             child: Text(
               '$quantidade',
               textAlign: TextAlign.center,
@@ -134,7 +136,12 @@ class Selo extends StatelessWidget {
         color: fundo,
         borderRadius: BorderRadius.circular(AppSpacing.raioSelo),
       ),
-      child: Text(texto.toUpperCase(), style: AppTypography.caption2.copyWith(color: cor)),
+      // Caixa alta só no visual (caption2); o leitor de tela lê a palavra normal, sem soletrar.
+      child: Text(
+        texto.toUpperCase(),
+        semanticsLabel: texto,
+        style: AppTypography.caption2.copyWith(color: cor),
+      ),
     );
   }
 }

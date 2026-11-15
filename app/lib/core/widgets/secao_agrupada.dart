@@ -64,24 +64,29 @@ class LinhaLista extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoListTile(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem, vertical: AppSpacing.sm),
-      backgroundColor: destaque ? AppColors.azul100 : null,
-      leading: icone == null ? null : Icon(icone, color: AppColors.azul800, size: AppSpacing.icone),
-      title: Text(
-        titulo,
-        maxLines: 3,
-        style: AppTypography.body.copyWith(color: corTitulo ?? AppColors.texto),
+    // Título, subtítulo, valor e controle da linha são anunciados juntos (ex.: "Plano, Trimestral").
+    return MergeSemantics(
+      child: CupertinoListTile(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem, vertical: AppSpacing.sm),
+        backgroundColor: destaque ? AppColors.azul100 : null,
+        leading: icone == null
+            ? null
+            : Icon(icone, color: AppColors.azul800, size: AppSpacing.icone),
+        title: Text(
+          titulo,
+          maxLines: 3,
+          style: AppTypography.body.copyWith(color: corTitulo ?? AppColors.texto),
+        ),
+        subtitle: subtitulo == null
+            ? null
+            : Text(
+                subtitulo!,
+                maxLines: 4,
+                style: AppTypography.subheadline.copyWith(color: AppColors.textoSecundario),
+              ),
+        trailing: trailing,
+        onTap: onTap,
       ),
-      subtitle: subtitulo == null
-          ? null
-          : Text(
-              subtitulo!,
-              maxLines: 4,
-              style: AppTypography.subheadline.copyWith(color: AppColors.textoSecundario),
-            ),
-      trailing: trailing,
-      onTap: onTap,
     );
   }
 }
