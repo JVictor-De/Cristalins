@@ -1,0 +1,44 @@
+# CI do app Flutter — analyze e testes.
+# Sem App Bundle e sem Play Store nesta fase (cr-0-ci).
+name: app
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - '.github/workflows/app.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - '.github/workflows/app.yml'
+
+defaults:
+  run:
+    working-directory: app
+
+jobs:
+  test:
+    name: analyze-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Unit / widget tests
+        run: flutter test

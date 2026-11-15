@@ -1,0 +1,75 @@
+# CI da API NestJS — lint, unitários e e2e com PostgreSQL 16.
+# Sem build/push de imagem e sem Coolify nesta fase (cr-0-ci).
+name: api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api.yml'
+
+defaults:
+  run:
+    working-directory: api
+
+jobs:
+  test:
+    name: lint-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cristalins
+          POSTGRES_PASSWORD: cristalins
+          POSTGRES_DB: cristalins_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cristalins -d cristalins_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      TZ: America/Sao_Paulo
+      # Credenciais só do serviço CI (não são secrets do repositório).
+      DATABASE_URL: postgresql://cristalins:cristalins@localhost:5432/cristalins_ci?schema=public
+      JWT_SECRET: ci-jwt-nao-usar-em-producao
+      JWT_REFRESH_SECRET: ci-refresh-nao-usar-em-producao
+      ASAAS_MODE: fake
+      CORS_ORIGINS: http://localhost:3000
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Apply migrations
+        run: npx prisma migrate deploy
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Integration / e2e tests
+        run: npm run test:e2e
