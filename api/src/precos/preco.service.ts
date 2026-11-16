@@ -165,21 +165,25 @@ export class PrecoService {
 
   /**
    * POST /precos/simular: carrega produtos, fatores da data de entrega, zona, cupom e ciclo
-   * anterior; valida a cesta e calcula. Não grava nada (CalculoPreco/ItemCiclo nascem no ciclo).
+   * anterior; valida a cesta e calcula. Sem `clienteId` (anônimo): sem fidelidade/ciclo/endereço;
+   * frete só por `zonaId` ou 0. Não grava nada (CalculoPreco/ItemCiclo nascem no ciclo).
    */
-  async simular(clienteId: string, dto: SimularPrecoDto): Promise<SimulacaoResponse> {
+  async simular(clienteId: string | undefined, dto: SimularPrecoDto): Promise<SimulacaoResponse> {
     const dataEntrega = dto.dataEntrega ?? this.hoje();
     const itens = await this.carregarCesta(dto.itens);
     this.validarCesta(itens, dto.plano);
 
+    const anonimo = !clienteId;
     const [parametros, zona, cupom, anterior] = await Promise.all([
       this.carregarParametros(dataEntrega),
-      this.carregarZona(clienteId, dto.zonaId, dto.enderecoId),
+      this.carregarZona(clienteId, dto.zonaId, anonimo ? undefined : dto.enderecoId),
       this.carregarCupom(dto.cupom, dataEntrega),
-      this.carregarCicloAnterior(clienteId, dto.cicloAnteriorId),
+      anonimo
+        ? Promise.resolve({ precos: new Map<string, Dec>(), ciclosPagosEmDia: 0 })
+        : this.carregarCicloAnterior(clienteId!, dto.cicloAnteriorId),
     ]);
 
-    const r = this.calcular({
+    const entrada: EntradaCalculo = {
       itens,
       plano: dto.plano,
       parametros,
@@ -189,7 +193,15 @@ export class PrecoService {
       // Créditos (RN20) abatem só a cobrança real, fora da AP2 (cr-5-cobranca).
       creditos: dec(0),
       precosAnteriores: anterior.precos,
-    });
+    };
+    const r = this.calcular(entrada);
+    const ue = r.ueSemAddon.toNumber();
+    const ueMinima = dto.plano === Plano.EMPRESA ? UE_MINIMA_EMPRESA : UE_MINIMA;
+    const subtotal = dinheiro(r.subtotal);
+    const economiaPlano =
+      dto.plano === Plano.FLEX
+        ? 0
+        : dinheiro(Dec.max(this.calcular({ ...entrada, plano: Plano.FLEX }).total.minus(r.total), 0));
 
     return {
       dataEntrega,
@@ -202,9 +214,9 @@ export class PrecoService {
         precoUnitario: dinheiro(i.precoUnitario),
         regra: i.regra,
       })),
-      ue: r.ueSemAddon.toNumber(),
+      ue,
       pesoKg: r.pesoKg.toDecimalPlaces(2).toNumber(),
-      subtotal: dinheiro(r.subtotal),
+      subtotal,
       frete: dinheiro(r.frete),
       creditos: dinheiro(r.creditos),
       total: dinheiro(r.total),
@@ -217,6 +229,12 @@ export class PrecoService {
       },
       detalhePreco: this.detalhe(r, zona !== null),
       zona: zona ? { id: zona.id, nome: zona.nome } : null,
+      ueMinima,
+      ueMaxima: UE_MAXIMA,
+      faltaUeParaMinimo: Math.max(0, ueMinima - ue),
+      freteGratisAcima: FRETE_GRATIS_ACIMA,
+      faltaParaFreteGratis: dinheiro(Dec.max(dec(FRETE_GRATIS_ACIMA).minus(r.subtotal), 0)),
+      economiaPlano,
     };
   }
 
@@ -256,8 +274,9 @@ export class PrecoService {
     });
   }
 
-  private async carregarZona(clienteId: string, zonaId?: string, enderecoId?: string) {
+  private async carregarZona(clienteId: string | undefined, zonaId?: string, enderecoId?: string) {
     if (enderecoId) {
+      if (!clienteId) throw semPermissao();
       const endereco = await this.prisma.endereco.findUnique({ where: { id: enderecoId }, include: { zona: true } });
       if (!endereco) throw naoEncontrado('Endereço não encontrado.', 'enderecoId');
       if (endereco.clienteId !== clienteId) throw semPermissao();

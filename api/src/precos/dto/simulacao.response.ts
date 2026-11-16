@@ -90,4 +90,25 @@ export class SimulacaoResponse {
   detalhePreco: LinhaDetalhePreco[];
   @ApiProperty({ type: ZonaSimulada, nullable: true })
   zona: ZonaSimulada | null;
+
+  @ApiProperty({ example: 12, description: 'UE mínima da cesta (48 no plano Empresa)' })
+  ueMinima: number;
+
+  @ApiProperty({ example: 120, description: 'UE máxima por entrega (exceto Empresa com atendimento comercial)' })
+  ueMaxima: number;
+
+  @ApiProperty({ example: 0, description: 'UE que faltam para atingir o mínimo (0 se a cesta já passa)' })
+  faltaUeParaMinimo: number;
+
+  @ApiProperty({ example: 250, description: 'Subtotal acima do qual o frete é grátis (RN18)' })
+  freteGratisAcima: number;
+
+  @ApiProperty({ example: 46.71, description: 'Quanto falta no subtotal para frete grátis (0 se já passou)' })
+  faltaParaFreteGratis: number;
+
+  @ApiProperty({
+    example: 15.3,
+    description: 'Economia em R$ do plano escolhido versus Flex (mesma cesta/fatores). 0 se o plano for Flex',
+  })
+  economiaPlano: number;
 }

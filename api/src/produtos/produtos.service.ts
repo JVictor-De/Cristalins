@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { dec } from '../precos/preco.tipos';
 import { TipoProduto } from '../../prisma/generated/prisma/client';
+import { DESCRICOES_PRODUTO } from './produto-descricoes';
 
 export class ProdutoResponse {
   @ApiProperty()
@@ -11,6 +12,11 @@ export class ProdutoResponse {
   codigo: string;
   @ApiProperty({ example: 'Water Protein (água com colágeno)' })
   nome: string;
+  @ApiProperty({
+    example: 'Cristalins com colágeno em garrafa de 500 ml.',
+    description: 'Texto de vitrine (catálogo do site). Sem coluna Prisma — montado na resposta.',
+  })
+  descricao: string;
   @ApiProperty({ enum: TipoProduto, example: TipoProduto.PRINCIPAL })
   tipo: TipoProduto;
   @ApiProperty({ example: 500 })
@@ -43,6 +49,7 @@ export class ProdutosService {
       id: p.id,
       codigo: p.codigo,
       nome: p.nome,
+      descricao: DESCRICOES_PRODUTO[p.codigo] ?? p.nome,
       tipo: p.tipo,
       volumeMl: p.volumeMl,
       ue: num(p.ue),

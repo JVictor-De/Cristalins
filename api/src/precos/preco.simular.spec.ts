@@ -50,6 +50,12 @@ describe('PrecoService.simular', () => {
       ue: 24,
       fatores: { volume: 8, compromisso: 7, fidelidade: 0, demanda: 0, cupom: 0 },
       zona: { id: ZONA_SUL, nome: 'Zona Sul' },
+      ueMinima: 12,
+      ueMaxima: 120,
+      faltaUeParaMinimo: 0,
+      freteGratisAcima: 250,
+      faltaParaFreteGratis: 46.71,
+      economiaPlano: 15.3,
     });
     expect(r.detalhePreco).toEqual([
       { fator: 'VOLUME', percentual: -8 },
@@ -59,6 +65,51 @@ describe('PrecoService.simular', () => {
     expect(r.itens).toEqual([
       { produto: 'WP500', quantidade: 24, precoBase: 9.9, precoUnitario: 8.47, regra: null },
     ]);
+  });
+
+  it('anônimo: sem fidelidade/ciclo; frete por zonaId; metas da cesta', async () => {
+    prisma.ciclos.push({
+      id: 'c1',
+      assinaturaId: 'a1',
+      numero: 1,
+      assinatura: { clienteId: CLIENTE },
+      itens: [{ produtoId: 'prod-WP500', quantidade: 24, precoUnitario: new Decimal('8.39') }],
+    });
+    prisma.pagamentos.push({
+      id: 'p1',
+      cicloId: 'c1',
+      status: 'PAGO',
+      vencimento: d('2026-12-01'),
+      pagoEm: new Date('2026-12-01T20:00:00Z'),
+    });
+    const r = await service.simular(undefined, dto({
+      zonaId: ZONA_SUL,
+      dataEntrega: '2026-11-16',
+      cicloAnteriorId: 'c1',
+      enderecoId: 'e-qualquer',
+    }));
+    expect(r).toMatchObject({
+      total: 213.19,
+      fatores: { fidelidade: 0 },
+      zona: { id: ZONA_SUL, nome: 'Zona Sul' },
+      economiaPlano: 15.3,
+      faltaParaFreteGratis: 46.71,
+    });
+  });
+
+  it('plano Flex: economiaPlano 0; freteGratisAcima 250', async () => {
+    const r = await service.simular(CLIENTE, dto({
+      plano: 'FLEX',
+      zonaId: ZONA_SUL,
+      itens: [{ produto: 'WP500', quantidade: 12 }],
+    }));
+    expect(r).toMatchObject({
+      subtotal: 118.8,
+      economiaPlano: 0,
+      ueMinima: 12,
+      freteGratisAcima: 250,
+      faltaParaFreteGratis: 131.2,
+    });
   });
 
   it('CT01 pela API: ciclo anterior com 2 ciclos pagos em dia, verão, Zona Sul → 219,09', async () => {

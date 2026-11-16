@@ -18,11 +18,17 @@ export class JwtAuthGuard implements CanActivate {
       ctx.getHandler(),
       ctx.getClass(),
     ]);
-    if (publico) return true;
-
     const req = ctx.switchToHttp().getRequest<RequisicaoAutenticada>();
     const [esquema, token] = (req.headers.authorization ?? '').split(' ');
-    if (esquema !== 'Bearer' || !token) {
+    const temBearer = esquema === 'Bearer' && !!token;
+
+    // Rota pública: sem token segue anônimo; com Bearer válido anexa o usuário (ex.: simular).
+    if (publico) {
+      if (temBearer) req.usuario = await this.tokens.verificarAcesso(token);
+      return true;
+    }
+
+    if (!temBearer) {
       throw new RegraNegocioException(
         'NAO_AUTENTICADO',
         'Entre na sua conta para continuar.',

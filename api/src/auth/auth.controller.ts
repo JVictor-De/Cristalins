@@ -5,7 +5,7 @@ import {
   ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ThrottlerGuard } from '@nestjs/throttler';
+import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { Publico } from './decorators';
 import { LoginDto, RefreshDto } from './dto/login.dto';
@@ -18,6 +18,7 @@ export class AuthController {
 
   @Post('login')
   @Publico()
+  @SkipThrottle({ simular: true })
   @UseGuards(ThrottlerGuard) // SEG06: 5 tentativas por minuto por IP (CT19)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: TokensResponse })

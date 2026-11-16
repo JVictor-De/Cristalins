@@ -36,7 +36,7 @@ describe('Catálogo, quiz e preço (e2e)', () => {
   });
 
   describe('GET /produtos e /kits (públicos)', () => {
-    it('lista os 8 produtos ativos com números no JSON', async () => {
+    it('lista os 8 produtos ativos com números no JSON e descricao de vitrine', async () => {
       const r = await http().get('/api/v1/produtos').expect(200);
       expect(r.body).toHaveLength(8);
       expect(r.body.find((p: { codigo: string }) => p.codigo === 'AMC510')).toMatchObject({
@@ -47,7 +47,9 @@ describe('Catálogo, quiz e preço (e2e)', () => {
         precoBase: 2.9,
         precoPiso: 2,
         pesoKg: 0.53,
+        descricao: 'Água mineral com gás em garrafa de 510 ml.',
       });
+      expect(r.body.find((p: { codigo: string }) => p.codigo === 'WP500').descricao).toContain('colágeno');
     });
 
     it('filtra por tipo e recusa tipo inválido', async () => {
@@ -135,8 +137,23 @@ describe('Catálogo, quiz e preço (e2e)', () => {
   describe('POST /precos/simular', () => {
     const base = { itens: [{ produto: 'WP500', quantidade: 24 }], frequencia: 'QUINZENAL', plano: 'TRIMESTRAL' };
 
-    it('exige token', async () => {
-      await http().post('/api/v1/precos/simular').send(base).expect(401);
+    it('aceita sem token (público) com metas da cesta', async () => {
+      const r = await http()
+        .post('/api/v1/precos/simular')
+        .send({ ...base, zonaId: 'zona-Zona-Sul', dataEntrega: '2026-11-16' })
+        .expect(200);
+      expect(r.body).toMatchObject({
+        subtotal: 203.29,
+        frete: 9.9,
+        total: 213.19,
+        fatores: { fidelidade: 0 },
+        ueMinima: 12,
+        ueMaxima: 120,
+        faltaUeParaMinimo: 0,
+        freteGratisAcima: 250,
+        faltaParaFreteGratis: 46.71,
+        economiaPlano: 15.3,
+      });
     });
 
     it('CT02: 200 com total 213,19 e detalhe no formato do Anexo', async () => {
@@ -145,7 +162,13 @@ describe('Catálogo, quiz e preço (e2e)', () => {
         .set(autenticado())
         .send({ ...base, zonaId: 'zona-Zona-Sul', dataEntrega: '2026-11-16' })
         .expect(200);
-      expect(r.body).toMatchObject({ subtotal: 203.29, frete: 9.9, total: 213.19 });
+      expect(r.body).toMatchObject({
+        subtotal: 203.29,
+        frete: 9.9,
+        total: 213.19,
+        economiaPlano: 15.3,
+        freteGratisAcima: 250,
+      });
       expect(r.body.detalhePreco).toEqual([
         { fator: 'VOLUME', percentual: -8 },
         { fator: 'COMPROMISSO', percentual: -7 },
