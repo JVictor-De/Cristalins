@@ -80,7 +80,8 @@ export class ClientesService {
 
   /**
    * RF05 / LGPD: anonimiza nome, contato e endereço; marca `excluidoEm`.
-   * Mantém CPF/nascimento e o histórico de pagamento (retenção fiscal 5 anos).
+   * Remove tokens de cartão (dado pessoal de meio de pagamento). Mantém CPF/nascimento
+   * e o histórico de pagamento (retenção fiscal 5 anos).
    */
   async excluir(id: string): Promise<void> {
     await this.buscarAtivo(id);
@@ -91,6 +92,8 @@ export class ClientesService {
         where: { clienteId: id, status: { not: StatusAssinatura.CANCELADA } },
         data: { status: StatusAssinatura.CANCELADA },
       });
+      // Assinatura.cartaoId → onDelete SetNull; apaga tokens Asaas e 4 últimos dígitos.
+      await tx.cartao.deleteMany({ where: { clienteId: id } });
       await tx.endereco.updateMany({
         where: { clienteId: id },
         data: {

@@ -30,7 +30,7 @@ Evidências de SEG01–SEG10 e RNF08–RNF13. Números de cobertura medidos nest
 
 ## LGPD — `DELETE /clientes/me` (RF05)
 
-Anonimiza `nome`, `email`, `celular`, `pushToken` e campos de endereço; define `excluidoEm`; cancela assinaturas não canceladas. **Mantém** `cpfCnpj` e `dataNascimento` e o histórico de pagamento (retenção fiscal 5 anos). Logs de sistema: política de 90 dias (operacional).
+Anonimiza `nome`, `email`, `celular`, `pushToken` e campos de endereço; define `excluidoEm`; cancela assinaturas não canceladas; **apaga** cartões tokenizados (`asaasToken` / final). **Mantém** `cpfCnpj` e `dataNascimento` e o histórico de pagamento (retenção fiscal 5 anos). Logs de sistema: política de 90 dias (operacional).
 
 - API: `ClientesService.excluir` + `DELETE /clientes/me`
 - App: «Excluir minha conta» na Tela 8 (action sheet) → limpa tokens locais

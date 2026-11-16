@@ -36,6 +36,7 @@ describe('ClientesService', () => {
     cliente: { findUnique: jest.Mock; create: jest.Mock; update: jest.Mock };
     $transaction: jest.Mock;
     assinatura: { updateMany: jest.Mock };
+    cartao: { deleteMany: jest.Mock };
     endereco: { updateMany: jest.Mock };
   };
   let service: ClientesService;
@@ -49,6 +50,7 @@ describe('ClientesService', () => {
       },
       $transaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) => fn(prisma)),
       assinatura: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
+      cartao: { deleteMany: jest.fn().mockResolvedValue({ count: 1 }) },
       endereco: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
     };
     service = new ClientesService(prisma as unknown as PrismaService, clockFixo);
@@ -109,6 +111,7 @@ describe('ClientesService', () => {
     prisma.cliente.update.mockResolvedValueOnce({ ...ativo, excluidoEm: new Date() });
     await service.excluir('c1');
     expect(prisma.assinatura.updateMany).toHaveBeenCalled();
+    expect(prisma.cartao.deleteMany).toHaveBeenCalledWith({ where: { clienteId: 'c1' } });
     expect(prisma.endereco.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ logradouro: '—', cep: '00000000', lat: null, lng: null }),
