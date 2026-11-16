@@ -10,7 +10,13 @@ import 'core/theme/app_theme.dart';
 
 /// Raiz do app: tema único, pt-BR, rotas nomeadas e dependências por `provider`.
 class CristalinsApp extends StatefulWidget {
-  const CristalinsApp({super.key, required this.config, this.abridorLinks, this.dependencias});
+  const CristalinsApp({
+    super.key,
+    required this.config,
+    this.abridorLinks,
+    this.dependencias,
+    this.exibirSplash = true,
+  });
 
   final AppConfig config;
 
@@ -19,6 +25,10 @@ class CristalinsApp extends StatefulWidget {
 
   /// Repositórios e Intents; nulo = implementação real com a API do [config].
   final Dependencias? dependencias;
+
+  /// Splash na abertura. `false` nos testes que esperam boas-vindas direto
+  /// (`pumpAndSettle` não termina com o loop da splash).
+  final bool exibirSplash;
 
   @override
   State<CristalinsApp> createState() => _CristalinsAppState();
@@ -59,7 +69,7 @@ class _CristalinsAppState extends State<CristalinsApp> {
           GlobalCupertinoLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
         ],
-        initialRoute: AppRoutes.boasVindas,
+        initialRoute: widget.exibirSplash ? AppRoutes.splash : AppRoutes.boasVindas,
         onGenerateRoute: AppRoutes.gerar,
       ),
     );

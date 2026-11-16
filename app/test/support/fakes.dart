@@ -94,8 +94,11 @@ class OcorrenciasFalsas implements OcorrenciaRepository {
     required String produto,
     required int quantidade,
     required String solucao,
-    required String caminhoFoto,
+    required List<int> bytesFoto,
+    String nomeArquivo = 'foto.jpg',
   }) async {
+    assert(bytesFoto.isNotEmpty);
+    assert(nomeArquivo.isNotEmpty);
     final o = OcorrenciaCriada(
       id: 'oc-${criadas.length + 1}',
       tipo: tipo,
@@ -465,4 +468,5 @@ AppConfig configDeTeste({String whatsapp = ''}) =>
 Widget appDeTeste(Falsos f, {String whatsapp = ''}) => CristalinsApp(
   config: configDeTeste(whatsapp: whatsapp),
   dependencias: f.dependencias,
+  exibirSplash: false,
 );

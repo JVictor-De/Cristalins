@@ -14,7 +14,8 @@ const _config = AppConfig(
   suporteWhatsapp: '',
 );
 
-Widget _app(AbridorLinks abridor) => CristalinsApp(config: _config, abridorLinks: abridor);
+Widget _app(AbridorLinks abridor) =>
+    CristalinsApp(config: _config, abridorLinks: abridor, exibirSplash: false);
 
 final _linkDoSite = find.text('Conhecer o site da Cristalins');
 
@@ -43,8 +44,10 @@ void main() {
     await tester.pumpWidget(_app(abridor));
     await tester.pumpAndSettle();
 
-    expect(find.text('Cristalins'), findsWidgets);
+    expect(find.bySemanticsLabel('Cristalins'), findsWidgets);
+    expect(find.image(const AssetImage('assets/images/brand/logo.jpg')), findsWidgets);
     expect(find.text('Responda 5 perguntas'), findsOneWidget);
+
     expect(find.text('Pague com Pix'), findsOneWidget);
     expect(find.text('Começar'), findsOneWidget);
   });
