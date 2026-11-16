@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Prisma } from '../../prisma/generated/prisma/client';
 import { CobrancaService } from '../asaas/cobranca.service';
 import { PrismaService } from '../common/prisma.service';
@@ -97,7 +97,8 @@ export class WebhooksService {
       }
       return;
     }
-    // Outros eventos: só registrados (régua completa em cr-5)
-    this.log.debug(`Evento ${tipo} ${idEvento} registrado sem ação nesta fase`);
+    // cr-5: recusa no cartão (CT18), vencido, estornado e removido.
+    this.log.debug(`Evento ${tipo} ${idEvento}`);
+    await this.cobranca.processarEvento(tipo, paymentId);
   }
 }

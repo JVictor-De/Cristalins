@@ -1,5 +1,10 @@
 import { Module } from '@nestjs/common';
+import { CuponsController } from './cupons.controller';
+import { CuponsService } from './cupons.service';
 
-// Módulo vazio criado em cr-0-api; controllers e services chegam nas fases seguintes.
-@Module({})
+/** RN21: `POST /admin/cupons`. */
+@Module({
+  controllers: [CuponsController],
+  providers: [CuponsService],
+})
 export class CuponsModule {}

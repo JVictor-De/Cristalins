@@ -1,8 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { StatusAssinatura, StatusCiclo, StatusPagamento } from '../../prisma/generated/prisma/client';
 import { AssinaturasService } from '../assinaturas/assinaturas.service';
 import { MaquinaEstadosService } from '../assinaturas/maquina-estados.service';
 import { CobrancaService } from '../asaas/cobranca.service';
+import { ConciliacaoService } from '../asaas/conciliacao.service';
+import { ReguaService } from '../asaas/regua.service';
 import { dataIso, somarDias } from '../ciclos/agenda';
 import { ClockService } from '../common/clock.service';
 import { PrismaService } from '../common/prisma.service';
@@ -23,6 +25,8 @@ export class JobsService {
     private readonly maquina: MaquinaEstadosService,
     private readonly cobranca: CobrancaService,
     private readonly webhooks: WebhooksService,
+    @Optional() private readonly regua?: ReguaService,
+    @Optional() private readonly conciliacao?: ConciliacaoService,
   ) {}
 
   /** 06:00 / admin — cobranças dos ciclos com entrega em D+5 (RN19). */
@@ -48,7 +52,8 @@ export class JobsService {
             await this.maquina.ciclo(tx, c, StatusCiclo.COBRADO);
           }
         });
-        await this.cobranca.cobrarCicloPix(ciclo.id);
+        // cr-5: Pix, boleto (vence em D-5, RN25) ou cartão, conforme a assinatura; abate créditos.
+        await this.cobranca.cobrarCiclo(ciclo.id);
         geradas++;
         this.log.log(`Cobrança gerada ciclo=${ciclo.id} entrega=${alvo}`);
       } catch (e) {
@@ -63,6 +68,9 @@ export class JobsService {
     await this.cancelarCobradoAposCorte();
     await this.cancelarAguardandoSemPagamento();
     await this.reguaMinima();
+    // cr-5: régua completa (+7 suspensão, +30 cancelamento, nova tentativa no cartão) e conciliação.
+    await this.regua?.executar();
+    await this.conciliacao?.executar();
   }
 
   /** CT22: COBRADO sem pagamento até o corte → CANCELADO. */

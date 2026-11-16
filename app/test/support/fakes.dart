@@ -14,6 +14,7 @@ import 'package:cristalins_assinatura/features/quiz/data/recomendacao_repository
 import 'package:cristalins_assinatura/features/quiz/domain/quiz.dart';
 import 'package:cristalins_assinatura/features/subscription/data/assinatura_repository.dart';
 import 'package:cristalins_assinatura/features/subscription/domain/assinatura.dart';
+import 'package:cristalins_assinatura/features/subscription/domain/pagamento.dart';
 import 'package:flutter/widgets.dart';
 
 /// Repositórios falsos com os mesmos formatos da API (valores do Anexo: caso A, CT02).
@@ -316,6 +317,50 @@ class AssinaturasFalsas implements AssinaturaRepository {
   Future<Cancelamento> cancelar(String id) async {
     chamadas.add('cancelar');
     return const Cancelamento(diferencaCompromisso: Dinheiro(3060));
+  }
+
+  // cr-5-cobranca
+  final faturasSalvas = <Fatura>[];
+  final cartoesSalvos = <CartaoSalvo>[];
+  var formaAtual = const FormaAtual(forma: FormaPagamento.pix);
+
+  @override
+  Future<List<Fatura>> faturas() async => List.of(faturasSalvas);
+
+  @override
+  Future<String> comprovante(String faturaId) async =>
+      'https://fake.asaas.local/comprovantes/$faturaId';
+
+  @override
+  Future<List<CartaoSalvo>> cartoes() async => List.of(cartoesSalvos);
+
+  /// Como a API: devolve só bandeira e final (nada do número fica neste fake).
+  @override
+  Future<CartaoSalvo> cadastrarCartao(DadosCartao dados) async {
+    final cartao = CartaoSalvo(
+      id: 'cartao-${cartoesSalvos.length + 1}',
+      bandeira: 'VISA',
+      final4: dados.numero.substring(dados.numero.length - 4),
+    );
+    cartoesSalvos.add(cartao);
+    chamadas.add('cartao ${cartao.final4}');
+    return cartao;
+  }
+
+  @override
+  Future<FormaAtual> formaPagamento(String assinaturaId) async => formaAtual;
+
+  @override
+  Future<FormaAtual> trocarForma(
+    String assinaturaId,
+    FormaPagamento forma, {
+    String? cartaoId,
+  }) async {
+    chamadas.add('forma ${forma.valor}');
+    return formaAtual = FormaAtual(
+      forma: forma,
+      cartao: cartaoId == null ? null : cartoesSalvos.firstWhere((c) => c.id == cartaoId),
+    );
   }
 }
 

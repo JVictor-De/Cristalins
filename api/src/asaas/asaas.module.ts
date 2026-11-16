@@ -1,9 +1,15 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { AssinaturasModule } from '../assinaturas/assinaturas.module';
+import { CreditosModule } from '../creditos/creditos.module';
 import { AsaasGateway } from './asaas.gateway';
+import { CartaoService } from './cartao.service';
 import { CobrancaService } from './cobranca.service';
+import { ConciliacaoService } from './conciliacao.service';
 import { FakeGateway } from './fake.gateway';
+import { FaturasService } from './faturas.service';
 import { PAGAMENTO_GATEWAY, PagamentoGateway } from './pagamento.gateway';
+import { PagamentosController } from './pagamentos.controller';
+import { ReguaService } from './regua.service';
 
 function criarGateway(): PagamentoGateway {
   const modo = (process.env.ASAAS_MODE ?? 'fake').toLowerCase();
@@ -12,12 +18,17 @@ function criarGateway(): PagamentoGateway {
 }
 
 @Module({
-  imports: [forwardRef(() => AssinaturasModule)],
+  imports: [forwardRef(() => AssinaturasModule), CreditosModule],
+  controllers: [PagamentosController],
   providers: [
     { provide: PAGAMENTO_GATEWAY, useFactory: criarGateway },
     CobrancaService,
+    CartaoService,
+    FaturasService,
+    ReguaService,
+    ConciliacaoService,
     FakeGateway,
   ],
-  exports: [CobrancaService, PAGAMENTO_GATEWAY, FakeGateway],
+  exports: [CobrancaService, ReguaService, ConciliacaoService, PAGAMENTO_GATEWAY, FakeGateway],
 })
 export class AsaasModule {}

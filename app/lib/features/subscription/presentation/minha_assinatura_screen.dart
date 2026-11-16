@@ -18,6 +18,7 @@ import '../../../core/widgets/tela_titulo_grande.dart';
 import '../../address/domain/endereco.dart';
 import '../../quiz/domain/quiz.dart';
 import '../domain/assinatura.dart';
+import 'faturas_screen.dart';
 import 'minha_assinatura_controller.dart';
 
 /// Tela 8 — Minha assinatura.
@@ -352,6 +353,20 @@ class _Conteudo extends StatelessWidget {
                       ),
                   ],
                 ),
+              SecaoAgrupada(
+                cabecalho: 'Pagamento',
+                children: [
+                  LinhaLista(
+                    titulo: 'Faturas e forma de pagamento',
+                    icone: CupertinoIcons.creditcard,
+                    trailing: const CupertinoListTileChevron(),
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      Navigator.of(context).push(rotaFaturas(a.id));
+                    },
+                  ),
+                ],
+              ),
               SecaoAgrupada(
                 cabecalho: 'Ajuda',
                 rodape: numero.isEmpty

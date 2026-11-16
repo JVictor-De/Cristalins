@@ -4,6 +4,7 @@ import '../../../core/network/api_erro.dart';
 import '../../catalog/data/catalogo_repository.dart';
 import '../../catalog/domain/catalogo.dart';
 import '../domain/assinatura.dart';
+import '../domain/pagamento.dart';
 
 abstract final class AssinaturaJson {
   static Assinatura assinatura(Map<String, dynamic> j) {
@@ -33,6 +34,35 @@ abstract final class AssinaturaJson {
     valor: j['valor'] == null ? null : Dinheiro.daApi(j['valor'] as num),
     motivoPulo: j['motivoPulo'] as String?,
   );
+}
+
+abstract final class PagamentoJson {
+  static Fatura fatura(Map<String, dynamic> j) => Fatura(
+    id: j['id'] as String,
+    cicloNumero: j['cicloNumero'] as int,
+    dataEntrega: j['dataEntrega'] as String,
+    forma: FormaPagamento.de(j['forma'] as String),
+    valor: Dinheiro.daApi(j['valor'] as num),
+    vencimento: j['vencimento'] as String,
+    status: j['status'] as String,
+    link: j['link'] as String?,
+    temComprovante: j['temComprovante'] as bool? ?? false,
+    observacao: j['observacao'] as String?,
+  );
+
+  static CartaoSalvo cartao(Map<String, dynamic> j) => CartaoSalvo(
+    id: j['id'] as String? ?? '',
+    bandeira: j['bandeira'] as String,
+    final4: j['final'] as String,
+  );
+
+  static FormaAtual forma(Map<String, dynamic> j) {
+    final cartao = j['cartao'] as Map<String, dynamic>?;
+    return FormaAtual(
+      forma: FormaPagamento.de(j['formaPagamento'] as String),
+      cartao: cartao == null ? null : PagamentoJson.cartao(cartao),
+    );
+  }
 }
 
 /// Rotas de assinatura. Pausa, corte, pulo e preço são decididos pela API.
@@ -111,6 +141,46 @@ class AssinaturaRepository {
       diferencaCompromisso: Dinheiro.daApi(r.data!['diferencaCompromisso'] as num),
     );
   });
+
+  // --- cr-5-cobranca: faturas, cartão e forma de pagamento ---
+
+  Future<List<Fatura>> faturas() => _chamar(() async {
+    final r = await _api.dio.get<List<dynamic>>('/faturas');
+    return r.data!.map((e) => PagamentoJson.fatura(e as Map<String, dynamic>)).toList();
+  });
+
+  /// Link do comprovante (Asaas) de uma fatura paga.
+  Future<String> comprovante(String faturaId) => _chamar(() async {
+    final r = await _api.dio.get<Map<String, dynamic>>('/faturas/$faturaId/comprovante');
+    return r.data!['url'] as String;
+  });
+
+  Future<List<CartaoSalvo>> cartoes() => _chamar(() async {
+    final r = await _api.dio.get<List<dynamic>>('/cartoes');
+    return r.data!.map((e) => PagamentoJson.cartao(e as Map<String, dynamic>)).toList();
+  });
+
+  /// Envia os dados à API, que tokeniza no Asaas. O app não guarda nada do que foi digitado.
+  Future<CartaoSalvo> cadastrarCartao(DadosCartao dados) => _chamar(() async {
+    final r = await _api.dio.post<Map<String, dynamic>>('/cartoes', data: dados.paraJson());
+    return PagamentoJson.cartao(r.data!);
+  });
+
+  Future<FormaAtual> formaPagamento(String assinaturaId) => _chamar(() async {
+    final r = await _api.dio.get<Map<String, dynamic>>(
+      '/assinaturas/$assinaturaId/forma-pagamento',
+    );
+    return PagamentoJson.forma(r.data!);
+  });
+
+  Future<FormaAtual> trocarForma(String assinaturaId, FormaPagamento forma, {String? cartaoId}) =>
+      _chamar(() async {
+        final r = await _api.dio.put<Map<String, dynamic>>(
+          '/assinaturas/$assinaturaId/forma-pagamento',
+          data: {'formaPagamento': forma.valor, 'cartaoId': ?cartaoId},
+        );
+        return PagamentoJson.forma(r.data!);
+      });
 
   Future<T> _chamar<T>(Future<T> Function() fn) async {
     try {

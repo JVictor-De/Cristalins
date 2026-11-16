@@ -96,7 +96,7 @@ describe('Endereço, assinatura e ciclos (e2e)', () => {
       formaPagamento: 'PIX',
     });
 
-    it('CT02: POST /assinaturas → 201 AGUARDANDO_PAGAMENTO com ciclo de 213,19 e sem Pix', async () => {
+    it('CT02: POST /assinaturas → 201 AGUARDANDO_PAGAMENTO com ciclo de 213,19 e Pix (cr-3)', async () => {
       const ana = await entrar('ana@exemplo.com', '52998224725');
       const r = await http().post('/api/v1/assinaturas').set(bearer(ana)).send(corpo(await enderecoEm(ana))).expect(201);
       expect(r.body).toMatchObject({
@@ -109,7 +109,7 @@ describe('Endereço, assinatura e ciclos (e2e)', () => {
           { fator: 'FRETE', valor: 9.9 },
         ],
       });
-      expect(r.body.ciclo.pix).toBeUndefined();
+      expect(r.body.ciclo.pix).toEqual({ copiaECola: expect.any(String), qrCodeBase64: expect.any(String) });
       const ciclos = await http().get(`/api/v1/assinaturas/${r.body.id}/ciclos`).set(bearer(ana)).expect(200);
       expect(ciclos.body).toHaveLength(1);
     });
@@ -149,6 +149,7 @@ describe('Endereço, assinatura e ciclos (e2e)', () => {
       // Ativa como o webhook da cr-3 fará (pagamento confirmado do 1º ciclo).
       const ciclo1 = prisma.ciclos[0];
       ciclo1.status = 'PAGO';
+      prisma.pagamentos[0].status = 'PAGO'; // a cr-3 cria o Pix do 1º ciclo na assinatura
       prisma.assinaturas[0].status = 'ATIVA';
 
       relogio.irPara('2026-11-15', '10:00'); // ciclo 1 (16/11): corte 14/11 23:59 já passou; próxima em aberto é ela

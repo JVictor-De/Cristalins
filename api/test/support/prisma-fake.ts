@@ -71,6 +71,7 @@ const RELACOES: Record<string, Record<string, Relacao>> = {
     cliente: { modelo: 'cliente', tipo: 'um', campo: 'clienteId' },
     endereco: { modelo: 'endereco', tipo: 'um', campo: 'enderecoId' },
     cupom: { modelo: 'cupom', tipo: 'um', campo: 'cupomId' },
+    cartao: { modelo: 'cartao', tipo: 'um', campo: 'cartaoId' },
     itens: { modelo: 'itemAssinatura', tipo: 'muitos', campo: 'assinaturaId' },
     ciclos: { modelo: 'ciclo', tipo: 'muitos', campo: 'assinaturaId' },
   },
@@ -169,6 +170,12 @@ function padroes(modelo: string): Linha {
       return { ...comuns, creditos: new Decimal(0), criadoEm: agora };
     case 'pagamento':
       return { ...comuns, asaasPaymentId: null, linkPagamento: null, status: 'PENDENTE', pagoEm: null, criadoEm: agora, atualizadoEm: agora };
+    case 'credito':
+      return { ...comuns, expiraEm: null, usadoEm: null, criadoEm: agora };
+    case 'cartao':
+      return { ...comuns, criadoEm: agora };
+    case 'cupom':
+      return { ...comuns, validade: null, usosMax: null, usos: 0 };
     case 'eventoWebhook':
       return { ...comuns, processadoEm: null, erro: null, recebidoEm: agora };
     case 'recomendacao':
@@ -200,6 +207,8 @@ export class PrismaFake {
   calculos: Linha[] = [];
   pagamentos: Linha[] = [];
   eventosWebhook: Linha[] = [];
+  creditos: Linha[] = [];
+  cartoes: Linha[] = [];
   filaEspera: Linha[] = [];
 
   $queryRaw = jest.fn().mockResolvedValue([{ '?column?': 1 }]);
@@ -222,6 +231,8 @@ export class PrismaFake {
       calculoPreco: 'calculos',
       pagamento: 'pagamentos',
       eventoWebhook: 'eventosWebhook',
+      credito: 'creditos',
+      cartao: 'cartoes',
       listaEspera: 'filaEspera',
     };
     return this[mapa[modelo]] as unknown as Linha[];
@@ -489,6 +500,8 @@ export class PrismaFake {
   calculoPreco = this.delegado('calculoPreco');
   pagamento = this.delegado('pagamento');
   eventoWebhook = this.delegado('eventoWebhook');
+  credito = this.delegado('credito');
+  cartao = this.delegado('cartao');
   listaEspera = this.delegado('listaEspera');
 }
 
