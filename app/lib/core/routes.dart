@@ -14,11 +14,15 @@ import '../features/subscription/presentation/aguardando_pagamento_screen.dart';
 import '../features/subscription/presentation/minha_assinatura_screen.dart';
 import '../features/subscription/presentation/plano_pagamento_screen.dart';
 import '../features/welcome/presentation/boas_vindas_screen.dart';
+import '../features/welcome/presentation/splash_screen.dart';
 
 /// Rotas nomeadas do app. Os dados de uma etapa passam para a seguinte em `arguments`
 /// (equivalente à Intent explícita): id da recomendação → [PedidoAssinatura] → [AlteracaoDeCesta].
 abstract final class AppRoutes {
-  static const boasVindas = '/';
+  /// Rota raiz: no Flutter Web a URL `/` define a rota inicial — tem de ser a splash
+  /// (água → garrafa), senão a abertura do site salta a animação.
+  static const splash = '/';
+  static const boasVindas = '/boas-vindas';
   static const cadastroLogin = '/cadastro-login';
   static const esqueciSenha = '/esqueci-senha';
   static const redefinirSenha = '/redefinir-senha';
@@ -34,6 +38,7 @@ abstract final class AppRoutes {
   static Route<Object?>? gerar(RouteSettings settings) {
     final args = settings.arguments;
     final Widget? tela = switch (settings.name) {
+      splash => const SplashScreen(),
       boasVindas => const BoasVindasScreen(),
       cadastroLogin => const CadastroLoginScreen(),
       esqueciSenha => const EsqueciSenhaScreen(),
