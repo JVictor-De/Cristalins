@@ -146,6 +146,21 @@ scripts/*_run_auto.ps1
 .onda_paralela.json
 GATE_APROVADO.md
 
+# --- Artefatos locais de mídia / fora do seed (não versionar) ---
+app/assets/images/produtos/Gemini_Generated_*
+app/assets/images/produtos/cerveja_ultra-fast.*
+app/assets/images/produtos/flow_fiber-fast.jpg
+
+# --- Graphify / scrapes locais ---
+graphify-out/
+app/graphify-out/
+cristalins.com.br/
+.claude/settings.json.graphify-bak
+
+# --- npm acidental na raiz do monorepo ---
+/package.json
+/package-lock.json
+
 # --- Misc ---
 *.bak
 *.tmp
