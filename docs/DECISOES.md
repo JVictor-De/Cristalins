@@ -42,3 +42,12 @@
 | Health no container | `/api/v1/health` (não `/health`) | Prefixo real da API; compose e Uptime usam o mesmo path |
 | Prisma no runtime | `npm prune --omit=dev` + `prisma@7.10.1` no stage build | CLI fica em devDependencies; `migrate deploy` no entrypoint precisa dela |
 | Push de imagem no CI | Só comentário em `docs/DEPLOY.md` | Fase não altera workflow; João pede depois |
+
+## 2026-11-15 — Operação (`cr-6-operacao`)
+
+| Dúvida | Decisão | Motivo |
+| --- | --- | --- |
+| Geocodificação (`Endereco.lat`/`lng`) | Campos ficam **nulos**; nenhum provedor no CONTEXTO/Anexo | Não inventar coordenada; mapa segue com `geo:` do endereço textual |
+| Foto da ocorrência | Referência interna `s3://bucket/chave` (PUT SigV4); sem `S3_*` → memória em dev | Bucket privado; resposta da API só `temFoto` (sem URL/credencial) |
+| Push FCM no app | `firebase_messaging` sem plugin Gradle/`google-services.json` nesta fase | João adiciona o projeto Firebase real; sem arquivo o app segue e só deixa de registrar token |
+| Código de recuperação de senha | HMAC do `JWT_SECRET` + id + hash atual + janela 15 min (vale 15–30 min) | Sem tabela nova; invalida ao trocar a senha |

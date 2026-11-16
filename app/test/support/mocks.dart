@@ -8,6 +8,7 @@ import 'package:cristalins_assinatura/features/address/domain/endereco.dart';
 import 'package:cristalins_assinatura/features/auth/data/auth_repository.dart';
 import 'package:cristalins_assinatura/features/catalog/data/catalogo_repository.dart';
 import 'package:cristalins_assinatura/features/catalog/domain/catalogo.dart';
+import 'package:cristalins_assinatura/features/ocorrencias/data/ocorrencia_repository.dart';
 import 'package:cristalins_assinatura/features/quiz/data/recomendacao_repository.dart';
 import 'package:cristalins_assinatura/features/quiz/domain/quiz.dart';
 import 'package:cristalins_assinatura/features/subscription/data/assinatura_repository.dart';
@@ -30,6 +31,8 @@ class MockEnderecos extends Mock implements EnderecoRepository {}
 
 class MockAssinaturas extends Mock implements AssinaturaRepository {}
 
+class MockOcorrencias extends Mock implements OcorrenciaRepository {}
+
 class MockLinks extends Mock implements AbridorLinks {}
 
 class MockCompartilhador extends Mock implements Compartilhador {}
@@ -40,6 +43,7 @@ class Mocks {
   final catalogo = MockCatalogo();
   final enderecos = MockEnderecos();
   final assinaturas = MockAssinaturas();
+  final ocorrencias = MockOcorrencias();
   final links = MockLinks();
   final compartilhador = MockCompartilhador();
 
@@ -49,6 +53,7 @@ class Mocks {
     catalogo: catalogo,
     enderecos: enderecos,
     assinaturas: assinaturas,
+    ocorrencias: ocorrencias,
     links: links,
     compartilhador: compartilhador,
   );

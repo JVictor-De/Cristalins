@@ -66,6 +66,35 @@ class AuthRepository {
 
   Future<void> sair() => _api.tokens.limpar();
 
+  /// RF52: sempre 200 na API (não revela se o e-mail existe).
+  Future<String> esqueciSenha(String email) async {
+    try {
+      final r = await _api.dio.post<Map<String, dynamic>>(
+        '/auth/esqueci-senha',
+        data: {'email': email},
+      );
+      return r.data!['mensagem'] as String;
+    } catch (e) {
+      throw ApiErro.de(e);
+    }
+  }
+
+  Future<String> redefinirSenha({
+    required String email,
+    required String codigo,
+    required String novaSenha,
+  }) async {
+    try {
+      final r = await _api.dio.post<Map<String, dynamic>>(
+        '/auth/redefinir-senha',
+        data: {'email': email, 'codigo': codigo, 'novaSenha': novaSenha},
+      );
+      return r.data!['mensagem'] as String;
+    } catch (e) {
+      throw ApiErro.de(e);
+    }
+  }
+
   Future<void> _salvar(Map<String, dynamic> tokens) => _api.tokens.salvar(
     acesso: tokens['accessToken'] as String,
     refresh: tokens['refreshToken'] as String,

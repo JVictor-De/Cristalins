@@ -15,6 +15,7 @@ import '../../../core/widgets/tela_titulo_grande.dart';
 import '../data/auth_repository.dart';
 import '../domain/validadores.dart';
 import 'cadastro_login_controller.dart';
+import 'esqueci_senha_screen.dart';
 
 /// Tela 2 — Cadastro e login.
 class CadastroLoginScreen extends StatelessWidget {
@@ -80,6 +81,10 @@ class _ConteudoState extends State<_Conteudo> {
       mostrarAviso(context, c.erro!, erro: true);
       return;
     }
+    // RF51: tenta registrar o token de push (sem Firebase configurado, segue em silêncio).
+    final dep = context.read<Dependencias>();
+    await dep.push.registrarSePossivel(dep.api);
+    if (!mounted) return;
     switch (destino) {
       case DestinoAposAcesso.minhaAssinatura:
         Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.minhaAssinatura, (_) => false);
@@ -216,6 +221,20 @@ class _ConteudoState extends State<_Conteudo> {
                       ),
                     ],
                   ),
+                  if (!cadastro)
+                    SecaoAgrupada(
+                      children: [
+                        LinhaLista(
+                          titulo: 'Esqueci a senha',
+                          corTitulo: AppColors.linkSobreSuperficie,
+                          trailing: const CupertinoListTileChevron(),
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            Navigator.of(context).push(rotaEsqueciSenha());
+                          },
+                        ),
+                      ],
+                    ),
                   if (cadastro)
                     SecaoAgrupada(
                       rodape: c.mostrarErroTermos

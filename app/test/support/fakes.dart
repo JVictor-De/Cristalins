@@ -10,6 +10,8 @@ import 'package:cristalins_assinatura/features/address/domain/endereco.dart';
 import 'package:cristalins_assinatura/features/auth/data/auth_repository.dart';
 import 'package:cristalins_assinatura/features/catalog/data/catalogo_repository.dart';
 import 'package:cristalins_assinatura/features/catalog/domain/catalogo.dart';
+import 'package:cristalins_assinatura/features/ocorrencias/data/ocorrencia_repository.dart';
+import 'package:cristalins_assinatura/features/ocorrencias/domain/ocorrencia.dart';
 import 'package:cristalins_assinatura/features/quiz/data/recomendacao_repository.dart';
 import 'package:cristalins_assinatura/features/quiz/domain/quiz.dart';
 import 'package:cristalins_assinatura/features/subscription/data/assinatura_repository.dart';
@@ -56,6 +58,52 @@ class AuthFalso implements AuthRepository {
 
   @override
   Future<void> sair() async {}
+
+  @override
+  Future<String> esqueciSenha(String email) async {
+    if (erro != null) throw erro!;
+    return 'Se o e-mail tiver cadastro, enviamos um código para criar uma nova senha.';
+  }
+
+  @override
+  Future<String> redefinirSenha({
+    required String email,
+    required String codigo,
+    required String novaSenha,
+  }) async {
+    if (erro != null) throw erro!;
+    return 'Senha alterada. Entre com a nova senha.';
+  }
+}
+
+class OcorrenciasFalsas implements OcorrenciaRepository {
+  final criadas = <OcorrenciaCriada>[];
+
+  @override
+  Future<OcorrenciaCriada> criar({
+    required String cicloId,
+    required String tipo,
+    required String produto,
+    required int quantidade,
+    required String solucao,
+    required String caminhoFoto,
+  }) async {
+    final o = OcorrenciaCriada(
+      id: 'oc-${criadas.length + 1}',
+      tipo: tipo,
+      produto: produto,
+      quantidade: quantidade,
+      solucao: solucao,
+      status: solucao == 'CREDITO' ? 'RESOLVIDA' : 'ABERTA',
+      temFoto: true,
+      credito: solucao == 'CREDITO' ? 19.8 : null,
+    );
+    criadas.add(o);
+    return o;
+  }
+
+  @override
+  Future<List<OcorrenciaCriada>> listar() async => List.of(criadas);
 }
 
 class RecomendacoesFalsas implements RecomendacaoRepository {
@@ -387,6 +435,7 @@ class Falsos {
   final catalogo = CatalogoFalso();
   final enderecos = EnderecosFalsos();
   final assinaturas = AssinaturasFalsas();
+  final ocorrencias = OcorrenciasFalsas();
   final links = LinksFalsos();
   final compartilhador = CompartilhadorFalso();
 
@@ -396,6 +445,7 @@ class Falsos {
     catalogo: catalogo,
     enderecos: enderecos,
     assinaturas: assinaturas,
+    ocorrencias: ocorrencias,
     links: links,
     compartilhador: compartilhador,
   );

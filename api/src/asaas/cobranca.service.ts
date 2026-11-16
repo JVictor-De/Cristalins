@@ -12,6 +12,7 @@ import { PrismaService } from '../common/prisma.service';
 import { RegraNegocioException } from '../common/regra-negocio.exception';
 import { CreditosService } from '../creditos/creditos.service';
 import { MaquinaEstadosService } from '../assinaturas/maquina-estados.service';
+import { MENSAGENS, NotificacoesService } from '../notificacoes/notificacoes.service';
 import { dec } from '../precos/preco.tipos';
 import { PAGAMENTO_GATEWAY, PagamentoGateway, PixQrCode } from './pagamento.gateway';
 
@@ -63,6 +64,7 @@ export class CobrancaService {
     private readonly maquina: MaquinaEstadosService,
     @Inject(PAGAMENTO_GATEWAY) private readonly gateway: PagamentoGateway,
     @Optional() private readonly creditos?: CreditosService,
+    @Optional() private readonly notificacoes?: NotificacoesService,
   ) {}
 
   /** Garante o cliente no Asaas (`asaasCustomerId`). */
@@ -158,18 +160,52 @@ export class CobrancaService {
       }
       const cobranca = await this.gateway.criarCobrancaCartao({ ...base, token });
       const p = await this.registrar(ciclo.id, formaUsada, cobranca.id, valor, vencimento, cobranca.linkFatura);
+      await this.avisarCobranca(ciclo, valor, vencimento);
       return { pagamentoId: p.id, asaasPaymentId: cobranca.id, forma: formaUsada, valor, vencimento };
     }
     if (formaUsada === FormaPagamento.BOLETO) {
       const cobranca = await this.gateway.criarCobrancaBoleto(base);
       const link = cobranca.linkBoleto ?? cobranca.linkFatura;
       const p = await this.registrar(ciclo.id, formaUsada, cobranca.id, valor, vencimento, link);
+      await this.avisarCobranca(ciclo, valor, vencimento);
       return { pagamentoId: p.id, asaasPaymentId: cobranca.id, forma: formaUsada, valor, vencimento, linkBoleto: link };
     }
     const cobranca = await this.gateway.criarCobrancaPix(base);
     const pix = await this.gateway.obterPixQrCode(cobranca.id);
     const p = await this.registrar(ciclo.id, FormaPagamento.PIX, cobranca.id, valor, vencimento, null);
+    await this.avisarCobranca(ciclo, valor, vencimento);
     return { pagamentoId: p.id, asaasPaymentId: cobranca.id, forma: FormaPagamento.PIX, valor, vencimento, pix };
+  }
+
+  /**
+   * RF51: aviso da cobrança. RF22: se o total do ciclo (antes dos créditos) subiu em relação ao
+   * ciclo anterior, avisa que dá para pular ou alterar até o corte. Falha de envio não quebra a cobrança.
+   */
+  private async avisarCobranca(
+    ciclo: { id: string; assinaturaId: string; numero: number; dataEntrega: Date; dataCorte: Date; assinatura: { clienteId: string } },
+    valor: number,
+    vencimento: string,
+  ): Promise<void> {
+    if (!this.notificacoes) return;
+    const entrega = ciclo.dataEntrega.toISOString().slice(0, 10);
+    const dados = { cicloId: ciclo.id };
+    await this.notificacoes.notificar(ciclo.assinatura.clienteId, 'COBRANCA', MENSAGENS.cobranca(entrega, valor, vencimento), dados);
+    if (ciclo.numero <= 1) return;
+    const [atual, anterior] = await Promise.all([
+      this.prisma.calculoPreco.findUnique({ where: { cicloId: ciclo.id } }),
+      this.prisma.calculoPreco.findFirst({ where: { ciclo: { assinaturaId: ciclo.assinaturaId, numero: ciclo.numero - 1 } } }),
+    ]);
+    if (!atual || !anterior) return;
+    const bruto = (c: { valorFinal: unknown; creditos: unknown }) => dec(c.valorFinal as string).plus(dec(c.creditos as string));
+    if (bruto(atual).gt(bruto(anterior))) {
+      const corte = new Date(ciclo.dataCorte.getTime() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10); // dia civil em São Paulo
+      await this.notificacoes.notificar(
+        ciclo.assinatura.clienteId,
+        'AUMENTO_PRECO',
+        MENSAGENS.aumento(entrega, Number(bruto(atual).toFixed(2)), Number(bruto(anterior).toFixed(2)), corte),
+        dados,
+      );
+    }
   }
 
   /** CT18: nova tentativa agendada no cartão → cobra com o token salvo. */
@@ -237,7 +273,7 @@ export class CobrancaService {
    * cobrança paga do cliente, credita a indicação de quem o indicou (RN22).
    */
   async confirmarPagamentoDoCiclo(cicloId: string, asaasPaymentId?: string): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
+    const confirmado = await this.prisma.$transaction(async (tx) => {
       const ciclo = await tx.ciclo.findUnique({
         where: { id: cicloId },
         include: {
@@ -245,10 +281,10 @@ export class CobrancaService {
           pagamentos: true,
         },
       });
-      if (!ciclo) return;
+      if (!ciclo) return null;
 
       if (ciclo.status === StatusCiclo.PAGO || ciclo.status === StatusCiclo.CANCELADO || ciclo.status === StatusCiclo.PULADO) {
-        return; // idempotente
+        return null; // idempotente
       }
 
       if (ciclo.status === StatusCiclo.AGENDADO) {
@@ -294,7 +330,13 @@ export class CobrancaService {
         const concedido = await this.creditos.concederIndicacao(tx, assinatura.clienteId);
         if (concedido) this.log.log(`RN22: crédito de indicação pelo cliente ${assinatura.clienteId}`);
       }
+      const entrega = await tx.ciclo.findUnique({ where: { id: ciclo.id } });
+      return { clienteId: assinatura.clienteId, entrega: entrega!.dataEntrega.toISOString().slice(0, 10) };
     });
+    // RF51: aviso do pagamento, fora da transação.
+    if (confirmado && this.notificacoes) {
+      await this.notificacoes.notificar(confirmado.clienteId, 'PAGAMENTO', MENSAGENS.pagamento(confirmado.entrega), { cicloId });
+    }
   }
 
   /**

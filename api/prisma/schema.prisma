@@ -442,13 +442,16 @@ model Cupom {
 // ---------- Operação ----------
 
 model Ocorrencia {
-  id       String             @id @default(uuid()) @db.Uuid
-  cicloId  String             @map("ciclo_id") @db.Uuid
-  tipo     TipoOcorrencia
-  fotoUrl  String?            @map("foto_url")
-  solucao  SolucaoOcorrencia?
-  status   StatusOcorrencia   @default(ABERTA)
-  criadoEm DateTime           @default(now()) @map("criado_em") @db.Timestamptz(3)
+  id         String             @id @default(uuid()) @db.Uuid
+  cicloId    String             @map("ciclo_id") @db.Uuid
+  tipo       TipoOcorrencia
+  fotoUrl    String?            @map("foto_url")
+  // cr-6: item avariado ou faltante (crédito e reposição do RN15 precisam de produto e quantidade)
+  produtoId  String?            @map("produto_id") @db.Uuid
+  quantidade Int?
+  solucao    SolucaoOcorrencia?
+  status     StatusOcorrencia   @default(ABERTA)
+  criadoEm   DateTime           @default(now()) @map("criado_em") @db.Timestamptz(3)
 
   ciclo Ciclo @relation(fields: [cicloId], references: [id], onDelete: Cascade)
 

@@ -16,6 +16,7 @@ import '../../../core/widgets/estados.dart';
 import '../../../core/widgets/secao_agrupada.dart';
 import '../../../core/widgets/tela_titulo_grande.dart';
 import '../../address/domain/endereco.dart';
+import '../../ocorrencias/presentation/ocorrencia_screen.dart';
 import '../../quiz/domain/quiz.dart';
 import '../domain/assinatura.dart';
 import 'faturas_screen.dart';
@@ -342,14 +343,25 @@ class _Conteudo extends StatelessWidget {
               if (c.ciclos.isNotEmpty)
                 SecaoAgrupada(
                   cabecalho: 'Entregas',
+                  rodape: 'Nas entregues, informe avaria ou falta em até 24 horas.',
                   children: [
                     for (final ciclo in c.ciclos.reversed.take(6))
                       LinhaLista(
                         titulo: Datas.comDiaDaSemana(ciclo.dataEntrega),
-                        subtitulo: rotuloStatusCiclo(ciclo.status, ciclo.motivoPulo),
-                        trailing: ciclo.valor == null
-                            ? null
-                            : Text(ciclo.valor!.formatado, style: secundario),
+                        subtitulo: ciclo.status == 'ENTREGUE'
+                            ? '${rotuloStatusCiclo(ciclo.status, ciclo.motivoPulo)} · Informar problema'
+                            : rotuloStatusCiclo(ciclo.status, ciclo.motivoPulo),
+                        trailing: ciclo.status == 'ENTREGUE'
+                            ? const CupertinoListTileChevron()
+                            : (ciclo.valor == null
+                                ? null
+                                : Text(ciclo.valor!.formatado, style: secundario)),
+                        onTap: ciclo.status == 'ENTREGUE'
+                            ? () {
+                                HapticFeedback.selectionClick();
+                                Navigator.of(context).push(rotaOcorrencia(ciclo));
+                              }
+                            : null,
                       ),
                   ],
                 ),

@@ -59,11 +59,13 @@ Flavors: `dev` / `hml` / `prod` (`main_dev.dart`, `main_hml.dart`, `main_prod.da
 | 6 | Endereço | `…/address/presentation/endereco_screen.dart` | `endereco_controller.dart` | `endereco_repository.dart`, `endereco.dart` | `GET /cep/{cep}`, `POST /enderecos`, `POST /lista-espera`; Intent `geo:` |
 | 7 | Plano e pagamento | `…/subscription/presentation/plano_pagamento_screen.dart` | `plano_pagamento_controller.dart` | `assinatura_repository.dart`, `assinatura.dart` | `POST /precos/simular`, `POST /assinaturas` |
 | — | Aguardando pagamento | `…/subscription/presentation/aguardando_pagamento_screen.dart` | `aguardando_pagamento_controller.dart` | idem | `GET /assinaturas/{id}` a cada 5 s até `ATIVA` (Pix de `ciclo.pix` na criação) |
-| 8 | Minha assinatura | `…/subscription/presentation/minha_assinatura_screen.dart` | `minha_assinatura_controller.dart` | idem | `GET/PUT/DELETE /assinaturas/{id}`, pausar, retomar, pular-entrega, `GET .../ciclos`; WhatsApp se `SUPORTE_WHATSAPP` |
+| 8 | Minha assinatura | `…/subscription/presentation/minha_assinatura_screen.dart` | `minha_assinatura_controller.dart` | idem | `GET/PUT/DELETE /assinaturas/{id}`, pausar, retomar, pular-entrega, `GET .../ciclos`; WhatsApp se `SUPORTE_WHATSAPP`; entrega ENTREGUE → ocorrência |
+| — | Ocorrência | `…/ocorrencias/presentation/ocorrencia_screen.dart` | `ocorrencia_controller.dart` | `ocorrencia_repository.dart` | `POST /ocorrencias` (multipart + foto) |
+| — | Esqueci / Nova senha | `…/auth/presentation/esqueci_senha_screen.dart`, `redefinir_senha_screen.dart` | — | `auth_repository.dart` | `POST /auth/esqueci-senha`, `POST /auth/redefinir-senha` |
 
 Rotas nomeadas: `app/lib/core/routes.dart`. Tema/widgets: `app/lib/core/theme/`, `app/lib/core/widgets/`.
 
-**Nota de rota:** a tela Aguardando pagamento é aberta por navegação direta (`rotaAguardandoPagamento`). O mapa `pushNamed('/aguardando-pagamento')` em `routes.dart` ainda aponta para “em construção” (lacuna registrada no HANDOFF; fora do escopo desta fase de docs).
+**Nota de rota:** a tela Aguardando pagamento abre por `rotaAguardandoPagamento(criada)` (fluxo da Tela 7) e também por `pushNamed('/aguardando-pagamento', arguments: AssinaturaCriada)` — ambos mapeiam para `AguardandoPagamentoScreen` em `core/routes.dart` (corrigido em `cr-4-revisao`).
 
 ---
 
@@ -92,8 +94,14 @@ Prefixo real: `/api/v1`.
 | `POST` | `/webhooks/asaas` | `webhooks/webhooks.controller.ts` | `WebhooksService.receber` → job `processarPendentes` → `CobrancaService.confirmarPagamentoDoCiclo` | `EventoWebhook`, `Pagamento`, `Ciclo`, `Assinatura` |
 | `PUT` | `/admin/produtos/{id}`, `/admin/fatores-preco`, `/admin/zonas/{id}` | `admin/admin.controller.ts` | admin services | `Produto` / `FatorPreco` / `Zona` |
 | `POST` | `/admin/jobs/gerar-cobrancas` | idem | `JobsService.gerarCobrancas` | novos `Pagamento` / cobranças |
+| `GET` | `/admin/separacao?data=` | `admin/admin.controller.ts` | `OperacaoService.separacao` | ciclos PAGO/SEPARADO do dia + prévia RN06 |
+| `PUT` | `/admin/ciclos/{id}/status` | idem | `OperacaoService.atualizarStatus` | SEPARADO/EM_ROTA/ENTREGUE/FALHOU + estoque/avisos |
+| `POST`/`GET` | `/ocorrencias` | `ocorrencias/ocorrencias.controller.ts` | `OcorrenciasService` | foto MinIO/`S3_*`; crédito ou reposição |
+| `PUT` | `/notificacoes/push-token` | `notificacoes/notificacoes.controller.ts` | `NotificacoesService` | token FCM do aparelho |
+| `POST` | `/auth/esqueci-senha`, `/auth/redefinir-senha` | `RecuperacaoSenhaController` | `RecuperacaoSenhaService` | código HMAC; SMTP se configurado |
 
 Gateway de pagamento: `api/src/asaas/` — `PagamentoGateway` escolhido por `ASAAS_MODE` (`FakeGateway` ou `AsaasGateway`).
+Push/e-mail: `api/src/notificacoes/` (FCM + SMTP; sem credencial → só log mascarado).
 
 ### Confirmação Pix (demo) e lacuna
 

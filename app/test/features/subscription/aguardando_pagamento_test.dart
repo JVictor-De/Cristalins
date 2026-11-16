@@ -188,6 +188,26 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('pushNamed /aguardando-pagamento com AssinaturaCriada abre a tela real', (
+    tester,
+  ) async {
+    when(
+      () => m.assinaturas.buscar('ass-1'),
+    ).thenAnswer((_) async => assinatura('AGUARDANDO_PAGAMENTO'));
+    await prepararTela(tester);
+    await tester.pumpWidget(appComMocks(m));
+    await tester.pumpAndSettle();
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .pushNamed(AppRoutes.aguardandoPagamento, arguments: criada());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 900));
+
+    expect(find.text('Aguardando o pagamento'), findsOneWidget);
+    expect(find.text('00020126FAKE-PIX-pay_fake_1234'), findsOneWidget);
+    expect(find.textContaining('em construção'), findsNothing);
+  });
+
   testWidgets('Tela 7: "Assinar agora" com Pix abre a tela de espera na rota nomeada', (
     tester,
   ) async {

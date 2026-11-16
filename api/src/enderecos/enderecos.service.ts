@@ -19,7 +19,7 @@ export class EnderecoResponse {
   @ApiProperty({ example: 'RJ' }) uf: string;
   @ApiPropertyOptional({ nullable: true, type: String }) referencia: string | null;
   @ApiPropertyOptional({ nullable: true, type: String }) instrucoes: string | null;
-  @ApiPropertyOptional({ nullable: true, type: Number, description: 'Nulo até a geocodificação (cr-6)' }) lat: number | null;
+  @ApiPropertyOptional({ nullable: true, type: Number, description: 'Sem provedor de geocodificação: permanece nulo (docs/DECISOES.md)' }) lat: number | null;
   @ApiPropertyOptional({ nullable: true, type: Number }) lng: number | null;
   @ApiProperty() principal: boolean;
   @ApiProperty({ example: { id: '…', nome: 'Zona Sul', taxaEntrega: 9.9, diasEntrega: ['SEG', 'QUA', 'SEX'] } })

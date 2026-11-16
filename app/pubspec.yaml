@@ -18,6 +18,10 @@ dependencies:
   url_launcher: ^6.3.3
   flutter_secure_storage: ^11.2.0
   share_plus: ^13.3.1
+  # cr-6-operacao: foto da ocorrência e token de push (sem google-services.json nesta fase).
+  image_picker: ^1.2.1
+  firebase_core: ^4.2.1
+  firebase_messaging: ^16.0.4
 
 dev_dependencies:
   flutter_test:

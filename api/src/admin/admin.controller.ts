@@ -1,8 +1,9 @@
-import { Body, Controller, Param, Post, Put } from '@nestjs/common';
-import { ApiBearerAuth, ApiForbiddenResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiConflictResponse, ApiForbiddenResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Papeis } from '../auth/decorators';
 import { JobsService } from '../jobs/jobs.service';
 import { AdminService } from './admin.service';
+import { AtualizarStatusCicloDto, OperacaoService, StatusCicloResponse } from './operacao.service';
 import { AtualizarFatorDto, AtualizarProdutoDto, AtualizarZonaDto } from './dto/admin.dto';
 
 /** SEG03: todas as rotas /admin exigem papel ADMIN (cliente → 403 SEM_PERMISSAO). */
@@ -15,6 +16,7 @@ export class AdminController {
   constructor(
     private readonly admin: AdminService,
     private readonly jobs: JobsService,
+    private readonly operacao: OperacaoService,
   ) {}
 
   @Put('produtos/:id')
@@ -39,5 +41,19 @@ export class AdminController {
   @ApiOkResponse({ description: 'Dispara o job das 06:00 (cobranças com entrega em D+5)' })
   gerarCobrancas() {
     return this.jobs.gerarCobrancas();
+  }
+
+  @Get('separacao')
+  @ApiQuery({ name: 'data', example: '2026-11-30', description: 'Dia da entrega (AAAA-MM-DD)' })
+  @ApiOkResponse({ description: 'RF29: ciclos pagos do dia por zona, com trocas do RN06 e reposições do RN15' })
+  separacao(@Query('data') data: string) {
+    return this.operacao.separacao(data);
+  }
+
+  @Put('ciclos/:id/status')
+  @ApiOkResponse({ type: StatusCicloResponse, description: 'RF31/RN17: separado, em rota, entregue ou falhou; avisa o cliente' })
+  @ApiConflictResponse({ description: 'TRANSICAO_INVALIDA' })
+  statusCiclo(@Param('id') id: string, @Body() dto: AtualizarStatusCicloDto): Promise<StatusCicloResponse> {
+    return this.operacao.atualizarStatus(id, dto.status);
   }
 }

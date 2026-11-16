@@ -1,6 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { AssinaturasModule } from '../assinaturas/assinaturas.module';
 import { CreditosModule } from '../creditos/creditos.module';
+import { NotificacoesModule } from '../notificacoes/notificacoes.module';
 import { AsaasGateway } from './asaas.gateway';
 import { CartaoService } from './cartao.service';
 import { CobrancaService } from './cobranca.service';
@@ -18,7 +19,7 @@ function criarGateway(): PagamentoGateway {
 }
 
 @Module({
-  imports: [forwardRef(() => AssinaturasModule), CreditosModule],
+  imports: [forwardRef(() => AssinaturasModule), CreditosModule, NotificacoesModule],
   controllers: [PagamentosController],
   providers: [
     { provide: PAGAMENTO_GATEWAY, useFactory: criarGateway },

@@ -12,6 +12,7 @@ import { HealthModule } from './health/health.module';
 import { JobsModule } from './jobs/jobs.module';
 import { KitsModule } from './kits/kits.module';
 import { ListaEsperaModule } from './lista-espera/lista-espera.module';
+import { NotificacoesModule } from './notificacoes/notificacoes.module';
 import { OcorrenciasModule } from './ocorrencias/ocorrencias.module';
 import { PrecosModule } from './precos/precos.module';
 import { ProdutosModule } from './produtos/produtos.module';
@@ -32,6 +33,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     AssinaturasModule,
     CiclosModule,
     OcorrenciasModule,
+    NotificacoesModule,
     AsaasModule,
     WebhooksModule,
     JobsModule,

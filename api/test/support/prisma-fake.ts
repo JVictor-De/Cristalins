@@ -82,7 +82,9 @@ const RELACOES: Record<string, Record<string, Relacao>> = {
     itens: { modelo: 'itemCiclo', tipo: 'muitos', campo: 'cicloId' },
     pagamentos: { modelo: 'pagamento', tipo: 'muitos', campo: 'cicloId' },
     calculoPreco: { modelo: 'calculoPreco', tipo: 'umReverso', campo: 'cicloId' },
+    ocorrencias: { modelo: 'ocorrencia', tipo: 'muitos', campo: 'cicloId' },
   },
+  ocorrencia: { ciclo: { modelo: 'ciclo', tipo: 'um', campo: 'cicloId' } },
   itemCiclo: { produto: { modelo: 'produto', tipo: 'um', campo: 'produtoId' } },
   calculoPreco: { ciclo: { modelo: 'ciclo', tipo: 'um', campo: 'cicloId' } },
   pagamento: { ciclo: { modelo: 'ciclo', tipo: 'um', campo: 'cicloId' } },
@@ -174,6 +176,8 @@ function padroes(modelo: string): Linha {
       return { ...comuns, expiraEm: null, usadoEm: null, criadoEm: agora };
     case 'cartao':
       return { ...comuns, criadoEm: agora };
+    case 'ocorrencia':
+      return { ...comuns, fotoUrl: null, produtoId: null, quantidade: null, solucao: null, status: 'ABERTA', criadoEm: agora };
     case 'cupom':
       return { ...comuns, validade: null, usosMax: null, usos: 0 };
     case 'eventoWebhook':
@@ -209,6 +213,7 @@ export class PrismaFake {
   eventosWebhook: Linha[] = [];
   creditos: Linha[] = [];
   cartoes: Linha[] = [];
+  ocorrencias: Linha[] = [];
   filaEspera: Linha[] = [];
 
   $queryRaw = jest.fn().mockResolvedValue([{ '?column?': 1 }]);
@@ -233,6 +238,7 @@ export class PrismaFake {
       eventoWebhook: 'eventosWebhook',
       credito: 'creditos',
       cartao: 'cartoes',
+      ocorrencia: 'ocorrencias',
       listaEspera: 'filaEspera',
     };
     return this[mapa[modelo]] as unknown as Linha[];
@@ -502,6 +508,7 @@ export class PrismaFake {
   eventoWebhook = this.delegado('eventoWebhook');
   credito = this.delegado('credito');
   cartao = this.delegado('cartao');
+  ocorrencia = this.delegado('ocorrencia');
   listaEspera = this.delegado('listaEspera');
 }
 
