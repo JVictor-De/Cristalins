@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
@@ -28,31 +29,43 @@ class SecaoComTitulo extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(titulo, style: AppTypography.title3.copyWith(color: AppColors.navy)),
-                    if (subtitulo != null) ...[
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(subtitulo!, style: AppTypography.footnote.copyWith(color: AppColors.textoSuave)),
-                    ],
-                  ],
-                ),
-              ),
-              if (acaoRotulo != null && onAcao != null)
-                TextButton(
-                  onPressed: onAcao,
-                  child: Text(
-                    acaoRotulo!,
-                    style: AppTypography.subheadline.copyWith(
-                      color: AppColors.azulMarca,
-                      fontWeight: FontWeight.w600,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Expanded(
+                    child: Text(
+                      titulo,
+                      style: AppTypography.title3.copyWith(color: AppColors.navy),
                     ),
                   ),
-                ),
+                  if (acaoRotulo != null && onAcao != null)
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        onAcao!();
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          acaoRotulo!,
+                          style: AppTypography.subheadline.copyWith(
+                            color: AppColors.azulMarca,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              if (subtitulo != null) ...[
+                const SizedBox(height: AppSpacing.xxs),
+                Text(subtitulo!, style: AppTypography.footnote.copyWith(color: AppColors.textoSuave)),
+              ],
             ],
           ),
         ),

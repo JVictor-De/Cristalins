@@ -33,6 +33,13 @@ class AppConfig {
   static const prefixoApi = '/api/v1';
   static const siteMarca = 'https://www.cristalins.com.br/';
 
+  /// Espelha `pubspec.yaml` `version:` (sem `package_info_plus`). Override: `--dart-define=APP_VERSION=`.
+  static const versaoApp = String.fromEnvironment('APP_VERSION', defaultValue: '0.1.0+1');
+
+  /// URLs legais — vazias = “em breve” na UI (não inventar).
+  static const urlTermos = String.fromEnvironment('URL_TERMOS');
+  static const urlPrivacidade = String.fromEnvironment('URL_PRIVACIDADE');
+
   final Ambiente ambiente;
   final String apiUrl;
   final String suporteWhatsapp;

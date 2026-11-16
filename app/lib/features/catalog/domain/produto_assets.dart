@@ -1,6 +1,7 @@
 import 'package:flutter/painting.dart';
 
 import '../../../core/theme/app_colors.dart';
+import 'catalogo.dart';
 
 /// Paths locais dos assets de produto (espelho cristalins-v2 → `assets/images/produtos/`).
 /// Alinhado aos códigos do seed da API (`WP500` … `GUA2000`).
@@ -30,7 +31,7 @@ String? assetDoProduto(String codigo) {
   }
 }
 
-/// Cor de acento da linha (chip / faixa / PDP). Na grade o fundo do card é [AppColors.gelo].
+/// Cor de acento da linha (chip / faixa / fundo suave do card).
 Color corDoProduto(String codigo) {
   switch (codigo) {
     case 'WP500':
@@ -41,6 +42,18 @@ Color corDoProduto(String codigo) {
       return AppColors.menta;
     default:
       return AppColors.aqua;
+  }
+}
+
+/// Nome curto no card / a11y (WP/FF sem volume longo da API).
+String nomeCardProduto(Produto produto) {
+  switch (produto.codigo) {
+    case 'WP500':
+      return 'Water Protein';
+    case 'FF500':
+      return 'Flow Fiber';
+    default:
+      return produto.nome;
   }
 }
 

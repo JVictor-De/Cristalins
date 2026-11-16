@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../features/catalog/domain/sacola_copy.dart';
 import '../../features/catalog/presentation/sacola_controller.dart';
 import '../routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
+import 'botao_principal.dart';
 import 'sugestao_minimo_cesta.dart';
 
 /// Barra fina acima da tab bar. Lê [SacolaController]; preço só da simulação API.
+/// Total = mesma fonte da Sacola: [Simulacao.total] / [Dinheiro.formatado] via [SacolaCopy].
 class BarraSacola extends StatelessWidget {
   const BarraSacola({super.key});
 
@@ -22,6 +25,8 @@ class BarraSacola extends StatelessWidget {
     final progresso = sim == null || sim.ueMinima <= 0
         ? null
         : (sim.ue / sim.ueMinima).clamp(0.0, 1.0).toDouble();
+    final n = sacola.totalItens;
+    final itensLabel = SacolaCopy.itens(n);
 
     return Material(
       color: AppColors.superficie,
@@ -74,25 +79,34 @@ class BarraSacola extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        sim == null
-                            ? '${sacola.totalItens} ${sacola.totalItens == 1 ? 'item' : 'itens'}'
-                            : '${sim.total.formatado}/entrega · ${sacola.totalItens} ${sacola.totalItens == 1 ? 'item' : 'itens'}',
-                        style: AppTypography.subheadline.copyWith(
-                          color: AppColors.tinta,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child: sim == null
+                          ? Text(
+                              itensLabel,
+                              style: AppTypography.subheadline.copyWith(
+                                color: AppColors.tinta,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            )
+                          : Text.rich(
+                              TextSpan(
+                                style: AppTypography.subheadline.copyWith(color: AppColors.tinta),
+                                children: [
+                                  TextSpan(text: '${SacolaCopy.itens(n)} · '),
+                                  TextSpan(
+                                    text: sim.total.formatado,
+                                    style: const TextStyle(fontWeight: FontWeight.w800),
+                                  ),
+                                  const TextSpan(text: ' por entrega'),
+                                ],
+                              ),
+                            ),
                     ),
-                    TextButton(
+                    const SizedBox(width: AppSpacing.sm),
+                    BotaoPrincipal(
+                      rotulo: 'Ver sacola',
+                      expandido: false,
+                      variante: VarianteBotaoPrincipal.navy,
                       onPressed: () => Navigator.of(context).pushNamed(AppRoutes.sacola),
-                      child: Text(
-                        'Ver sacola',
-                        style: AppTypography.subheadline.copyWith(
-                          color: AppColors.azulMarca,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
                     ),
                   ],
                 ),

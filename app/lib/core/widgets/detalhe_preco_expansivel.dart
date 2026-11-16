@@ -14,19 +14,21 @@ class DetalhePrecoExpansivel extends StatefulWidget {
     this.subtotal,
     this.frete,
     this.total,
+    this.inicialmenteAberto = false,
   });
 
   final List<LinhaPreco> detalhe;
   final Dinheiro? subtotal;
   final Dinheiro? frete;
   final Dinheiro? total;
+  final bool inicialmenteAberto;
 
   @override
   State<DetalhePrecoExpansivel> createState() => _DetalhePrecoExpansivelState();
 }
 
 class _DetalhePrecoExpansivelState extends State<DetalhePrecoExpansivel> {
-  var _aberto = false;
+  late var _aberto = widget.inicialmenteAberto;
 
   @override
   Widget build(BuildContext context) {

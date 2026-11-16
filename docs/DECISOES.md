@@ -79,11 +79,92 @@
 | UX v3 (registrar) | Home bifurcada; cards sem preço; frequência só na sacola; mínimo com sugestão; login contextual | Monólito v3 missão / §2 |
 | Hero WP asset | Usar `produtos/protein.webp` (não `flow_protein.webp` = print de landing) | BUGS_UX #3–5; tipografia só no widget |
 | Origem / Como funciona | Foto `ams500.webp` + copy curta; não crop de `colocar_site-fast.webp` | BUGS_UX #2, #5 |
-| Logo header | `LogoMarca` com `ColorFilter` no JPG branco → transparente aproximado | Sem flutter_svg; BUGS_UX #7 |
+| Logo header | `brand/logo.png` transparente + `LogoMarca` **sem** ColorFilter (JPG/`ColorFilter` aposentados) | BUGS_UX #7; ver tabela polimento PNG abaixo |
 | Ícone aba Assinatura | `Icons.water_drop_outlined` / `water_drop` (substitui `autorenew`) | BUGS_UX #31; recorrência de água mais legível |
 | Abrir Produtos | `AbrirProdutosCallback({Categoria?})` no shell — Montar≠Ver águas | BUGS_UX #11, #24 |
 | Animação impacto (`mk-5b`+) | Cena na PDP de **todas** as SKUs do catálogo; mineral usa garrafa+copy do site; WP/Fiber/Guaraná usam foto do produto e **sem** frase “água mineral” | Pedido João 2026-11-16 — mesma cena, rótulo honesto |
 | Motion impacto | `AnimationController` 1,8 s espelhando CSS site; sem Lottie/Rive; reduced motion → frame final | A11y + parity com `impacto__*.css` |
+
+## 2026-11-16 — Polimento UX pós-smoke P5 (`ux_polimento_pos_smoke`)
+
+| Dúvida | Decisão | Motivo |
+| --- | --- | --- |
+| P5.2 coleta mínima | **Opção B** — CPF + nascimento (ou constituição CNPJ) permanecem no create | API `CriarClienteDto` ainda exige; não fingir deferral |
+| Celular | Obrigatório no form; API continua opcional mas app sempre envia | Entregador; sem migrate |
+| CNPJ | `nome` = razão social; data = constituição (mesmo campo `dataNascimento`) | Sem coluna IE/razão; P5.10 gate |
+| Cabeçalho | AppBar + `LogoMarca`; sem `largeTitle` “Criar conta” | Título só na aba/CTA |
+| Explorar | Link discreto **abaixo** do CTA | Fora do miolo do form |
+| Destino pós-sucesso | `arguments: 'checkout'` → `pop` (sacola); senão quiz / minha assinatura | P5.7 |
+| Termos URL | Links só se `URL_TERMOS`/`URL_PRIVACIDADE`; senão “(links em breve)” | Não inventar URL |
+| Gates | OAuth/OTP/captcha/HIBP/analytics/IE/biometria | Documentados; não inventar |
+
+## 2026-11-16 — Polimento UX pós-smoke P4 (`ux_polimento_pos_smoke`)
+
+| Dúvida | Decisão | Motivo |
+| --- | --- | --- |
+| Título Perfil (aba shell) | `AppTypography.title3` (não `largeTitle`) | P4.1; alinha Sacola/shell |
+| CTA guest | “Entrar ou criar conta” navy + “Com e-mail e senha” | P4.2; sem Google/Apple/telefone |
+| Termos / privacidade | `URL_TERMOS` / `URL_PRIVACIDADE` dart-define; vazio = “Em breve” | Não inventar URL LGPD |
+| Versão app | `AppConfig.versaoApp` default `0.1.0+1` (= pubspec) | Sem `package_info_plus` |
+| CEP no Perfil | Mesma sheet/`consultarCep` da Home | API já existe |
+| Logado: nome/foto/status | Planejado; copy honest até ligar `/clientes/me` na tela | P4.5 parcial |
+| Endereços / Notificações | “Em breve” (sem rota guest-safe) | Não fake |
+| Faturas | Deep-link `MinhaAssinatura` (precisa id p/ `FaturasScreen`) | Rota dedicada exige assinaturaId |
+| Excluir conta | Só logado; `DELETE /clientes/me` + sheet confirmação | Guest não vê Excluir |
+
+## 2026-11-16 — Polimento UX pós-smoke P3 (`ux_polimento_pos_smoke`)
+
+| Dúvida | Decisão | Motivo |
+| --- | --- | --- |
+| Fonte única do total | Helper `SacolaCopy` + `sim.total.formatado` na Sacola e `BarraSacola` | P3.12; evita 72,86×72,88 |
+| Continuar / AppBar | `BotaoPrincipal` navy; scaffold/AppBar `AppColors.fundo` | P3.1 |
+| Config assinatura | Card único freq+plano; sem subtítulo “Padrão: quinzenal…” | P3.2 / P3.4 |
+| ≈/mês | UI: `total × 4/2/1` por SEMANAL/QUINZENAL/MENSAL; caption suave | Aproximação de exibição; não é regra de preço API |
+| Empty “Assinar WP” | `adicionarPasso(WP)` se no catálogo; senão shell Produtos (não PDP) | Alinha P1 hero; evita PDP órfã |
+| Cupom / CEP na Sacola | Omitidos aqui — cupom no pagamento; CEP no fluxo endereço | Não inventar UI sem wiring completo |
+| Seed preço galão | Fora do app (HANDOFF humano) | Contrato “Não fazer” |
+
+## 2026-11-16 — Polimento UX pós-smoke P2 (`ux_polimento_pos_smoke`)
+
+| Dúvida | Decisão | Motivo |
+| --- | --- | --- |
+| Ordem carrossel Home | Águas / Fiber / galão primeiro; `WP500` peso 90 (fim); `AMN5000` forçado no `take(8)` se filtro Todos | P2.5; WP já no hero |
+| Filtros carrossel | Enum local `FiltroHomeCarrossel` (Todos/Sem gás/Com gás/Funcionais/Galão) por `codigo`/`nome`/`volumeMl` | Não misturar com `Categoria` da aba Produtos |
+| Pular / Editar na Home | TextButtons → `onAbrirAssinatura` (aba Assinatura); sem POST na Home | Confirmação/`pularEntrega` já vivem em Minha assinatura |
+| Oferta 1º pedido | Faixa tipográfica Pix/frequência **sem** %/R$ | Gate monólito P2.7 |
+| FAQ / WhatsApp | FAQ estática (RJ, pausa, cancelamento); WhatsApp só se `suporteWhatsapp` ≠ vazio | Honesty + config já usada no Perfil |
+| Banner marca | `assetHeroAguaBokeh` + overlay + “Da fonte ao Rio” | Asset existente; sem inventar serra |
+| Selos | Água mineral / entrega RJ / Pix — sem NPS | P2.4 |
+| Como funciona | 3 cards com ícones; copy “Semanal, quinzenal ou mensal” | P2.1–P2.2 |
+| Skeletons / erro | Hero `SkeletonCard` se `carregandoCatalogo`; carrossel skeletons + `EstadoErro` + retry | P2.9 |
+
+## 2026-11-16 — Polimento UX pós-smoke P1 (`ux_polimento_pos_smoke`)
+
+| Dúvida | Decisão | Motivo |
+| --- | --- | --- |
+| Fundo tela | Token `AppColors.fundo` `#F6F9FB`; `gelo` fica accent | P1.1; não quebrar usos de gelo em chips/progress |
+| Hero tipografia | Inter (`title2`), não DM Serif | P1.2 monólito |
+| Badge hero | **Mais vendido** | Substitui Carro-chefe |
+| Chips hero | Uma linha “5 g de proteína por garrafa · 0 açúcar · 0 gordura” | Mesmo copy do monólito; evita overflow em largura estreita |
+| Preço no hero | `a partir de {precoBase.formatado}/un.` só se WP no catálogo | Exceção documentada vs cards sem preço |
+| “Ver todas as águas” | Manter, alinhado à **esquerda** sob o CTA | Complementa “Ver todos” da seção (produtos gerais ≠ só águas) |
+| Assinar WP | `adicionarPasso(WP)` + `AppRoutes.sacola`; WP ausente → aba Produtos | Sem PDP órfã |
+| Badge sacola header | Contador = `SacolaController.totalItens` (soma qty) | P1.5 |
+| `BarraSacola` | `BotaoPrincipal` navy “Ver sacola”; copy `N itens · {sim.total.formatado} por entrega` | Mesma fonte da Sacola |
+| CEP Home | Sheet + `EnderecoRepository.consultarCep`; rótulo só na sessão | API já existe; sem inventar endpoint / sem store guest |
+
+## 2026-11-16 — Polimento UX pós-smoke P0 (`ux_polimento_pos_smoke`)
+
+| Dúvida | Decisão | Motivo |
+| --- | --- | --- |
+| FF “xadrez” / caixa preta | Reexport `flow_fiber-fast.png` RGBA (fundo preto → alpha 0) + max width 1200 | Prints pediam PNG sem caixa; chroma-key local sem inventar asset novo |
+| Nome no card | Helper `nomeCardProduto` (WP/FF curtos; demais = `nome` API) | Monólito P0.4; evita título longo competindo com seção |
+| Após 1º “+” no card | Troca para `StepperQuantidade`; SnackBar “Adicionado à sacola” + haptic | P0.7; reusa widget da PDP/sacola |
+| Fundo miniatura | `corDoProduto(codigo).withValues(alpha: 0.22)` + card branco/`superficie` + borda | P0.3; acento por SKU sem preço |
+| Banner “Da fonte ao Rio” | Só tipografia — remove mini-garrafa do bloco Como funciona | P0.5; evita órfã flutuante |
+| Skeleton hero | `SkeletonCard` enquanto `carregandoCatalogo` no lugar do hero visitante | P0.8 |
+| `CardKit` minis | `codigosItens` → até 4 `assetDoProduto`; remove `Spacer` void | P0.6 |
+| Preço/% nos cards | **Gate** — não adicionar | Marketplace v3 |
 
 ## 2026-11-16 — Polimento UX marketplace (PNG / catálogo curto)
 
@@ -93,7 +174,8 @@
 | WP500 | `protein.png` (não existe `wp500.png`) | Recorte compartilhado com fundo transparente |
 | FF500 | `flow_fiber-fast.png` (não existe `ff500.png`) | Idem |
 | Demais SKUs seed | `ams500.png`, `amc510.png`, `amn1500.png`, `amn5000.png`, `amc200.png`, `gua2000.png` | 1:1 com código |
-| Logo | Manter `brand/logo.jpg` + `LogoMarca` (sem `logo.png` no disco) | ColorFilter continua necessário |
+| Logo | `brand/logo.png` transparente; `LogoMarca` sem ColorFilter | Fundo preto do asset removido (alpha); JPG legado fora da UI |
+| Teste Tela 1 | `CristalinsApp(rotaInicial: AppRoutes.boasVindas, exibirSplash: false)` | Só `exibirSplash: false` abre o **shell** (marketplace); `pumpAndSettle` na home quebrava o teste de boas-vindas |
 | Cena impacto | Camadas `impacto-*.webp` mantidas; garrafa do SKU na PDP usa PNG do produto | Composição ≠ foto de produto |
 | `kLimiteCatalogoCurto` | `12` | Seed ~8 SKUs: esconder busca; chips Todos \| Águas \| Funcionais (+ Kits se houver) |
 | Empty catálogo | Ícone + título + subtítulo + link “Atualizar” — **nunca** `BotaoPrincipal` filled | Densidade; retry ≠ conversão |

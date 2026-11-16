@@ -126,7 +126,13 @@ void main() {
         SizedBox(
           width: 160,
           height: 240,
-          child: CardProduto(produto: wp, onAbrir: () {}, onAdicionar: () {}),
+          child: CardProduto(
+            produto: wp,
+            passo: 3,
+            onAbrir: () {},
+            onAdicionar: () {},
+            onAlterar: (_) {},
+          ),
         ),
       ),
     );
@@ -135,18 +141,16 @@ void main() {
   });
 
   testWidgets('golden CardKit sem preço', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(260, 180));
+    await tester.binding.setSurfaceSize(const Size(280, 260));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       envelopar(
-        SizedBox(
-          height: 140,
-          child: CardKit(
-            nome: 'Kit Treino',
-            resumoItens: '12× Water Protein',
-            onTap: () {},
-            onAdicionar: () {},
-          ),
+        CardKit(
+          nome: 'Kit Treino',
+          resumoItens: '12× Water Protein',
+          codigosItens: const ['WP500', 'FF500'],
+          onTap: () {},
+          onAdicionar: () {},
         ),
       ),
     );
@@ -158,7 +162,14 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(400, 420));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
-      envelopar(HeroWaterProtein(onAssinar: () {}, onVerAguas: () {}), size: const Size(400, 900)),
+      envelopar(
+        HeroWaterProtein(
+          onAssinar: () {},
+          onVerAguas: () {},
+          precoAPartirDe: const Dinheiro(990),
+        ),
+        size: const Size(400, 900),
+      ),
     );
     await tester.pump();
     await expectLater(find.byType(HeroWaterProtein), matchesGoldenFile('mk_hero_wp.png'));
@@ -321,14 +332,16 @@ void main() {
           child: CardProduto(
             produto: const Produto(
               codigo: 'FF500',
-              nome: 'Flow Fiber',
+              nome: 'Flow Fiber 500 ml caixa',
               tipo: 'PRINCIPAL',
               volumeMl: 500,
               embalagemQtd: 6,
               precoBase: Dinheiro(890),
             ),
+            passo: 3,
             onAbrir: () {},
             onAdicionar: () {},
+            onAlterar: (_) {},
           ),
         ),
       ),
@@ -339,5 +352,42 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('CardProduto: nome curto WP/FF + stepper após qty', (tester) async {
+    var qty = 0;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return envelopar(
+            SizedBox(
+              width: 180,
+              height: 280,
+              child: CardProduto(
+                produto: const Produto(
+                  codigo: 'WP500',
+                  nome: 'Water Protein 500 ml — caixa com 6',
+                  tipo: 'PRINCIPAL',
+                  volumeMl: 500,
+                  embalagemQtd: 6,
+                  precoBase: Dinheiro(990),
+                ),
+                quantidade: qty,
+                passo: 3,
+                onAbrir: () {},
+                onAdicionar: () => setState(() => qty = 3),
+                onAlterar: (q) => setState(() => qty = q),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    expect(find.text('Water Protein'), findsOneWidget);
+    expect(find.textContaining('caixa com 6'), findsNothing);
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+    expect(find.text('Adicionado à sacola'), findsOneWidget);
+    expect(find.byType(StepperQuantidade), findsOneWidget);
   });
 }

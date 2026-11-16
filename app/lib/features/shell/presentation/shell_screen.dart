@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/barra_sacola.dart';
 import '../../catalog/domain/catalogo.dart';
 import '../../home/presentation/home_screen.dart';
@@ -65,7 +66,7 @@ class _ShellScreenState extends State<ShellScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.gelo,
+        backgroundColor: AppColors.fundo,
         body: IndexedStack(
           index: _aba,
           children: [
@@ -89,34 +90,52 @@ class _ShellScreenState extends State<ShellScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const BarraSacola(),
-            NavigationBar(
-              selectedIndex: _aba,
-              backgroundColor: AppColors.superficie,
-              indicatorColor: AppColors.menta,
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              onDestinationSelected: _selecionarAba,
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home, color: AppColors.navy),
-                  label: 'Início',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.grid_view_outlined),
-                  selectedIcon: Icon(Icons.grid_view, color: AppColors.navy),
-                  label: 'Produtos',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.water_drop_outlined),
-                  selectedIcon: Icon(Icons.water_drop, color: AppColors.navy),
-                  label: 'Assinatura',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.person_outline),
-                  selectedIcon: Icon(Icons.person, color: AppColors.navy),
-                  label: 'Perfil',
-                ),
-              ],
+            NavigationBarTheme(
+              data: NavigationBarThemeData(
+                labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                  final selected = states.contains(WidgetState.selected);
+                  return AppTypography.caption2.copyWith(
+                    color: selected ? AppColors.navy : AppColors.tinta,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  );
+                }),
+                iconTheme: WidgetStateProperty.resolveWith((states) {
+                  final selected = states.contains(WidgetState.selected);
+                  return IconThemeData(
+                    color: selected ? AppColors.navy : AppColors.tinta,
+                    size: 24,
+                  );
+                }),
+              ),
+              child: NavigationBar(
+                selectedIndex: _aba,
+                backgroundColor: AppColors.superficie,
+                indicatorColor: AppColors.menta,
+                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                onDestinationSelected: _selecionarAba,
+                destinations: const [
+                  NavigationDestination(
+                    icon: Icon(Icons.home_outlined),
+                    selectedIcon: Icon(Icons.home),
+                    label: 'Início',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.grid_view_outlined),
+                    selectedIcon: Icon(Icons.grid_view),
+                    label: 'Produtos',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.water_drop_outlined),
+                    selectedIcon: Icon(Icons.water_drop),
+                    label: 'Assinatura',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.person_outline),
+                    selectedIcon: Icon(Icons.person),
+                    label: 'Perfil',
+                  ),
+                ],
+              ),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:cristalins_assinatura/core/config/app_config.dart';
 import 'package:cristalins_assinatura/core/formatacao.dart';
 import 'package:cristalins_assinatura/core/routes.dart';
 import 'package:cristalins_assinatura/core/theme/app_colors.dart';
@@ -115,11 +116,16 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: buildAppTheme(),
-        home: Provider.value(
-          value: mocks.dependencias,
-          child: ChangeNotifierProvider<SacolaController>.value(
-            value: controller(),
-            child: HomeScreen(
+        home: MultiProvider(
+          providers: [
+            Provider.value(
+              value: const AppConfig(ambiente: Ambiente.dev, apiUrl: '', suporteWhatsapp: ''),
+            ),
+            Provider.value(value: mocks.dependencias),
+            ChangeNotifierProvider<SacolaController>.value(value: controller()),
+          ],
+          child: Scaffold(
+            body: HomeScreen(
               onAbrirProdutos: ({Categoria? categoria}) {},
               onAbrirAssinatura: () {},
             ),
@@ -178,11 +184,16 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: buildAppTheme(),
-        home: Provider.value(
-          value: mocks.dependencias,
-          child: ChangeNotifierProvider<SacolaController>.value(
-            value: controller(),
-            child: HomeScreen(
+        home: MultiProvider(
+          providers: [
+            Provider.value(
+              value: const AppConfig(ambiente: Ambiente.dev, apiUrl: '', suporteWhatsapp: ''),
+            ),
+            Provider.value(value: mocks.dependencias),
+            ChangeNotifierProvider<SacolaController>.value(value: controller()),
+          ],
+          child: Scaffold(
+            body: HomeScreen(
               onAbrirProdutos: ({Categoria? categoria}) {},
               onAbrirAssinatura: () {},
             ),

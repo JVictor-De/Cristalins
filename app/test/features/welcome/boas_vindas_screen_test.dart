@@ -1,6 +1,7 @@
 import 'package:cristalins_assinatura/app.dart';
 import 'package:cristalins_assinatura/core/config/app_config.dart';
 import 'package:cristalins_assinatura/core/intents/abridor_links.dart';
+import 'package:cristalins_assinatura/core/routes.dart';
 import 'package:cristalins_assinatura/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,8 +15,13 @@ const _config = AppConfig(
   suporteWhatsapp: '',
 );
 
-Widget _app(AbridorLinks abridor) =>
-    CristalinsApp(config: _config, abridorLinks: abridor, exibirSplash: false);
+/// Tela 1 — não shell/home (marketplace). `exibirSplash: false` sozinho abre o shell.
+Widget _app(AbridorLinks abridor) => CristalinsApp(
+      config: _config,
+      abridorLinks: abridor,
+      exibirSplash: false,
+      rotaInicial: AppRoutes.boasVindas,
+    );
 
 final _linkDoSite = find.text('Conhecer o site da Cristalins');
 
@@ -45,7 +51,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.bySemanticsLabel('Cristalins'), findsWidgets);
-    expect(find.image(const AssetImage('assets/images/brand/logo.jpg')), findsWidgets);
+    expect(find.image(const AssetImage('assets/images/brand/logo.png')), findsWidgets);
     expect(find.text('Responda 5 perguntas'), findsOneWidget);
 
     expect(find.text('Pague com Pix'), findsOneWidget);
@@ -54,6 +60,7 @@ void main() {
 
   testWidgets('tema usa Inter, plataforma iOS e azulMarca como primária', (tester) async {
     await tester.pumpWidget(_app(abridor));
+    await tester.pumpAndSettle();
     final tema = Theme.of(tester.element(find.text('Começar')));
 
     expect(tema.platform, TargetPlatform.iOS);
@@ -64,6 +71,7 @@ void main() {
 
   testWidgets('Começar abre a rota da Tela 2 e o voltar retorna', (tester) async {
     await tester.pumpWidget(_app(abridor));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Começar'));
     await tester.pumpAndSettle();
 

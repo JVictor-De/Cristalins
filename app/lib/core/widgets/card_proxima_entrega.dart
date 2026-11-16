@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../formatacao.dart';
 import '../theme/app_colors.dart';
@@ -15,12 +16,18 @@ class CardProximaEntrega extends StatelessWidget {
     this.janela,
     this.status,
     this.onEditarSacola,
+    this.onPularEntrega,
+    this.onEditarAssinatura,
   });
 
   final String dataEntrega;
   final String? janela;
   final String? status;
   final VoidCallback? onEditarSacola;
+
+  /// Deep-link para fluxo existente (aba/tela Assinatura) — não inventa endpoint.
+  final VoidCallback? onPularEntrega;
+  final VoidCallback? onEditarAssinatura;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +38,7 @@ class CardProximaEntrega extends StatelessWidget {
         color: AppColors.superficie,
         borderRadius: BorderRadius.circular(AppSpacing.raioCard),
         boxShadow: AppSombras.card,
+        border: Border.all(color: AppColors.linha),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,6 +65,42 @@ class CardProximaEntrega extends StatelessWidget {
               onPressed: onEditarSacola,
               variante: VarianteBotaoPrincipal.contorno,
               expandido: false,
+            ),
+          ],
+          if (onPularEntrega != null || onEditarAssinatura != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Wrap(
+              spacing: AppSpacing.sm,
+              children: [
+                if (onPularEntrega != null)
+                  TextButton(
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      onPularEntrega!();
+                    },
+                    child: Text(
+                      'Pular entrega',
+                      style: AppTypography.subheadline.copyWith(
+                        color: AppColors.azulMarca,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                if (onEditarAssinatura != null)
+                  TextButton(
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      onEditarAssinatura!();
+                    },
+                    child: Text(
+                      'Editar assinatura',
+                      style: AppTypography.subheadline.copyWith(
+                        color: AppColors.azulMarca,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
         ],

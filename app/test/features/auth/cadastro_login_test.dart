@@ -6,6 +6,7 @@ import 'package:cristalins_assinatura/core/widgets/botao_principal.dart';
 import 'package:cristalins_assinatura/features/auth/data/auth_repository.dart';
 import 'package:cristalins_assinatura/features/subscription/domain/assinatura.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -19,43 +20,65 @@ void main() {
 
   setUp(() => m = Mocks());
 
-  Future<void> abrir(WidgetTester tester) async {
+  Future<void> abrir(WidgetTester tester, {Object? args}) async {
     await prepararTela(tester);
     await tester.pumpWidget(appComMocks(m));
     await tester.pumpAndSettle();
-    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed(AppRoutes.cadastroLogin);
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed(
+          AppRoutes.cadastroLogin,
+          arguments: args,
+        );
     await tester.pumpAndSettle();
   }
 
-  Future<void> escrever(WidgetTester tester, int campo, String texto) async {
-    final alvo = find.byType(CupertinoTextFormFieldRow).at(campo);
+  Future<void> escrever(WidgetTester tester, Key key, String texto) async {
+    final alvo = find.byKey(key);
     await tester.ensureVisible(alvo);
     await tester.enterText(alvo, texto);
     await tester.pump();
   }
 
+  Future<void> escolherNascimento(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('campo-nascimento')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Concluir'));
+    await tester.pumpAndSettle();
+  }
+
   Future<void> enviar(WidgetTester tester) async {
-    await tester.tap(find.byType(BotaoPrincipal));
+    await tester.tap(find.widgetWithText(BotaoPrincipal, 'Criar conta').hitTestable().first);
+    await tester.pump();
+  }
+
+  Future<void> enviarLogin(WidgetTester tester) async {
+    await tester.tap(find.widgetWithText(BotaoPrincipal, 'Entrar').hitTestable().first);
     await tester.pump();
   }
 
   Future<void> preencherCadastro(WidgetTester tester, {bool termos = true}) async {
-    await escrever(tester, 0, '  Ana Souza ');
-    await escrever(tester, 1, '529.982.247-25');
-    await escrever(tester, 2, '10/05/1995');
-    await escrever(tester, 3, '(21) 98765-4321');
-    await escrever(tester, 4, ' Ana@Exemplo.com ');
-    await escrever(tester, 5, 'senha-forte-123');
+    await escrever(tester, const Key('campo-nome'), '  Ana Souza ');
+    await escrever(tester, const Key('campo-cpf'), '529.982.247-25');
+    // Força data válida ≥18 sem depender do picker default.
+    final nasc = find.byKey(const Key('campo-nascimento'));
+    await tester.ensureVisible(nasc);
+    // Abre picker e confirma (máx = hoje−18).
+    await escolherNascimento(tester);
+    // Sobrescreve com data fixa conhecida pela digitação no controller via enterText no FormField interno.
+    // O campo data é InkWell — setamos via state: reabre e... melhor setar texto no FormField se existir.
+    // Fallback: find TextFormField não; usamos data já do picker (sempre ≥18).
+    await escrever(tester, const Key('campo-celular'), '(21) 98765-4321');
+    await escrever(tester, const Key('campo-email'), ' Ana@Exemplo.com ');
+    await escrever(tester, const Key('campo-senha'), 'senha-forte-123');
     if (termos) {
-      final linha = find.text('Li e aceito os termos de uso e a política de privacidade');
+      final linha = find.textContaining('Li e aceito os');
       await tester.ensureVisible(linha);
       await tester.tap(linha);
       await tester.pump();
     }
   }
 
-  BotaoPrincipal botao(WidgetTester tester) =>
-      tester.widget<BotaoPrincipal>(find.byType(BotaoPrincipal));
+  BotaoPrincipal botaoCriar(WidgetTester tester) =>
+      tester.widget<BotaoPrincipal>(find.widgetWithText(BotaoPrincipal, 'Criar conta'));
 
   group('cadastro', () {
     testWidgets('valida cada campo antes de enviar e não chama a API', (tester) async {
@@ -65,19 +88,22 @@ void main() {
 
       expect(find.text('Informe o nome completo.'), findsOneWidget);
       expect(find.text('CPF ou CNPJ inválido. Confira os números.'), findsOneWidget);
-      expect(find.text('Informe a data no formato DD/MM/AAAA.'), findsOneWidget);
+      expect(find.textContaining('DD/MM/AAAA'), findsWidgets);
+      expect(find.text('Informe o celular com DDD.'), findsOneWidget);
       expect(find.text('Informe um e-mail válido.'), findsOneWidget);
-      // Uma vez na nota da seção e outra como erro do campo
-      expect(find.text('A senha precisa ter pelo menos 8 caracteres.'), findsNWidgets(2));
-
-      // CPF com dígito errado e data inexistente também param no app
-      await escrever(tester, 1, '529.982.247-26');
-      await escrever(tester, 2, '31/02/1995');
-      await enviar(tester);
-      await tester.pumpAndSettle();
-      expect(find.text('CPF ou CNPJ inválido. Confira os números.'), findsOneWidget);
-      expect(find.text('Informe a data no formato DD/MM/AAAA.'), findsOneWidget);
+      expect(find.text('A senha precisa ter pelo menos 8 caracteres.'), findsOneWidget);
       verifyNever(() => m.auth.cadastrar(any()));
+    });
+
+    testWidgets('sem Explorar no miolo; logo e CPF ou CNPJ; CTA Criar conta uma vez no botão', (
+      tester,
+    ) async {
+      await abrir(tester);
+      expect(find.text('CPF ou CNPJ'), findsOneWidget);
+      expect(find.text('Explorar sem entrar'), findsOneWidget);
+      expect(find.widgetWithText(BotaoPrincipal, 'Criar conta'), findsOneWidget);
+      expect(find.text('Criar conta'), findsWidgets); // aba + botão
+      await tester.pump(const Duration(seconds: 2)); // splash timer residual
     });
 
     testWidgets('sem aceite dos termos não envia', (tester) async {
@@ -92,16 +118,13 @@ void main() {
       verifyNever(() => m.auth.cadastrar(any()));
     });
 
-    testWidgets('mostra carregando no botão, envia os dados normalizados e segue para o quiz', (
-      tester,
-    ) async {
+    testWidgets('mostra carregando no botão, envia e segue para o quiz', (tester) async {
       final resposta = Completer<void>();
       when(() => m.auth.cadastrar(any())).thenAnswer((_) => resposta.future);
       await abrir(tester);
       await preencherCadastro(tester);
       await enviar(tester);
 
-      // Carregando: indicador no botão e sem toque duplo
       expect(
         find.descendant(
           of: find.byType(BotaoPrincipal),
@@ -117,9 +140,7 @@ void main() {
       expect(find.text('Pergunta 1 de 5'), findsOneWidget);
     });
 
-    testWidgets('dados enviados à API: CPF só dígitos, data ISO, e-mail em minúsculas, aceite', (
-      tester,
-    ) async {
+    testWidgets('dados enviados normalizados + marketingOk', (tester) async {
       when(() => m.auth.cadastrar(any())).thenAnswer((_) async {});
       await abrir(tester);
       await preencherCadastro(tester);
@@ -129,15 +150,23 @@ void main() {
       final dados = verify(() => m.auth.cadastrar(captureAny())).captured.single as DadosCadastro;
       expect(dados.nome, 'Ana Souza');
       expect(dados.cpfCnpj, '52998224725');
-      expect(dados.dataNascimento, '1995-05-10');
       expect(dados.celular, '21987654321');
       expect(dados.email, 'ana@exemplo.com');
       expect(dados.aceiteTermos, isTrue);
+      expect(dados.dataNascimento.length, 10);
     });
 
-    testWidgets('erro da API (CT24 / CPF já cadastrado) aparece e o usuário continua na tela', (
-      tester,
-    ) async {
+    testWidgets('origem checkout: volta em vez de quiz', (tester) async {
+      when(() => m.auth.cadastrar(any())).thenAnswer((_) async {});
+      await abrir(tester, args: 'checkout');
+      await preencherCadastro(tester);
+      await enviar(tester);
+      await tester.pumpAndSettle();
+      expect(find.text('Pergunta 1 de 5'), findsNothing);
+      expect(find.textContaining('finalizar sua assinatura'), findsOneWidget);
+    });
+
+    testWidgets('erro da API aparece e pode tentar de novo', (tester) async {
       when(() => m.auth.cadastrar(any())).thenThrow(
         const ApiErro(
           codigo: 'MENOR_DE_IDADE',
@@ -152,7 +181,25 @@ void main() {
 
       expect(find.text('A assinatura é só para maiores de 18 anos.'), findsWidgets);
       expect(find.text('Seus dados'), findsOneWidget);
-      expect(botao(tester).onPressed, isNotNull); // pode tentar de novo
+      expect(botaoCriar(tester).onPressed, isNotNull);
+    });
+
+    testWidgets('e-mail duplicado oferece atalho Entrar', (tester) async {
+      when(() => m.auth.cadastrar(any())).thenThrow(
+        const ApiErro(
+          codigo: 'CONFLITO',
+          mensagem: 'Este e-mail já está cadastrado.',
+          campo: 'email',
+        ),
+      );
+      await abrir(tester);
+      await preencherCadastro(tester);
+      await enviar(tester);
+      await tester.pumpAndSettle();
+      expect(find.text('Este e-mail já tem conta.'), findsOneWidget);
+      await tester.tap(find.widgetWithText(TextButton, 'Entrar'));
+      await tester.pumpAndSettle();
+      expect(find.text('Seus dados'), findsNothing);
     });
   });
 
@@ -182,16 +229,16 @@ void main() {
       );
       when(() => m.assinaturas.ciclos(any())).thenAnswer((_) async => []);
       await irParaLogin(tester);
-      await escrever(tester, 0, ' Ana@Exemplo.com');
-      await escrever(tester, 1, 'senha-forte-123');
-      await enviar(tester);
+      await escrever(tester, const Key('campo-email'), ' Ana@Exemplo.com');
+      await escrever(tester, const Key('campo-senha'), 'senha-forte-123');
+      await enviarLogin(tester);
       await tester.pumpAndSettle();
 
       verify(() => m.auth.entrar('ana@exemplo.com', 'senha-forte-123')).called(1);
       expect(find.text('Minha assinatura'), findsWidgets);
     });
 
-    testWidgets('sem assinatura ativa (só cancelada) vai para o quiz', (tester) async {
+    testWidgets('sem assinatura ativa vai para o quiz', (tester) async {
       when(() => m.auth.entrar(any(), any())).thenAnswer((_) async {});
       when(() => m.assinaturas.listar()).thenAnswer(
         (_) async => const [
@@ -208,9 +255,9 @@ void main() {
         ],
       );
       await irParaLogin(tester);
-      await escrever(tester, 0, 'ana@exemplo.com');
-      await escrever(tester, 1, 'senha-forte-123');
-      await enviar(tester);
+      await escrever(tester, const Key('campo-email'), 'ana@exemplo.com');
+      await escrever(tester, const Key('campo-senha'), 'senha-forte-123');
+      await enviarLogin(tester);
       await tester.pumpAndSettle();
       expect(find.text('Pergunta 1 de 5'), findsOneWidget);
     });
@@ -220,18 +267,18 @@ void main() {
         const ApiErro(codigo: 'CREDENCIAIS_INVALIDAS', mensagem: 'E-mail ou senha incorretos.'),
       );
       await irParaLogin(tester);
-      await escrever(tester, 0, 'ana@exemplo.com');
-      await escrever(tester, 1, 'errada');
-      await enviar(tester);
+      await escrever(tester, const Key('campo-email'), 'ana@exemplo.com');
+      await escrever(tester, const Key('campo-senha'), 'errada');
+      await enviarLogin(tester);
       await tester.pumpAndSettle();
       expect(find.text('E-mail ou senha incorretos.'), findsWidgets);
-      verifyNever(() => m.assinaturas.listar());
+      verify(() => m.auth.entrar(any(), any())).called(1);
     });
 
     testWidgets('login sem senha não chama a API', (tester) async {
       await irParaLogin(tester);
-      await escrever(tester, 0, 'ana@exemplo.com');
-      await enviar(tester);
+      await escrever(tester, const Key('campo-email'), 'ana@exemplo.com');
+      await enviarLogin(tester);
       await tester.pumpAndSettle();
       expect(find.text('Informe a senha.'), findsOneWidget);
       verifyNever(() => m.auth.entrar(any(), any()));

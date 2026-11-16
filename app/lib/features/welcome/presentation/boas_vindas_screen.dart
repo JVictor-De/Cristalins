@@ -169,18 +169,34 @@ class _Secao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final estiloNota = AppTypography.footnote.copyWith(color: AppColors.textoSecundario);
-    return CupertinoListSection.insetGrouped(
-      margin: EdgeInsets.fromLTRB(margem, AppSpacing.secao, margem, 0),
-      backgroundColor: AppColors.fundoAgrupado,
-      decoration: BoxDecoration(
-        color: AppColors.superficie,
-        borderRadius: BorderRadius.circular(AppSpacing.raioCelula),
+    // Footnote fora do `footer` do CupertinoListSection: o footer ignora a cor do
+    // Text e cai no primary (~azulMarca), com ~4.18:1 sobre gelo (< AA 4.5).
+    final estiloNota = AppTypography.footnote.copyWith(color: AppColors.texto);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(margem, AppSpacing.secao, margem, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CupertinoListSection.insetGrouped(
+            margin: EdgeInsets.zero,
+            backgroundColor: AppColors.fundoAgrupado,
+            decoration: BoxDecoration(
+              color: AppColors.superficie,
+              borderRadius: BorderRadius.circular(AppSpacing.raioCelula),
+            ),
+            separatorColor: AppColors.borda,
+            header: Text(cabecalho, style: estiloNota),
+            children: children,
+          ),
+          if (rodape != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              child: Text(rodape!, style: estiloNota),
+            ),
+          ],
+        ],
       ),
-      separatorColor: AppColors.borda,
-      header: Text(cabecalho, style: estiloNota),
-      footer: rodape == null ? null : Text(rodape!, style: estiloNota),
-      children: children,
     );
   }
 }

@@ -4,7 +4,8 @@
 /// de landing (BUGS_UX #2–5). `flow_protein.webp` / `colocar_site-fast.webp`
 /// ficam no disco só como legado — não usar na UI.
 /// Garrafas de produto: PNG transparente em `produtos/` (sem caixa opaca).
-const assetLogoMarca = 'assets/images/brand/logo.jpg';
+/// PNG com fundo transparente (sem ColorFilter / chroma-key).
+const assetLogoMarca = 'assets/images/brand/logo.png';
 
 /// Recorte de produto (sem texto de site) — hero WP.
 const assetHeroFlowProtein = 'assets/images/produtos/protein.png';

@@ -17,6 +17,7 @@ class CristalinsApp extends StatefulWidget {
     this.abridorLinks,
     this.dependencias,
     this.exibirSplash = true,
+    this.rotaInicial,
   });
 
   final AppConfig config;
@@ -27,9 +28,13 @@ class CristalinsApp extends StatefulWidget {
   /// Repositórios e Intents; nulo = implementação real com a API do [config].
   final Dependencias? dependencias;
 
-  /// Splash na abertura. `false` nos testes que esperam boas-vindas direto
-  /// (`pumpAndSettle` não termina com o loop da splash).
+  /// Splash na abertura. `false` nos testes que não precisam do loop da splash
+  /// (`pumpAndSettle` não termina com o `AnimationController.repeat` dela).
   final bool exibirSplash;
+
+  /// Sobrescreve a rota inicial (ex.: testes da Tela 1 usam [AppRoutes.boasVindas]).
+  /// Se nulo: splash ou shell conforme [exibirSplash].
+  final String? rotaInicial;
 
   @override
   State<CristalinsApp> createState() => _CristalinsAppState();
@@ -73,7 +78,23 @@ class _CristalinsAppState extends State<CristalinsApp> {
           GlobalCupertinoLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
         ],
-        initialRoute: widget.exibirSplash ? AppRoutes.splash : AppRoutes.shell,
+        // Sem `onGenerateInitialRoutes`, `initialRoute: '/boas-vindas'` também monta `/`
+        // (splash com timer/loop) e `pumpAndSettle` nunca termina.
+        initialRoute: widget.rotaInicial ??
+            (widget.exibirSplash ? AppRoutes.splash : AppRoutes.shell),
+        onGenerateInitialRoutes: widget.rotaInicial == null
+            ? null
+            : (_) {
+                final settings = RouteSettings(name: widget.rotaInicial);
+                final rota = AppRoutes.gerar(settings);
+                return [
+                  rota ??
+                      MaterialPageRoute<void>(
+                        settings: settings,
+                        builder: (_) => const SizedBox.shrink(),
+                      ),
+                ];
+              },
         onGenerateRoute: AppRoutes.gerar,
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../features/catalog/domain/produto_assets.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sombras.dart';
 import '../theme/app_spacing.dart';
@@ -14,6 +15,7 @@ class CardKit extends StatelessWidget {
     required this.resumoItens,
     required this.onTap,
     required this.onAdicionar,
+    this.codigosItens = const [],
   });
 
   final String nome;
@@ -21,11 +23,20 @@ class CardKit extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onAdicionar;
 
+  /// Códigos dos produtos do kit (miniaturas PNG).
+  final List<String> codigosItens;
+
   @override
   Widget build(BuildContext context) {
+    final minis = <String>[
+      for (final c in codigosItens)
+        if (assetDoProduto(c) case final path?) path,
+    ].take(4).toList();
+
     return Material(
       color: AppColors.superficie,
       borderRadius: BorderRadius.circular(AppSpacing.raioCard),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.raioCard),
         onTap: onTap,
@@ -39,8 +50,34 @@ class CardKit extends StatelessWidget {
             border: Border.all(color: AppColors.linha),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (minis.isNotEmpty) ...[
+                SizedBox(
+                  height: 48,
+                  child: Row(
+                    children: [
+                      for (var i = 0; i < minis.length; i++) ...[
+                        if (i > 0) const SizedBox(width: 4),
+                        Expanded(
+                          child: ColoredBox(
+                            color: AppColors.gelo,
+                            child: Image.asset(
+                              minis[i],
+                              fit: BoxFit.contain,
+                              cacheWidth: 160,
+                              semanticLabel: 'Item do kit $nome',
+                              errorBuilder: (_, _, _) => const ColoredBox(color: AppColors.aqua),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+              ],
               Text(
                 nome,
                 maxLines: 2,
@@ -54,7 +91,7 @@ class CardKit extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.caption1.copyWith(color: AppColors.textoSuave),
               ),
-              const Spacer(),
+              const SizedBox(height: AppSpacing.xs),
               Align(
                 alignment: Alignment.centerRight,
                 child: Semantics(
@@ -68,6 +105,8 @@ class CardKit extends StatelessWidget {
                     },
                     icon: const Icon(Icons.add_circle, color: AppColors.azulMarca),
                     iconSize: 28,
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
                     constraints: const BoxConstraints(
                       minWidth: AppSpacing.toqueMinimo,
                       minHeight: AppSpacing.toqueMinimo,

@@ -32,7 +32,7 @@ ThemeData buildAppTheme() {
     platform: TargetPlatform.iOS,
     fontFamily: AppTypography.familia,
     colorScheme: scheme,
-    scaffoldBackgroundColor: AppColors.gelo,
+    scaffoldBackgroundColor: AppColors.fundo,
     textTheme: AppTypography.textTheme,
     splashFactory: NoSplash.splashFactory,
     highlightColor: Colors.transparent,
@@ -45,8 +45,8 @@ ThemeData buildAppTheme() {
     cupertinoOverrideTheme: CupertinoThemeData(
       primaryColor: AppColors.azulMarca,
       primaryContrastingColor: AppColors.sobrePrimaria,
-      scaffoldBackgroundColor: AppColors.gelo,
-      barBackgroundColor: AppColors.gelo, // opaco: sem blur
+      scaffoldBackgroundColor: AppColors.fundo,
+      barBackgroundColor: AppColors.fundo, // opaco: sem blur
       textTheme: CupertinoTextThemeData(
         primaryColor: AppColors.azulMarca,
         textStyle: AppTypography.body.copyWith(color: AppColors.tinta, inherit: false),

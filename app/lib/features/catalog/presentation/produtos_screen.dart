@@ -184,7 +184,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
                           : () => setState(() => _categoria = Categoria.todos),
                     )
                   : SizedBox(
-                      height: 140,
+                      height: 176,
                       child: ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
                         scrollDirection: Axis.horizontal,
@@ -196,6 +196,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
                           return CardKit(
                             nome: k.nome,
                             resumoItens: resumo,
+                            codigosItens: [for (final e in k.itens) e.produto],
                             onTap: () => sacola.usarKit(k),
                             onAdicionar: () => sacola.usarKit(k),
                           );
@@ -263,9 +264,11 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
                     return CardProduto(
                       produto: p,
                       quantidade: sacola.quantidadeDe(p.codigo),
+                      passo: sacola.passo(p),
                       onAbrir: () =>
                           Navigator.of(context).pushNamed(AppRoutes.produto, arguments: p.codigo),
                       onAdicionar: () => sacola.adicionarPasso(p),
+                      onAlterar: (q) => sacola.alterar(p.codigo, q),
                     );
                   },
                   childCount: produtos.length,

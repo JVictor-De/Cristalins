@@ -19,7 +19,10 @@ abstract final class AppColors {
   static const aqua = Color(0xFFBDE9E8);
   static const menta = Color(0xFFE9F7F3);
 
-  /// Fundo de tela e fundo padrão dos cards na grade.
+  /// Fundo de tela (home/shell) — off-white P1 `#F6F9FB`.
+  static const fundo = Color(0xFFF6F9FB);
+
+  /// Accent gelo (chips, progress, minis) — não usar como parede de tela.
   static const gelo = Color(0xFFEDF8FD);
 
   static const tinta = Color(0xFF17333D);
@@ -46,8 +49,8 @@ abstract final class AppColors {
   static const azul100 = Color(0xFFD9ECF4);
   static const azul50 = Color(0xFFF2F8FB);
 
-  /// Alias legado → [gelo] (marketplace).
-  static const fundoAgrupado = gelo;
+  /// Alias legado → [fundo] (telas marketplace).
+  static const fundoAgrupado = fundo;
   static const superficie = Color(0xFFFFFFFF);
 
   /// Texto principal (= [tinta]).

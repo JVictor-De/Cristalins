@@ -156,11 +156,13 @@ class _AbaProdutosState extends State<_AbaProdutos> {
                                     return CardProduto(
                                       produto: p,
                                       quantidade: sacola.quantidadeDe(p.codigo),
+                                      passo: sacola.passo(p),
                                       onAbrir: () => Navigator.of(context).pushNamed(
                                         AppRoutes.produto,
                                         arguments: p.codigo,
                                       ),
                                       onAdicionar: () => sacola.adicionarPasso(p),
+                                      onAlterar: (q) => sacola.alterar(p.codigo, q),
                                     );
                                   },
                                 ),

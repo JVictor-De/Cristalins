@@ -1,15 +1,20 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/dependencias.dart';
+import '../../../core/network/api_erro.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/botao_principal.dart';
+import '../../../core/widgets/estados.dart';
+import '../../auth/domain/validadores.dart';
 
-/// Perfil mínimo — guest e logado.
+/// Perfil — guest (P4) + logado com rotas/API existentes.
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
 
@@ -21,6 +26,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   var _logado = false;
   var _carregando = true;
   var _iniciou = false;
+  String? _rotuloCep;
 
   @override
   void didChangeDependencies() {
@@ -41,59 +47,592 @@ class _PerfilScreenState extends State<PerfilScreen> {
     }
   }
 
+  Future<void> _abrirWhatsApp(AppConfig config) async {
+    final n = config.suporteWhatsapp;
+    if (n.isEmpty) return;
+    HapticFeedback.selectionClick();
+    final digitos = n.replaceAll(RegExp(r'\D'), '');
+    await context.read<Dependencias>().links.abrir('https://wa.me/$digitos');
+  }
+
+  Future<void> _abrirCep() async {
+    HapticFeedback.selectionClick();
+    final resultado = await showModalBottomSheet<_ResultadoCepPerfil>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.superficie,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.raioCard)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+        child: const _FolhaCepPerfil(),
+      ),
+    );
+    if (!mounted || resultado == null) return;
+    setState(() => _rotuloCep = resultado.rotulo);
+  }
+
+  void _abrirFaq() {
+    HapticFeedback.selectionClick();
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.superficie,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.raioCard)),
+      ),
+      builder: (ctx) => const _FolhaFaq(),
+    );
+  }
+
+  Future<void> _sair() async {
+    HapticFeedback.selectionClick();
+    await context.read<Dependencias>().auth.sair();
+    if (!mounted) return;
+    setState(() => _logado = false);
+    Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.shell, (_) => false);
+  }
+
+  Future<void> _excluirConta() async {
+    HapticFeedback.selectionClick();
+    final confirmar = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: const Text('Excluir minha conta?'),
+        message: const Text(
+          'Anonimizamos nome, contato e endereço. Dados fiscais ficam o tempo exigido por lei. Esta ação não tem volta.',
+        ),
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Excluir conta'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: const Text('Manter conta'),
+        ),
+      ),
+    );
+    if (confirmar != true || !mounted) return;
+    try {
+      await context.read<Dependencias>().auth.excluirConta();
+      if (!mounted) return;
+      HapticFeedback.mediumImpact();
+      setState(() => _logado = false);
+      Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.shell, (_) => false);
+      mostrarAviso(context, 'Conta excluída.');
+    } catch (e) {
+      if (mounted) mostrarAviso(context, ApiErro.de(e).mensagem, erro: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final config = context.watch<AppConfig>();
 
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.margem),
-        children: [
-          Text('Perfil', style: AppTypography.largeTitle.copyWith(color: AppColors.navy)),
-          const SizedBox(height: AppSpacing.secao),
-          if (_carregando)
-            const Center(child: CircularProgressIndicator())
-          else if (!_logado) ...[
-            Text(
-              'Entre para ver endereços, pagamento e faturas.',
-              style: AppTypography.body.copyWith(color: AppColors.textoSuave),
-            ),
-            const SizedBox(height: AppSpacing.margem),
-            BotaoPrincipal(
-              rotulo: 'Entrar',
-              onPressed: () => Navigator.of(context).pushNamed(AppRoutes.cadastroLogin),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            BotaoPrincipal(
-              rotulo: 'Explorar sem entrar',
-              variante: VarianteBotaoPrincipal.contorno,
-              onPressed: () {},
-            ),
-          ] else ...[
-            ListTile(
-              title: const Text('Minha assinatura'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).pushNamed(AppRoutes.minhaAssinatura),
-            ),
-            ListTile(
-              title: const Text('Faturas e pagamento'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).pushNamed(AppRoutes.minhaAssinatura),
-            ),
-          ],
-          const Divider(height: AppSpacing.secao),
-          ListTile(
-            title: const Text('Site Cristalins'),
-            onTap: () => context.read<Dependencias>().links.abrir(AppConfig.siteMarca),
+    return Material(
+      color: AppColors.fundo,
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.margem,
+            AppSpacing.sm,
+            AppSpacing.margem,
+            AppSpacing.secaoGrande,
           ),
-          if (config.suporteWhatsapp.isNotEmpty)
-            ListTile(
-              title: const Text('WhatsApp'),
-              onTap: () => context.read<Dependencias>().links.abrir(
-                'https://wa.me/${config.suporteWhatsapp}',
+          children: [
+            Text('Perfil', style: AppTypography.title3.copyWith(color: AppColors.navy)),
+            const SizedBox(height: AppSpacing.secao),
+            if (_carregando)
+              const Padding(
+                padding: EdgeInsets.all(AppSpacing.secao),
+                child: Center(child: CircularProgressIndicator(color: AppColors.azulMarca)),
+              )
+            else if (!_logado)
+              _Guest(
+                config: config,
+                rotuloCep: _rotuloCep,
+                onEntrar: () => Navigator.of(context).pushNamed(AppRoutes.cadastroLogin),
+                onFaq: _abrirFaq,
+                onWhatsApp: () => _abrirWhatsApp(config),
+                onCep: _abrirCep,
+                onSite: () => context.read<Dependencias>().links.abrir(AppConfig.siteMarca),
+              )
+            else
+              _Logado(
+                config: config,
+                rotuloCep: _rotuloCep,
+                onFaq: _abrirFaq,
+                onWhatsApp: () => _abrirWhatsApp(config),
+                onCep: _abrirCep,
+                onSite: () => context.read<Dependencias>().links.abrir(AppConfig.siteMarca),
+                onAssinatura: () => Navigator.of(context).pushNamed(AppRoutes.minhaAssinatura),
+                onSair: _sair,
+                onExcluir: _excluirConta,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Guest extends StatelessWidget {
+  const _Guest({
+    required this.config,
+    required this.onEntrar,
+    required this.onFaq,
+    required this.onWhatsApp,
+    required this.onCep,
+    required this.onSite,
+    this.rotuloCep,
+  });
+
+  final AppConfig config;
+  final String? rotuloCep;
+  final VoidCallback onEntrar;
+  final VoidCallback onFaq;
+  final VoidCallback onWhatsApp;
+  final VoidCallback onCep;
+  final VoidCallback onSite;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Icon(Icons.person_outline, size: 56, color: AppColors.textoSuave.withValues(alpha: 0.8)),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          'Acompanhe entregas, pause e edite sua assinatura',
+          textAlign: TextAlign.center,
+          style: AppTypography.body.copyWith(color: AppColors.tinta),
+        ),
+        const SizedBox(height: AppSpacing.margem),
+        BotaoPrincipal(
+          rotulo: 'Entrar ou criar conta',
+          variante: VarianteBotaoPrincipal.navy,
+          onPressed: onEntrar,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Com e-mail e senha',
+          textAlign: TextAlign.center,
+          style: AppTypography.footnote.copyWith(color: AppColors.textoSuave),
+        ),
+        const SizedBox(height: AppSpacing.secao),
+        _BlocoSuporteSobre(
+          config: config,
+          rotuloCep: rotuloCep,
+          onFaq: onFaq,
+          onWhatsApp: onWhatsApp,
+          onCep: onCep,
+          onSite: onSite,
+        ),
+        const SizedBox(height: AppSpacing.secao),
+        Text(
+          'Versão ${AppConfig.versaoApp}',
+          textAlign: TextAlign.center,
+          style: AppTypography.caption1.copyWith(color: AppColors.textoSuave),
+        ),
+      ],
+    );
+  }
+}
+
+class _Logado extends StatelessWidget {
+  const _Logado({
+    required this.config,
+    required this.onFaq,
+    required this.onWhatsApp,
+    required this.onCep,
+    required this.onSite,
+    required this.onAssinatura,
+    required this.onSair,
+    required this.onExcluir,
+    this.rotuloCep,
+  });
+
+  final AppConfig config;
+  final String? rotuloCep;
+  final VoidCallback onFaq;
+  final VoidCallback onWhatsApp;
+  final VoidCallback onCep;
+  final VoidCallback onSite;
+  final VoidCallback onAssinatura;
+  final VoidCallback onSair;
+  final VoidCallback onExcluir;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Sua conta',
+          style: AppTypography.headline.copyWith(color: AppColors.navy),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Gerencie assinatura e faturas. Nome e status detalhados entram quando /clientes/me estiver ligado nesta tela.',
+          style: AppTypography.footnote.copyWith(color: AppColors.textoSuave),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _Linha(
+          icone: Icons.local_shipping_outlined,
+          titulo: 'Minha assinatura',
+          onTap: onAssinatura,
+        ),
+        _Linha(
+          icone: Icons.receipt_long_outlined,
+          titulo: 'Faturas e pagamento',
+          subtitulo: 'Pelo fluxo da assinatura',
+          onTap: onAssinatura,
+        ),
+        const _Linha(
+          icone: Icons.home_outlined,
+          titulo: 'Endereços',
+          subtitulo: 'Em breve',
+          habilitado: false,
+        ),
+        const _Linha(
+          icone: Icons.notifications_outlined,
+          titulo: 'Notificações',
+          subtitulo: 'Em breve',
+          habilitado: false,
+        ),
+        const SizedBox(height: AppSpacing.secao),
+        _BlocoSuporteSobre(
+          config: config,
+          rotuloCep: rotuloCep,
+          onFaq: onFaq,
+          onWhatsApp: onWhatsApp,
+          onCep: onCep,
+          onSite: onSite,
+        ),
+        const SizedBox(height: AppSpacing.secao),
+        TextButton(
+          onPressed: onSair,
+          child: Text(
+            'Sair',
+            style: AppTypography.subheadline.copyWith(
+              color: AppColors.azulMarca,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: onExcluir,
+          child: Text(
+            'Excluir conta',
+            style: AppTypography.subheadline.copyWith(
+              color: AppColors.erro,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          'Versão ${AppConfig.versaoApp}',
+          textAlign: TextAlign.center,
+          style: AppTypography.caption1.copyWith(color: AppColors.textoSuave),
+        ),
+      ],
+    );
+  }
+}
+
+class _BlocoSuporteSobre extends StatelessWidget {
+  const _BlocoSuporteSobre({
+    required this.config,
+    required this.onFaq,
+    required this.onWhatsApp,
+    required this.onCep,
+    required this.onSite,
+    this.rotuloCep,
+  });
+
+  final AppConfig config;
+  final String? rotuloCep;
+  final VoidCallback onFaq;
+  final VoidCallback onWhatsApp;
+  final VoidCallback onCep;
+  final VoidCallback onSite;
+
+  @override
+  Widget build(BuildContext context) {
+    final termosOk = AppConfig.urlTermos.isNotEmpty;
+    final privOk = AppConfig.urlPrivacidade.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Suporte', style: AppTypography.headline.copyWith(color: AppColors.navy)),
+        const SizedBox(height: AppSpacing.xs),
+        _Linha(
+          icone: Icons.help_outline,
+          titulo: 'Ajuda e perguntas frequentes',
+          onTap: onFaq,
+        ),
+        if (config.suporteWhatsapp.isNotEmpty)
+          _Linha(
+            icone: Icons.chat_outlined,
+            titulo: 'Fale conosco no WhatsApp',
+            onTap: onWhatsApp,
+          ),
+        _Linha(
+          icone: Icons.location_on_outlined,
+          titulo: 'Área de entrega',
+          subtitulo: rotuloCep ?? 'Consultar CEP',
+          onTap: onCep,
+        ),
+        const SizedBox(height: AppSpacing.secao),
+        Text('Sobre', style: AppTypography.headline.copyWith(color: AppColors.navy)),
+        const SizedBox(height: AppSpacing.xs),
+        _Linha(
+          icone: Icons.description_outlined,
+          titulo: 'Termos de uso',
+          subtitulo: termosOk ? null : 'Em breve',
+          habilitado: termosOk,
+          onTap: termosOk
+              ? () => context.read<Dependencias>().links.abrir(AppConfig.urlTermos)
+              : null,
+        ),
+        _Linha(
+          icone: Icons.privacy_tip_outlined,
+          titulo: 'Política de privacidade',
+          subtitulo: privOk ? null : 'Em breve',
+          habilitado: privOk,
+          onTap: privOk
+              ? () => context.read<Dependencias>().links.abrir(AppConfig.urlPrivacidade)
+              : null,
+        ),
+        _Linha(
+          icone: Icons.language,
+          titulo: 'Site Cristalins',
+          trailing: Icons.open_in_new,
+          onTap: onSite,
+        ),
+      ],
+    );
+  }
+}
+
+class _Linha extends StatelessWidget {
+  const _Linha({
+    required this.icone,
+    required this.titulo,
+    this.subtitulo,
+    this.trailing = Icons.chevron_right,
+    this.onTap,
+    this.habilitado = true,
+  });
+
+  final IconData icone;
+  final String titulo;
+  final String? subtitulo;
+  final IconData? trailing;
+  final VoidCallback? onTap;
+  final bool habilitado;
+
+  @override
+  Widget build(BuildContext context) {
+    final ativo = habilitado && onTap != null;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icone, color: ativo ? AppColors.azulMarca : AppColors.textoSuave),
+      title: Text(
+        titulo,
+        style: AppTypography.subheadline.copyWith(
+          color: ativo ? AppColors.tinta : AppColors.textoSuave,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      subtitle: subtitulo == null
+          ? null
+          : Text(subtitulo!, style: AppTypography.caption1.copyWith(color: AppColors.textoSuave)),
+      trailing: trailing == null
+          ? null
+          : Icon(trailing, color: ativo ? AppColors.textoSuave : AppColors.linha),
+      onTap: ativo ? onTap : null,
+      minVerticalPadding: 12,
+    );
+  }
+}
+
+class _FolhaFaq extends StatelessWidget {
+  const _FolhaFaq();
+
+  static const _faqs = [
+    ('Onde vocês entregam?', 'Atendemos bairros oficiais do município do Rio de Janeiro. Confirme pelo CEP na home ou no checkout.'),
+    ('Posso pausar a assinatura?', 'Sim. Na área logada você pausa ou ajusta a frequência conforme as regras da assinatura.'),
+    ('Como cancelo?', 'Pelo app, em Minha assinatura, com confirmação. Sem taxa inventada nesta tela.'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.margem,
+          AppSpacing.sm,
+          AppSpacing.margem,
+          AppSpacing.margem,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.linha,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-        ],
+            const SizedBox(height: AppSpacing.sm),
+            Text('Perguntas frequentes', style: AppTypography.title3.copyWith(color: AppColors.navy)),
+            const SizedBox(height: AppSpacing.sm),
+            for (final (q, a) in _faqs) ...[
+              Text(q, style: AppTypography.headline.copyWith(color: AppColors.tinta)),
+              const SizedBox(height: 2),
+              Text(a, style: AppTypography.footnote.copyWith(color: AppColors.textoSuave)),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ResultadoCepPerfil {
+  const _ResultadoCepPerfil({required this.rotulo});
+  final String rotulo;
+}
+
+class _FolhaCepPerfil extends StatefulWidget {
+  const _FolhaCepPerfil();
+
+  @override
+  State<_FolhaCepPerfil> createState() => _FolhaCepPerfilState();
+}
+
+class _FolhaCepPerfilState extends State<_FolhaCepPerfil> {
+  final _ctrl = TextEditingController();
+  var _carregando = false;
+  String? _erro;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _consultar() async {
+    final msg = Validadores.cep(_ctrl.text);
+    if (msg != null) {
+      setState(() => _erro = msg);
+      return;
+    }
+    setState(() {
+      _carregando = true;
+      _erro = null;
+    });
+    try {
+      final digitos = Validadores.digitos(_ctrl.text);
+      final r = await context.read<Dependencias>().enderecos.consultarCep(digitos);
+      if (!mounted) return;
+      Navigator.of(context).pop(
+        _ResultadoCepPerfil(rotulo: 'Entrega em ${r.bairro} · ${r.zona.nome}'),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _carregando = false;
+        _erro = ApiErro.de(e).mensagem;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.margem,
+          AppSpacing.sm,
+          AppSpacing.margem,
+          AppSpacing.margem,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.linha,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text('Área de entrega', style: AppTypography.title3.copyWith(color: AppColors.navy)),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Informe o CEP para ver se atendemos o bairro (mesma consulta do checkout).',
+              style: AppTypography.footnote.copyWith(color: AppColors.textoSuave),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: _ctrl,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.postalCode],
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(8),
+              ],
+              decoration: InputDecoration(
+                labelText: 'CEP',
+                hintText: '00000000',
+                errorText: _erro,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.raioCard)),
+              ),
+              onSubmitted: (_) => _consultar(),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            FilledButton(
+              onPressed: _carregando ? null : _consultar,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.navy,
+                minimumSize: const Size(0, AppSpacing.toqueMinimo),
+              ),
+              child: _carregando
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.sobrePrimaria),
+                    )
+                  : const Text('Confirmar CEP'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Informar no checkout',
+                style: AppTypography.subheadline.copyWith(color: AppColors.azulMarca),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
