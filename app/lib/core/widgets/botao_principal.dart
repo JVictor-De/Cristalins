@@ -36,7 +36,7 @@ class BotaoPrincipal extends StatelessWidget {
         null as Color?,
       ),
       VarianteBotaoPrincipal.navy => (AppColors.navy, AppColors.sobrePrimaria, null),
-      VarianteBotaoPrincipal.contorno => (AppColors.superficie, AppColors.tinta, AppColors.linha),
+      VarianteBotaoPrincipal.contorno => (AppColors.superficie, AppColors.navy, AppColors.navy),
     };
 
     final filho = carregando

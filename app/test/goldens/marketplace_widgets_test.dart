@@ -155,10 +155,10 @@ void main() {
   });
 
   testWidgets('golden HeroWaterProtein', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(400, 360));
+    await tester.binding.setSurfaceSize(const Size(400, 420));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
-      envelopar(HeroWaterProtein(onAssinar: () {}, onVerAguas: () {}), size: const Size(400, 800)),
+      envelopar(HeroWaterProtein(onAssinar: () {}, onVerAguas: () {}), size: const Size(400, 900)),
     );
     await tester.pump();
     await expectLater(find.byType(HeroWaterProtein), matchesGoldenFile('mk_hero_wp.png'));
@@ -299,11 +299,11 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       envelopar(
-        DetalhePrecoExpansivel(
-          detalhe: const [LinhaPreco(fator: 'VOLUME', percentual: -8)],
-          subtotal: const Dinheiro(20329),
-          frete: const Dinheiro(990),
-          total: const Dinheiro(21319),
+        const DetalhePrecoExpansivel(
+          detalhe: [LinhaPreco(fator: 'VOLUME', percentual: -8)],
+          subtotal: Dinheiro(20329),
+          frete: Dinheiro(990),
+          total: Dinheiro(21319),
         ),
       ),
     );

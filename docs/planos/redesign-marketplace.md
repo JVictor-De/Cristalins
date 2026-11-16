@@ -1,16 +1,15 @@
-# Plano — Redesign marketplace Cristalins (v3.1)
+# Plano — Redesign marketplace Cristalins (v3.3)
 
-## Feito (código no app, 2026-11-16)
+## Feito (fila completa, 2026-11-16)
 
-Tokens, assets do site, API simular público + metas, widgets, Shell, Home A/B, Produtos, PDP, Sacola global, Onboarding 3 CTAs, Perfil, aba Assinatura.
+Tokens, assets, API simular público, widgets, Shell, Home A/B, Produtos, PDP, Sacola, Onboarding, Perfil, aba Assinatura, **hotfix UX** (`BUGS_UX`), **animação PDP mineral**, testes, revisão § D, **consolidação**.
 
-## Restante (fila)
+Detalhe: `doc/prompts/features/cristalins_marketplace/CONSOLIDACAO.md`.
 
-1. `mk-5b-animacao` — impacto água (site → `cena_impacto_agua`)
-2. `mk-6-testes` — analyze + integration marketplace
-3. `mk-7-revisao` — uma volta + prints PNG se faltarem
-4. `consolidacao`
+## Pendências humanas
 
-## Princípios (inalterados)
+Seed Coolify, redeploy, prints PNG — `HANDOFF.md` da fila.
 
-Cards sem preço; freq na sacola; guest first; hero WP visitante; sem feed iFood; sem apple-style obrigatório.
+## Princípios
+
+Cards sem preço; freq na sacola; guest first; hero WP visitante; animação não compete com WP; CTA `#087FAE`.

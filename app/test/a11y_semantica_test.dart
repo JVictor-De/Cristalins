@@ -116,7 +116,7 @@ void main() {
     await abrir(tester, AppRoutes.catalogo, args: pedido);
     const nome = 'Water Protein (água com colágeno)';
     final foto = find.byWidgetPredicate(
-      (w) => w is Image && (w as Image).semanticLabel == nome,
+      (w) => w is Image && w.semanticLabel == nome,
     );
     expect(foto, findsOneWidget);
   });

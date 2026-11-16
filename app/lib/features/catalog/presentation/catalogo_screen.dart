@@ -10,9 +10,11 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/botao_principal.dart';
 import '../../../core/widgets/card_produto.dart';
+import '../../../core/widgets/controles.dart';
 import '../../../core/widgets/estados.dart';
 import '../../subscription/domain/assinatura.dart';
 import '../domain/catalogo.dart';
+import '../domain/produto_assets.dart';
 import 'cesta_controller.dart';
 import 'sacola_controller.dart';
 
@@ -242,26 +244,115 @@ class _FluxoLegado extends StatelessWidget {
       appBar: AppBar(title: Text(c.assinaturaId == null ? 'Sua cesta' : 'Alterar cesta')),
       body: c.carregando
           ? const Center(child: CircularProgressIndicator())
+          : c.erroCarregar != null
+          ? EstadoErro(mensagem: c.erroCarregar!, onTentarDeNovo: c.carregar)
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.margem),
               children: [
-                for (final p in c.visiveis)
-                  ListTile(
-                    title: Text(p.nome),
-                    subtitle: Text('${c.quantidades[p.codigo] ?? 0} un.'),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () => c.alterar(p.codigo, (c.quantidades[p.codigo] ?? 0) + c.passo(p)),
-                    ),
+                for (final p in c.visiveis) _LinhaCestaLegado(produto: p),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Water Protein e Flow Fiber dividem a caixa de 6. '
+                  'As águas vêm na embalagem de venda.',
+                  style: AppTypography.footnote.copyWith(color: AppColors.textoSuave),
+                ),
+                if (c.erroSimulacao != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    c.erroSimulacao!,
+                    style: AppTypography.footnote.copyWith(color: AppColors.erro),
                   ),
+                ],
               ],
             ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.margem),
           child: BotaoPrincipal(
-            rotulo: c.assinaturaId == null ? 'Continuar' : 'Salvar',
+            rotulo: c.assinaturaId == null ? 'Continuar' : 'Salvar cesta',
+            carregando: c.salvando,
             onPressed: c.podeContinuar ? () => _confirmar(context, c) : null,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Linha da cesta legada (pedido / alterar) — imagem + [SeletorQuantidade] (a11y Tela 5).
+class _LinhaCestaLegado extends StatelessWidget {
+  const _LinhaCestaLegado({required this.produto});
+
+  final Produto produto;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.watch<CestaController>();
+    final quantidade = c.quantidades[produto.codigo] ?? 0;
+    final asset = assetDoProduto(produto.codigo);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Material(
+        color: AppColors.superficie,
+        borderRadius: BorderRadius.circular(AppSpacing.raioCard),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppSpacing.raioChip),
+                    child: SizedBox(
+                      width: AppSpacing.imagemProduto,
+                      height: AppSpacing.imagemProduto,
+                      child: ColoredBox(
+                        color: corDoProduto(produto.codigo).withValues(alpha: 0.35),
+                        child: asset == null
+                            ? const Icon(Icons.water_drop_outlined, color: AppColors.azulMarca)
+                            : Image.asset(
+                                asset,
+                                fit: BoxFit.contain,
+                                semanticLabel: produto.nome,
+                              ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          produto.rotuloTipo,
+                          style: AppTypography.caption1.copyWith(color: AppColors.textoSuave),
+                        ),
+                        Text(
+                          produto.nome,
+                          style: AppTypography.headline.copyWith(color: AppColors.tinta),
+                        ),
+                        Text(
+                          '${produto.volume} · ${produto.embalagem}',
+                          style: AppTypography.subheadline.copyWith(color: AppColors.textoSuave),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: SeletorQuantidade(
+                  rotulo: produto.nome,
+                  quantidade: quantidade,
+                  passo: c.passo(produto),
+                  onAlterar: (q) => c.alterar(produto.codigo, q),
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -38,6 +38,7 @@ flutter:
   assets:
     - assets/images/produtos/
     - assets/images/brand/
+    - assets/images/brand/impacto/
     - assets/images/hero/
   # Inter + DM Serif Display (SIL OFL 1.1). Nunca SF Pro / SF Symbols.
   fonts:

@@ -77,3 +77,10 @@
 | Tipografia hero | DM Serif Display Regular (OFL) embarcada; corpo Inter | Monólito §3.2 |
 | `flow_protein.webp` | Redimensionado para largura 1200 (~64 KB no app) | Monólito pede ≤ ~1200 px / evitar ~1,8 MB |
 | UX v3 (registrar) | Home bifurcada; cards sem preço; frequência só na sacola; mínimo com sugestão; login contextual | Monólito v3 missão / §2 |
+| Hero WP asset | Usar `produtos/protein.webp` (não `flow_protein.webp` = print de landing) | BUGS_UX #3–5; tipografia só no widget |
+| Origem / Como funciona | Foto `ams500.webp` + copy curta; não crop de `colocar_site-fast.webp` | BUGS_UX #2, #5 |
+| Logo header | `LogoMarca` com `ColorFilter` no JPG branco → transparente aproximado | Sem flutter_svg; BUGS_UX #7 |
+| Ícone aba Assinatura | `Icons.water_drop_outlined` / `water_drop` (substitui `autorenew`) | BUGS_UX #31; recorrência de água mais legível |
+| Abrir Produtos | `AbrirProdutosCallback({Categoria?})` no shell — Montar≠Ver águas | BUGS_UX #11, #24 |
+| Animação impacto (`mk-5b`) | Cena completa **só** na PDP de água mineral (`AMS500`/`AMC510`/`AMN1500`/`AMN5000`/`AMC200`); camada da foto; WP mantém foto+respingo | Monólito animação — default B; não compete com hero WP |
+| Motion impacto | `AnimationController` 1,8 s espelhando CSS site; sem Lottie/Rive; reduced motion → frame final | A11y + parity com `impacto__*.css` |

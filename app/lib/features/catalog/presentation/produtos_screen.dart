@@ -8,6 +8,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/card_kit.dart';
 import '../../../core/widgets/card_produto.dart';
 import '../../../core/widgets/chip_categoria.dart';
+import '../../../core/widgets/estado_vazio.dart';
 import '../../../core/widgets/estados.dart';
 import '../../../core/widgets/skeleton_card.dart';
 import '../domain/catalogo.dart';
@@ -29,10 +30,20 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
   String _filtro = '';
 
   @override
+  void didUpdateWidget(covariant ProdutosScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.categoriaInicial != oldWidget.categoriaInicial && widget.categoriaInicial != null) {
+      _categoria = widget.categoriaInicial!;
+    }
+  }
+
+  @override
   void dispose() {
     _busca.dispose();
     super.dispose();
   }
+
+  bool get _filtroAtivo => _filtro.isNotEmpty || _categoria != Categoria.todos;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +62,8 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
       return p.nome.toLowerCase().contains(q) || p.codigo.toLowerCase().contains(q);
     }).toList();
 
+    final catalogoVazio = !sacola.carregandoCatalogo && sacola.produtos.isEmpty;
+
     return SafeArea(
       child: CustomScrollView(
         slivers: [
@@ -68,60 +81,116 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
-              child: SearchBar(
-                hintText: 'Buscar produto',
+              child: TextField(
+                controller: _busca,
                 onChanged: (v) => setState(() => _filtro = v.trim()),
-                elevation: const WidgetStatePropertyAll(0),
-                backgroundColor: const WidgetStatePropertyAll(AppColors.superficie),
-                side: const WidgetStatePropertyAll(BorderSide(color: AppColors.linha)),
+                style: AppTypography.body.copyWith(color: AppColors.tinta),
+                decoration: InputDecoration(
+                  hintText: 'Buscar produto',
+                  hintStyle: AppTypography.body.copyWith(color: AppColors.textoSuave),
+                  prefixIcon: const Icon(Icons.search, color: AppColors.navy),
+                  filled: true,
+                  fillColor: AppColors.superficie,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.raioBotao),
+                    borderSide: BorderSide(color: AppColors.navy.withValues(alpha: 0.25)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.raioBotao),
+                    borderSide: BorderSide(color: AppColors.navy.withValues(alpha: 0.25)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.raioBotao),
+                    borderSide: const BorderSide(color: AppColors.azulMarca, width: 1.5),
+                  ),
+                ),
               ),
             ),
           ),
           SliverToBoxAdapter(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.margem,
-                AppSpacing.sm,
-                AppSpacing.margem,
-                AppSpacing.sm,
-              ),
-              child: Row(
+            child: SizedBox(
+              height: AppSpacing.toqueMinimo + AppSpacing.sm * 2,
+              child: Stack(
                 children: [
-                  for (final c in Categoria.values)
-                    Padding(
-                      padding: const EdgeInsets.only(right: AppSpacing.xs),
-                      child: ChipCategoria(
-                        rotulo: c.rotulo,
-                        selecionado: _categoria == c,
-                        onTap: () => setState(() => _categoria = c),
+                  ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.margem,
+                      AppSpacing.sm,
+                      AppSpacing.margem + 24,
+                      AppSpacing.sm,
+                    ),
+                    children: [
+                      for (final c in Categoria.values)
+                        Padding(
+                          padding: const EdgeInsets.only(right: AppSpacing.xs),
+                          child: ChipCategoria(
+                            rotulo: c.rotulo,
+                            selecionado: _categoria == c,
+                            onTap: () => setState(() => _categoria = c),
+                          ),
+                        ),
+                    ],
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: 28,
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.gelo.withValues(alpha: 0),
+                              AppColors.gelo,
+                            ],
+                          ),
+                        ),
                       ),
                     ),
+                  ),
                 ],
               ),
             ),
           ),
           if (_categoria == Categoria.kits && !sacola.carregandoCatalogo)
             SliverToBoxAdapter(
-              child: SizedBox(
-                height: 140,
-                child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: sacola.kits.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-                  itemBuilder: (context, i) {
-                    final k = sacola.kits[i];
-                    final resumo = k.itens.map((e) => e.produto).join(', ');
-                    return CardKit(
-                      nome: k.nome,
-                      resumoItens: resumo,
-                      onTap: () => sacola.usarKit(k),
-                      onAdicionar: () => sacola.usarKit(k),
-                    );
-                  },
-                ),
-              ),
+              child: sacola.kits.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
+                      child: EstadoVazio(
+                        icone: Icons.widgets_outlined,
+                        titulo: catalogoVazio ? 'Catálogo indisponível' : 'Nenhum kit no momento',
+                        subtitulo: catalogoVazio
+                            ? 'Tente de novo em instantes.'
+                            : 'Escolha produtos individuais na grade.',
+                        rotuloAcao: catalogoVazio ? 'Tentar de novo' : 'Ver todos',
+                        onAcao: catalogoVazio
+                            ? sacola.carregarCatalogo
+                            : () => setState(() => _categoria = Categoria.todos),
+                      ),
+                    )
+                  : SizedBox(
+                      height: 140,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: sacola.kits.length,
+                        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+                        itemBuilder: (context, i) {
+                          final k = sacola.kits[i];
+                          final resumo = k.itens.map((e) => e.produto).join(', ');
+                          return CardKit(
+                            nome: k.nome,
+                            resumoItens: resumo,
+                            onTap: () => sacola.usarKit(k),
+                            onAdicionar: () => sacola.usarKit(k),
+                          );
+                        },
+                      ),
+                    ),
             ),
           if (sacola.carregandoCatalogo)
             SliverPadding(
@@ -140,9 +209,28 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
               ),
             )
           else if (_categoria != Categoria.kits && produtos.isEmpty)
-            const SliverFillRemaining(
+            SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(child: Text('Nada encontrado. Tente outro filtro.')),
+              child: catalogoVazio
+                  ? EstadoVazio(
+                      titulo: 'Catálogo indisponível',
+                      subtitulo: 'Os produtos ainda não chegaram. Toque para tentar de novo.',
+                      rotuloAcao: 'Tentar de novo',
+                      onAcao: sacola.carregarCatalogo,
+                    )
+                  : EstadoVazio(
+                      icone: Icons.filter_alt_off_outlined,
+                      titulo: 'Nada neste filtro',
+                      subtitulo: _filtroAtivo
+                          ? 'Tente limpar a busca ou escolher outra categoria.'
+                          : 'Nenhum produto nesta categoria.',
+                      rotuloAcao: 'Limpar filtros',
+                      onAcao: () => setState(() {
+                        _categoria = Categoria.todos;
+                        _filtro = '';
+                        _busca.clear();
+                      }),
+                    ),
             )
           else if (_categoria != Categoria.kits)
             SliverPadding(

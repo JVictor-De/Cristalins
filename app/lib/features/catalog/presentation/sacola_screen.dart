@@ -8,6 +8,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/botao_principal.dart';
+import '../../../core/widgets/detalhe_preco_expansivel.dart';
+import '../../../core/widgets/sugestao_minimo_cesta.dart';
+import '../../shell/presentation/shell_screen.dart';
 import '../../subscription/domain/assinatura.dart';
 import '../domain/catalogo.dart';
 import '../domain/produto_assets.dart';
@@ -34,10 +37,24 @@ class SacolaScreen extends StatelessWidget {
                 const SizedBox(height: AppSpacing.secao),
                 BotaoPrincipal(
                   rotulo: 'Assinar Water Protein',
-                  onPressed: () => Navigator.of(context).pushNamed(AppRoutes.produto, arguments: 'WP500'),
+                  onPressed: () {
+                    if (sacola.produtoDe('WP500') != null) {
+                      Navigator.of(context).pushNamed(AppRoutes.produto, arguments: 'WP500');
+                    } else {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        AppRoutes.shell,
+                        (_) => false,
+                        arguments: const ShellArgs(abaInicial: 1),
+                      );
+                    }
+                  },
                 ),
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                    AppRoutes.shell,
+                    (_) => false,
+                    arguments: const ShellArgs(abaInicial: 1, categoriaInicial: Categoria.aguas),
+                  ),
                   child: const Text('Ver todas as águas'),
                 ),
               ],
@@ -48,7 +65,6 @@ class SacolaScreen extends StatelessWidget {
     }
 
     final sim = sacola.simulacao;
-    final sugestao = sacola.sugerirParaMinimo();
 
     return Scaffold(
       backgroundColor: AppColors.gelo,
@@ -78,14 +94,7 @@ class SacolaScreen extends StatelessWidget {
               'Falta um pouco para o mínimo da assinatura.',
               style: AppTypography.footnote.copyWith(color: AppColors.textoSuave),
             ),
-            if (sugestao != null)
-              TextButton(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  sacola.adicionarPasso(sugestao);
-                },
-                child: Text('Adicionar ${sugestao.nome} (${sugestao.embalagem})'),
-              ),
+            const SugestaoMinimoCesta(),
           ],
           const SizedBox(height: AppSpacing.secao),
           Text('Frequência', style: AppTypography.headline),
@@ -139,20 +148,15 @@ class SacolaScreen extends StatelessWidget {
             ),
           ],
           const SizedBox(height: AppSpacing.sm),
-          ExpansionTile(
-            title: Text('Ver detalhes do preço', style: AppTypography.subheadline),
-            children: [
-              if (sim != null)
-                for (final l in sim.detalhe)
-                  ListTile(
-                    dense: true,
-                    title: Text(l.rotulo),
-                    trailing: Text(l.valorFormatado),
-                  )
-              else if (sacola.erroSimulacao != null)
-                ListTile(title: Text(sacola.erroSimulacao!)),
-            ],
-          ),
+          if (sim != null)
+            DetalhePrecoExpansivel(
+              detalhe: sim.detalhe,
+              subtotal: sim.subtotal,
+              frete: sim.frete,
+              total: sim.total,
+            )
+          else if (sacola.erroSimulacao != null)
+            Text(sacola.erroSimulacao!, style: AppTypography.footnote.copyWith(color: AppColors.erro)),
           const SizedBox(height: 100),
         ],
       ),

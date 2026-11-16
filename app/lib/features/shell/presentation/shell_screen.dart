@@ -17,6 +17,9 @@ class ShellArgs {
   final Categoria? categoriaInicial;
 }
 
+/// Callback tipado: abrir aba Produtos com categoria opcional.
+typedef AbrirProdutosCallback = void Function({Categoria? categoria});
+
 /// Shell com 4 abas + [BarraSacola] quando há itens.
 class ShellScreen extends StatefulWidget {
   const ShellScreen({super.key, this.abaInicial = 0, this.categoriaInicial});
@@ -30,6 +33,27 @@ class ShellScreen extends StatefulWidget {
 
 class _ShellScreenState extends State<ShellScreen> {
   late int _aba = widget.abaInicial.clamp(0, 3);
+  late Categoria? _categoriaProdutos = widget.categoriaInicial;
+  int _geracaoHome = 0;
+  int _geracaoAssinatura = 0;
+
+  void _irPara(int i, {Categoria? categoria}) {
+    setState(() {
+      _aba = i;
+      if (categoria != null) _categoriaProdutos = categoria;
+      if (i == 0) _geracaoHome++;
+      if (i == 2) _geracaoAssinatura++;
+    });
+  }
+
+  void _selecionarAba(int i) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _aba = i;
+      if (i == 0) _geracaoHome++;
+      if (i == 2) _geracaoAssinatura++;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +70,18 @@ class _ShellScreenState extends State<ShellScreen> {
           index: _aba,
           children: [
             HomeScreen(
-              onAbrirProdutos: () => _irPara(1),
+              key: ValueKey('home-$_geracaoHome'),
+              onAbrirProdutos: ({Categoria? categoria}) => _irPara(1, categoria: categoria),
               onAbrirAssinatura: () => _irPara(2),
             ),
-            ProdutosScreen(categoriaInicial: widget.categoriaInicial),
-            AssinaturaTabScreen(onIrProdutos: () => _irPara(1)),
+            ProdutosScreen(
+              key: ValueKey('produtos-${_categoriaProdutos?.name ?? 'todos'}'),
+              categoriaInicial: _categoriaProdutos,
+            ),
+            AssinaturaTabScreen(
+              key: ValueKey('assinatura-$_geracaoAssinatura'),
+              onIrProdutos: ({Categoria? categoria}) => _irPara(1, categoria: categoria),
+            ),
             const PerfilScreen(),
           ],
         ),
@@ -63,10 +94,7 @@ class _ShellScreenState extends State<ShellScreen> {
               backgroundColor: AppColors.superficie,
               indicatorColor: AppColors.gelo,
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              onDestinationSelected: (i) {
-                HapticFeedback.selectionClick();
-                setState(() => _aba = i);
-              },
+              onDestinationSelected: _selecionarAba,
               destinations: const [
                 NavigationDestination(
                   icon: Icon(Icons.home_outlined),
@@ -79,8 +107,8 @@ class _ShellScreenState extends State<ShellScreen> {
                   label: 'Produtos',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.autorenew_outlined),
-                  selectedIcon: Icon(Icons.autorenew, color: AppColors.navy),
+                  icon: Icon(Icons.water_drop_outlined),
+                  selectedIcon: Icon(Icons.water_drop, color: AppColors.navy),
                   label: 'Assinatura',
                 ),
                 NavigationDestination(
@@ -95,6 +123,4 @@ class _ShellScreenState extends State<ShellScreen> {
       ),
     );
   }
-
-  void _irPara(int i) => setState(() => _aba = i);
 }

@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/botao_principal.dart';
+import '../../../core/widgets/cena_impacto_agua.dart';
 import '../domain/produto_assets.dart';
 import 'sacola_controller.dart';
 
@@ -43,12 +44,45 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
     final p = sacola.produtoDe(widget.codigo);
     if (p == null) {
       return Scaffold(
-        appBar: AppBar(),
-        body: Center(
-          child: sacola.carregandoCatalogo
-              ? const CircularProgressIndicator()
-              : Text('Produto ${widget.codigo} não encontrado'),
+        backgroundColor: AppColors.gelo,
+        appBar: AppBar(
+          backgroundColor: AppColors.gelo,
+          title: const Text('Produto'),
         ),
+        body: sacola.carregandoCatalogo
+            ? const Center(child: CircularProgressIndicator())
+            : Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.margem),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.inventory_2_outlined, size: 48, color: AppColors.azulMarca),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        sacola.produtos.isEmpty
+                            ? 'Catálogo indisponível'
+                            : 'Produto não encontrado',
+                        style: AppTypography.title3.copyWith(color: AppColors.navy),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        sacola.produtos.isEmpty
+                            ? 'Não foi possível abrir este item. Tente de novo depois.'
+                            : 'O código ${widget.codigo} não está no catálogo.',
+                        style: AppTypography.subheadline.copyWith(color: AppColors.textoSuave),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: AppSpacing.margem),
+                      BotaoPrincipal(
+                        rotulo: 'Voltar',
+                        onPressed: () => Navigator.of(context).maybePop(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
       );
     }
 
@@ -70,25 +104,39 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
             child: CustomScrollView(
               slivers: [
                 SliverAppBar(
-                  expandedHeight: MediaQuery.sizeOf(context).height * (sacola.temItens ? 0.36 : 0.42),
+                  expandedHeight: MediaQuery.sizeOf(context).height *
+                      (usaCenaImpactoAgua(p.codigo)
+                          ? (sacola.temItens ? 0.40 : 0.46)
+                          : (sacola.temItens ? 0.36 : 0.42)),
                   pinned: true,
-                  backgroundColor: fundo,
+                  backgroundColor: usaCenaImpactoAgua(p.codigo) ? const Color(0xFF43BDE6) : fundo,
                   flexibleSpace: FlexibleSpaceBar(
-                    background: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        if (p.codigo == 'WP500')
-                          Image.asset(assetHeroRespingo, fit: BoxFit.cover, opacity: const AlwaysStoppedAnimation(0.25)),
-                        Padding(
-                          padding: const EdgeInsets.all(AppSpacing.secao),
-                          child: Image.asset(
-                            p.codigo == 'WP500' ? 'assets/images/produtos/protein.webp' : asset,
-                            fit: BoxFit.contain,
-                            semanticLabel: p.nome,
+                    background: usaCenaImpactoAgua(p.codigo)
+                        ? const CenaImpactoAgua()
+                        : Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              if (p.codigo == 'WP500')
+                                Image.asset(
+                                  assetHeroRespingo,
+                                  fit: BoxFit.cover,
+                                  opacity: const AlwaysStoppedAnimation(0.25),
+                                ),
+                              Padding(
+                                padding: const EdgeInsets.all(AppSpacing.secao),
+                                child: Image.asset(
+                                  p.codigo == 'WP500' ? assetProdutoWaterProtein : asset,
+                                  fit: BoxFit.contain,
+                                  semanticLabel: p.nome,
+                                  errorBuilder: (_, _, _) => Image.asset(
+                                    asset,
+                                    fit: BoxFit.contain,
+                                    semanticLabel: p.nome,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
                 SliverToBoxAdapter(

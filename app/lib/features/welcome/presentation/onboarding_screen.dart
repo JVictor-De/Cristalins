@@ -8,6 +8,7 @@ import '../../catalog/domain/catalogo.dart';
 import '../../shell/presentation/shell_screen.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/botao_principal.dart';
+import '../../../core/widgets/logo_marca.dart';
 import '../data/onboarding_prefs.dart';
 
 /// 1ª abertura: 3 CTAs + Pular.
@@ -43,7 +44,7 @@ class OnboardingScreen extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  Image.asset(assetLogoMarca, height: 36, semanticLabel: 'Cristalins'),
+                  const LogoMarca(altura: 36),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     'Água Cristalins na sua porta',

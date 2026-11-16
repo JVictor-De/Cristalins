@@ -27,7 +27,10 @@ class ChipCategoria extends StatelessWidget {
       child: Material(
         color: selecionado ? AppColors.navy : AppColors.superficie,
         shape: StadiumBorder(
-          side: BorderSide(color: selecionado ? AppColors.navy : AppColors.linha),
+          side: BorderSide(
+            color: selecionado ? AppColors.navy : AppColors.azulPetroleo.withValues(alpha: 0.55),
+            width: selecionado ? 1 : 1.25,
+          ),
         ),
         child: InkWell(
           customBorder: const StadiumBorder(),
@@ -43,7 +46,7 @@ class ChipCategoria extends StatelessWidget {
                 child: Text(
                   rotulo,
                   style: AppTypography.subheadline.copyWith(
-                    color: selecionado ? AppColors.sobrePrimaria : AppColors.tinta,
+                    color: selecionado ? AppColors.sobrePrimaria : AppColors.navy,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

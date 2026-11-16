@@ -3,16 +3,21 @@ import 'package:provider/provider.dart';
 
 import '../../../core/dependencias.dart';
 import '../../../core/marca_assets.dart';
+import '../../../core/network/api_erro.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/card_proxima_entrega.dart';
 import '../../../core/widgets/card_produto.dart';
+import '../../../core/widgets/estado_vazio.dart';
 import '../../../core/widgets/hero_water_protein.dart';
+import '../../../core/widgets/logo_marca.dart';
 import '../../../core/widgets/secao_com_titulo.dart';
 import '../../../core/widgets/skeleton_card.dart';
+import '../../catalog/domain/catalogo.dart';
 import '../../catalog/presentation/sacola_controller.dart';
+import '../../shell/presentation/shell_screen.dart';
 import '../../subscription/domain/assinatura.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,7 +27,7 @@ class HomeScreen extends StatefulWidget {
     required this.onAbrirAssinatura,
   });
 
-  final VoidCallback onAbrirProdutos;
+  final AbrirProdutosCallback onAbrirProdutos;
   final VoidCallback onAbrirAssinatura;
 
   @override
@@ -32,6 +37,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Assinatura? _assinaturaAtiva;
   bool _checandoAssinatura = true;
+  bool _erroAssinatura = false;
 
   @override
   void initState() {
@@ -40,20 +46,43 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _checarAssinatura() async {
+    setState(() {
+      _checandoAssinatura = true;
+      _erroAssinatura = false;
+    });
     final dep = context.read<Dependencias>();
     try {
-      final lista = await dep.assinaturas.listar();
-      _assinaturaAtiva = lista.where((a) => !a.cancelada).firstOrNull;
-    } catch (_) {
+      // Sem sessão na API real → visitante. Com `api` null (testes) chama o mock.
+      final token = await dep.api?.tokens.lerAcesso();
+      if (dep.api != null && (token == null || token.isEmpty)) {
+        _assinaturaAtiva = null;
+        _erroAssinatura = false;
+      } else {
+        final lista = await dep.assinaturas.listar();
+        _assinaturaAtiva = lista.where((a) => !a.cancelada).firstOrNull;
+        _erroAssinatura = false;
+      }
+    } catch (e) {
+      final err = ApiErro.de(e);
       _assinaturaAtiva = null;
+      // 401 = visitante; demais falhas mantêm modo visitante sem banner (home).
+      _erroAssinatura = err.codigo != 'NAO_AUTENTICADO' && err.status != 401;
     }
     if (mounted) setState(() => _checandoAssinatura = false);
+  }
+
+  void _abrirWpOuProdutos(SacolaController sacola) {
+    if (sacola.produtoDe('WP500') != null) {
+      Navigator.of(context).pushNamed(AppRoutes.produto, arguments: 'WP500');
+      return;
+    }
+    widget.onAbrirProdutos();
   }
 
   @override
   Widget build(BuildContext context) {
     final sacola = context.watch<SacolaController>();
-    final modoAssinante = !_checandoAssinatura && _assinaturaAtiva != null;
+    final modoAssinante = !_checandoAssinatura && !_erroAssinatura && _assinaturaAtiva != null;
 
     return SafeArea(
       child: CustomScrollView(
@@ -76,8 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.margem),
                 child: HeroWaterProtein(
-                  onAssinar: () => Navigator.of(context).pushNamed(AppRoutes.produto, arguments: 'WP500'),
-                  onVerAguas: widget.onAbrirProdutos,
+                  onAssinar: () => _abrirWpOuProdutos(sacola),
+                  onVerAguas: () => widget.onAbrirProdutos(categoria: Categoria.aguas),
                 ),
               ),
             ),
@@ -86,8 +115,11 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SecaoComTitulo(
               titulo: modoAssinante ? 'Sua sacola recorrente' : 'Produtos',
               acaoRotulo: 'Ver todos',
-              onAcao: widget.onAbrirProdutos,
-              child: _CarrosselProdutos(sacola: sacola),
+              onAcao: () => widget.onAbrirProdutos(),
+              child: _CarrosselProdutos(
+                sacola: sacola,
+                onRetry: sacola.carregarCatalogo,
+              ),
             ),
           ),
           if (!modoAssinante)
@@ -138,7 +170,7 @@ class _Header extends StatelessWidget {
                   style: AppTypography.largeTitle.copyWith(color: AppColors.navy),
                 ),
               ),
-              Image.asset(assetLogoMarca, height: 32, semanticLabel: 'Cristalins'),
+              const LogoMarca(altura: 36),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -162,16 +194,26 @@ class _ChipEntrega extends StatelessWidget {
     return Semantics(
       label: texto,
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 8),
         decoration: BoxDecoration(
-          color: AppColors.superficie,
-          borderRadius: BorderRadius.circular(AppSpacing.raioBotao),
-          border: Border.all(color: AppColors.linha),
+          color: AppColors.menta,
+          borderRadius: BorderRadius.circular(AppSpacing.raioChip),
         ),
-        child: Text(
-          texto,
-          style: AppTypography.footnote.copyWith(color: AppColors.textoSuave),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.location_on_outlined, size: 16, color: AppColors.azulMarca),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                texto,
+                style: AppTypography.footnote.copyWith(
+                  color: AppColors.navy,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -179,8 +221,13 @@ class _ChipEntrega extends StatelessWidget {
 }
 
 class _CarrosselProdutos extends StatelessWidget {
-  const _CarrosselProdutos({required this.sacola});
+  const _CarrosselProdutos({
+    required this.sacola,
+    required this.onRetry,
+  });
+
   final SacolaController sacola;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -197,8 +244,31 @@ class _CarrosselProdutos extends StatelessWidget {
       );
     }
 
+    if (sacola.erroCatalogo != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
+        child: EstadoVazio(
+          icone: Icons.cloud_off_outlined,
+          titulo: 'Não foi possível carregar',
+          subtitulo: sacola.erroCatalogo!,
+          rotuloAcao: 'Tentar de novo',
+          onAcao: onRetry,
+        ),
+      );
+    }
+
     final lista = sacola.produtos.take(8).toList();
-    if (lista.isEmpty) return const SizedBox.shrink();
+    if (lista.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
+        child: EstadoVazio(
+          titulo: 'Catálogo indisponível',
+          subtitulo: 'Os produtos ainda não chegaram. Tente de novo em instantes.',
+          rotuloAcao: 'Tentar de novo',
+          onAcao: onRetry,
+        ),
+      );
+    }
 
     return SizedBox(
       height: 248,
@@ -261,16 +331,30 @@ class _ComoFunciona extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
         ],
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Da fonte ao Rio — água mineral natural.',
+          style: AppTypography.footnote.copyWith(color: AppColors.textoSuave),
+        ),
+        const SizedBox(height: AppSpacing.xs),
         ClipRRect(
           borderRadius: BorderRadius.circular(AppSpacing.raioCard),
-          child: Image.asset(
-            assetHeroColocarSite,
-            height: 96,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            semanticLabel: 'Origem Cristalins',
-            cacheWidth: 800,
-            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+          child: ColoredBox(
+            color: AppColors.aqua.withValues(alpha: 0.4),
+            child: SizedBox(
+              height: 120,
+              width: double.infinity,
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                child: Image.asset(
+                  assetProdutoAguaMineral,
+                  fit: BoxFit.contain,
+                  semanticLabel: 'Água mineral Cristalins',
+                  cacheWidth: 600,
+                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                ),
+              ),
+            ),
           ),
         ),
       ],
