@@ -79,7 +79,7 @@ Prefixo real: `/api/v1`.
 | `POST` | `/clientes` | `clientes/clientes.controller.ts` | `ClientesService.criar` | `Cliente` (+ hash senha) |
 | `POST` | `/auth/login` | `auth/auth.controller.ts` | `AuthService.login` | lê `Cliente`; emite JWT |
 | `POST` | `/auth/refresh` | idem | `AuthService` (refresh) | — |
-| `GET`/`PUT` | `/clientes/me` | `clientes.controller.ts` | `ClientesService` | `Cliente` |
+| `GET`/`PUT`/`DELETE` | `/clientes/me` | `clientes.controller.ts` | `ClientesService` (excluir = RF05/LGPD) | `Cliente` |
 | `GET` | `/produtos` | `produtos/produtos.controller.ts` | listagem | `Produto` |
 | `GET` | `/kits` | `kits/kits.controller.ts` | listagem | `Kit` + `KitItem` |
 | `POST`/`GET` | `/recomendacoes` | `recomendacoes/recomendacoes.controller.ts` | `RecomendacaoService` | `Recomendacao` (+ itens) |
@@ -171,7 +171,7 @@ Até `cr-4-revisao`:
 - Acessibilidade documentada (`A11Y.md` na pasta da fila; testes de guideline)  
 - Este README / estudo / roteiro de apresentação  
 
-**Fora da AP2 (pós):** cartão/boleto (`cr-5`), ocorrências/fotos/FCM (`cr-6`), LGPD/segurança aprofundada (`cr-7`), lista oficial de bairros (`cr-8`).
+**Pós-AP2:** cartão/boleto (`cr-5`), ocorrências/fotos/FCM (`cr-6`), LGPD/SEG/Sentry (`cr-7` → `docs/SEGURANCA.md`), lista oficial de bairros (`cr-8`).
 
 ---
 

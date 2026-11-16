@@ -66,6 +66,16 @@ class AuthRepository {
 
   Future<void> sair() => _api.tokens.limpar();
 
+  /// RF05 / LGPD: anonimiza a conta no servidor e limpa os tokens locais.
+  Future<void> excluirConta() async {
+    try {
+      await _api.dio.delete<void>('/clientes/me');
+      await _api.tokens.limpar();
+    } catch (e) {
+      throw ApiErro.de(e);
+    }
+  }
+
   /// RF52: sempre 200 na API (não revela se o e-mail existe).
   Future<String> esqueciSenha(String email) async {
     try {

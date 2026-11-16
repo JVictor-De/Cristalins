@@ -1,8 +1,9 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Post, Put } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -55,5 +56,14 @@ export class ClientesController {
     @Body() dto: AtualizarClienteDto,
   ): Promise<ClienteResponse> {
     return this.clientes.paraResposta(await this.clientes.atualizar(usuario.id, dto));
+  }
+
+  @Delete('me')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse({ description: 'RF05/LGPD: conta anonimizada; CPF e histórico fiscal preservados' })
+  @ApiUnauthorizedResponse({ description: 'NAO_AUTENTICADO' })
+  async excluir(@UsuarioAtual() usuario: UsuarioToken): Promise<void> {
+    await this.clientes.excluir(usuario.id);
   }
 }

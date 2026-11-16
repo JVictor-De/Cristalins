@@ -32,7 +32,12 @@ async function codigoDoErro(promessa: Promise<unknown>): Promise<string> {
 }
 
 describe('ClientesService', () => {
-  let prisma: { cliente: { findUnique: jest.Mock; create: jest.Mock; update: jest.Mock } };
+  let prisma: {
+    cliente: { findUnique: jest.Mock; create: jest.Mock; update: jest.Mock };
+    $transaction: jest.Mock;
+    assinatura: { updateMany: jest.Mock };
+    endereco: { updateMany: jest.Mock };
+  };
   let service: ClientesService;
 
   beforeEach(() => {
@@ -42,6 +47,9 @@ describe('ClientesService', () => {
         create: jest.fn().mockImplementation(({ data }) => Promise.resolve({ id: 'c1', ...data })),
         update: jest.fn(),
       },
+      $transaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) => fn(prisma)),
+      assinatura: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
+      endereco: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
     };
     service = new ClientesService(prisma as unknown as PrismaService, clockFixo);
   });
@@ -86,5 +94,33 @@ describe('ClientesService', () => {
   it('conta excluída não é encontrada', async () => {
     prisma.cliente.findUnique.mockResolvedValueOnce({ id: 'c1', excluidoEm: new Date() });
     expect(await codigoDoErro(service.buscarAtivo('c1'))).toBe('NAO_AUTENTICADO');
+  });
+
+  it('DELETE /clientes/me: anonimiza nome/contato/endereço e marca excluidoEm (RF05)', async () => {
+    const ativo = {
+      id: 'c1',
+      nome: 'Ana',
+      email: 'ana@exemplo.com',
+      celular: '21999999999',
+      cpfCnpj: '52998224725',
+      excluidoEm: null,
+    };
+    prisma.cliente.findUnique.mockResolvedValueOnce(ativo);
+    prisma.cliente.update.mockResolvedValueOnce({ ...ativo, excluidoEm: new Date() });
+    await service.excluir('c1');
+    expect(prisma.assinatura.updateMany).toHaveBeenCalled();
+    expect(prisma.endereco.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ logradouro: '—', cep: '00000000', lat: null, lng: null }),
+      }),
+    );
+    const { data } = prisma.cliente.update.mock.calls[0][0];
+    expect(data.nome).toBe('Conta excluída');
+    expect(data.email).toBe('excluido-c1@anon.local');
+    expect(data.celular).toBeNull();
+    expect(data.pushToken).toBeNull();
+    expect(data.excluidoEm).toEqual(new Date('2026-11-15T00:30:00.000Z'));
+    expect(data.senhaHash).toMatch(/^\$2[aby]\$/);
+    expect(data).not.toHaveProperty('cpfCnpj'); // CPF permanece no registro (retenção fiscal)
   });
 });

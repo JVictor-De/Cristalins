@@ -59,6 +59,14 @@ class AuthFalso implements AuthRepository {
   @override
   Future<void> sair() async {}
 
+  int exclusoes = 0;
+
+  @override
+  Future<void> excluirConta() async {
+    if (erro != null) throw erro!;
+    exclusoes++;
+  }
+
   @override
   Future<String> esqueciSenha(String email) async {
     if (erro != null) throw erro!;

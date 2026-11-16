@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import { mascararPii } from './mascarar';
 import { CorpoErro, RegraNegocioException } from './regra-negocio.exception';
 
 // Código padrão quando a exceção não é uma RegraNegocioException.
@@ -46,7 +47,8 @@ export class FiltroExcecao implements ExceptionFilter {
         : (mensagemOriginal ?? excecao.message);
       return { status, corpo: { codigo: CODIGO_POR_STATUS[status] ?? 'ERRO', mensagem } };
     }
-    this.logger.error(excecao instanceof Error ? excecao.stack : String(excecao));
+    const bruto = excecao instanceof Error ? (excecao.stack ?? excecao.message) : String(excecao);
+    this.logger.error(mascararPii(bruto));
     return {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       corpo: { codigo: 'ERRO_INTERNO', mensagem: 'Erro inesperado. Tente de novo.' },

@@ -1,11 +1,12 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { randomBytes } from 'node:crypto';
+import { StatusAssinatura, type Cliente } from '../../prisma/generated/prisma/client';
 import { gerarHashSenha } from '../auth/senha';
 import { ClockService } from '../common/clock.service';
 import { dataIsoParaDate, dataIsoValida, dateParaDataIso, idadeEm } from '../common/datas';
 import { cpfOuCnpjValido } from '../common/documento';
 import { PrismaService } from '../common/prisma.service';
 import { RegraNegocioException } from '../common/regra-negocio.exception';
-import { Cliente } from '../../prisma/generated/prisma/client';
 import { AtualizarClienteDto } from './dto/atualizar-cliente.dto';
 import { ClienteResponse } from './dto/cliente.response';
 import { CriarClienteDto } from './dto/criar-cliente.dto';
@@ -74,6 +75,49 @@ export class ClientesService {
         ...(dto.celular !== undefined && { celular: dto.celular }),
         ...(dto.marketingOk !== undefined && { marketingOk: dto.marketingOk }),
       },
+    });
+  }
+
+  /**
+   * RF05 / LGPD: anonimiza nome, contato e endereço; marca `excluidoEm`.
+   * Mantém CPF/nascimento e o histórico de pagamento (retenção fiscal 5 anos).
+   */
+  async excluir(id: string): Promise<void> {
+    await this.buscarAtivo(id);
+    const agora = this.clock.agora();
+    const senhaInutil = await gerarHashSenha(randomBytes(32).toString('hex'));
+    await this.prisma.$transaction(async (tx) => {
+      await tx.assinatura.updateMany({
+        where: { clienteId: id, status: { not: StatusAssinatura.CANCELADA } },
+        data: { status: StatusAssinatura.CANCELADA },
+      });
+      await tx.endereco.updateMany({
+        where: { clienteId: id },
+        data: {
+          apelido: null,
+          logradouro: '—',
+          numero: '—',
+          complemento: null,
+          bairro: '—',
+          cep: '00000000',
+          referencia: null,
+          instrucoes: null,
+          lat: null,
+          lng: null,
+        },
+      });
+      await tx.cliente.update({
+        where: { id },
+        data: {
+          nome: 'Conta excluída',
+          email: `excluido-${id}@anon.local`,
+          celular: null,
+          pushToken: null,
+          marketingOk: false,
+          senhaHash: senhaInutil,
+          excluidoEm: agora,
+        },
+      });
     });
   }
 

@@ -10,14 +10,21 @@ carregarEnv({ path: path.resolve(process.cwd(), '..', '.env'), quiet: true });
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import * as Sentry from '@sentry/node';
 import { AppModule } from './app.module';
 import { configurarApp, PREFIXO_API } from './configurar-app';
 
 async function bootstrap(): Promise<void> {
+  // RNF11: Sentry só se SENTRY_DSN estiver definida (nunca hardcode).
+  if (process.env.SENTRY_DSN?.trim()) {
+    Sentry.init({ dsn: process.env.SENTRY_DSN.trim(), environment: process.env.NODE_ENV ?? 'development' });
+  }
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   // Coolify / reverse proxy: IP real do cliente (throttle login / CT19). Só 1 hop confiável.
   app.set('trust proxy', 1);
   app.enableShutdownHooks();
+  // SEG09: CORS só para a lista explícita; sem CORS_ORIGINS não libera origem cruzada.
   const origens = process.env.CORS_ORIGINS?.split(',').map((o) => o.trim()).filter(Boolean);
   if (origens?.length) app.enableCors({ origin: origens });
   configurarApp(app);

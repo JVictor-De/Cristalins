@@ -23,14 +23,4 @@ export interface CanalEmail {
 export const CANAL_PUSH = Symbol('CANAL_PUSH');
 export const CANAL_EMAIL = Symbol('CANAL_EMAIL');
 
-/** SEG10: e-mail mascarado nos logs (a***@dominio). */
-export function mascararEmail(email: string): string {
-  const [usuario, dominio] = email.split('@');
-  if (!dominio) return '***';
-  return `${usuario.slice(0, 1)}***@${dominio}`;
-}
-
-/** Token de push mascarado nos logs. */
-export function mascararToken(token: string): string {
-  return token.length <= 8 ? '***' : `${token.slice(0, 4)}…${token.slice(-4)}`;
-}
+export { mascararEmail, mascararToken } from '../common/mascarar';

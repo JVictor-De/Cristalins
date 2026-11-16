@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/dependencias.dart';
 import '../../../core/formatacao.dart';
+import '../../../core/network/api_erro.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -162,6 +163,42 @@ class _Conteudo extends StatelessWidget {
         ? 'Assinatura cancelada.'
         : 'Assinatura cancelada. Pelo compromisso do plano, fica a diferença de ${diferenca.formatado}.';
     if (context.mounted) await _resultado(context, erro, texto);
+  }
+
+  Future<void> _excluirConta(BuildContext context) async {
+    HapticFeedback.selectionClick();
+    final confirmar = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: const Text('Excluir minha conta?'),
+        message: const Text(
+          'Anonimizamos nome, contato e endereço. Dados fiscais ficam o tempo exigido por lei. Esta ação não tem volta.',
+        ),
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Excluir conta'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: const Text('Manter conta'),
+        ),
+      ),
+    );
+    if (confirmar != true || !context.mounted) return;
+    try {
+      await context.read<Dependencias>().auth.excluirConta();
+      if (!context.mounted) return;
+      HapticFeedback.mediumImpact();
+      Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.boasVindas, (_) => false);
+      mostrarAviso(context, 'Conta excluída.');
+    } catch (e) {
+      if (context.mounted) {
+        mostrarAviso(context, ApiErro.de(e).mensagem, erro: true);
+      }
+    }
   }
 
   Future<void> _alterarCesta(BuildContext context, MinhaAssinaturaController c) async {
@@ -413,6 +450,11 @@ class _Conteudo extends StatelessWidget {
                   destrutivo: true,
                   onPressed: c.executando ? null : () => _cancelar(context, c),
                 ),
+              BotaoSecundario(
+                rotulo: 'Excluir minha conta',
+                destrutivo: true,
+                onPressed: c.executando ? null : () => _excluirConta(context),
+              ),
             ],
           ),
         ),
