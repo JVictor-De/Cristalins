@@ -125,6 +125,7 @@ export function fatoresSeed(): FatorTeste[] {
   ];
 }
 
+/** Igual ao seed: lê `prisma/data/bairros-rj.json` e une aos exemplos do Anexo. */
 export function zonasSeed() {
   const z = (nome: string, bairros: string[], taxa: string) => ({
     id: `zona-${nome.replace(/\s/g, '-')}`,
@@ -134,12 +135,38 @@ export function zonasSeed() {
     diasEntrega: [] as string[],
     ativa: true,
   });
+  const exemplos: Record<string, string[]> = {
+    Centro: ['Centro', 'Lapa', 'Santa Teresa'],
+    'Zona Sul': ['Copacabana', 'Ipanema', 'Leblon', 'Botafogo', 'Flamengo'],
+    'Barra e Recreio': ['Barra da Tijuca', 'Recreio', 'Jacarepaguá'],
+    'Zona Norte': ['Tijuca', 'Méier', 'Vila Isabel', 'Ilha do Governador'],
+    'Zona Oeste': ['Campo Grande', 'Bangu', 'Santa Cruz'],
+  };
+  const porZona: Record<string, string[]> = Object.fromEntries(
+    Object.keys(exemplos).map((nome) => [nome, [...exemplos[nome]]]),
+  );
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const doc = require('../../prisma/data/bairros-rj.json') as {
+      bairros: { bairro: string; zona: string }[];
+    };
+    for (const item of doc.bairros ?? []) {
+      if (!item.bairro || !item.zona || !porZona[item.zona]) continue;
+      const chave = item.bairro.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      if (porZona[item.zona].some((b) => b.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === chave)) {
+        continue;
+      }
+      porZona[item.zona].push(item.bairro);
+    }
+  } catch {
+    // Sem JSON (caminho estranho no Jest): cai nos exemplos do Anexo.
+  }
   return [
-    z('Centro', ['Centro', 'Lapa', 'Santa Teresa'], '9.90'),
-    z('Zona Sul', ['Copacabana', 'Ipanema', 'Leblon', 'Botafogo', 'Flamengo'], '9.90'),
-    z('Barra e Recreio', ['Barra da Tijuca', 'Recreio', 'Jacarepaguá'], '12.90'),
-    z('Zona Norte', ['Tijuca', 'Méier', 'Vila Isabel', 'Ilha do Governador'], '12.90'),
-    z('Zona Oeste', ['Campo Grande', 'Bangu', 'Santa Cruz'], '19.90'),
+    z('Centro', porZona.Centro, '9.90'),
+    z('Zona Sul', porZona['Zona Sul'], '9.90'),
+    z('Barra e Recreio', porZona['Barra e Recreio'], '12.90'),
+    z('Zona Norte', porZona['Zona Norte'], '12.90'),
+    z('Zona Oeste', porZona['Zona Oeste'], '19.90'),
   ];
 }
 

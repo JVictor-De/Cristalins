@@ -2,9 +2,12 @@
  * Seed da AP2 — idempotente (upsert por chave natural). Rode com `npx prisma db seed` na pasta api.
  * Valores de preço, peso e taxas são de EXEMPLO (Anexo); os reais vêm da Cristalins.
  * Senha dos usuários de teste é só de desenvolvimento (ver docs/ESTUDO.md). Nunca use em produção.
+ * Bairros oficiais: `prisma/data/bairros-rj.json` (cr-8-bairros); taxas/dias das zonas continuam do Anexo.
  */
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   DiaSemana,
   ObjetivoKit,
@@ -41,13 +44,56 @@ const kits: { codigo: string; nome: string; objetivo: ObjetivoKit; itens: Record
 ];
 
 const { SEG, TER, QUA, QUI, SEX, SAB } = DiaSemana;
-const zonas = [
-  { nome: 'Centro', bairros: ['Centro', 'Lapa', 'Santa Teresa'], taxaEntrega: '9.90', diasEntrega: [SEG, QUA, SEX] },
-  { nome: 'Zona Sul', bairros: ['Copacabana', 'Ipanema', 'Leblon', 'Botafogo', 'Flamengo'], taxaEntrega: '9.90', diasEntrega: [SEG, QUA, SEX] },
-  { nome: 'Barra e Recreio', bairros: ['Barra da Tijuca', 'Recreio', 'Jacarepaguá'], taxaEntrega: '12.90', diasEntrega: [TER, QUI, SAB] },
-  { nome: 'Zona Norte', bairros: ['Tijuca', 'Méier', 'Vila Isabel', 'Ilha do Governador'], taxaEntrega: '12.90', diasEntrega: [TER, QUI] },
-  { nome: 'Zona Oeste', bairros: ['Campo Grande', 'Bangu', 'Santa Cruz'], taxaEntrega: '19.90', diasEntrega: [SAB] },
+
+/** Metadados de frete do Anexo (não inventar taxa). Bairros vêm do JSON oficial. */
+const zonasMeta: { nome: string; taxaEntrega: string; diasEntrega: DiaSemana[]; exemplosAp2: string[] }[] = [
+  { nome: 'Centro', taxaEntrega: '9.90', diasEntrega: [SEG, QUA, SEX], exemplosAp2: ['Centro', 'Lapa', 'Santa Teresa'] },
+  { nome: 'Zona Sul', taxaEntrega: '9.90', diasEntrega: [SEG, QUA, SEX], exemplosAp2: ['Copacabana', 'Ipanema', 'Leblon', 'Botafogo', 'Flamengo'] },
+  { nome: 'Barra e Recreio', taxaEntrega: '12.90', diasEntrega: [TER, QUI, SAB], exemplosAp2: ['Barra da Tijuca', 'Recreio', 'Jacarepaguá'] },
+  { nome: 'Zona Norte', taxaEntrega: '12.90', diasEntrega: [TER, QUI], exemplosAp2: ['Tijuca', 'Méier', 'Vila Isabel', 'Ilha do Governador'] },
+  { nome: 'Zona Oeste', taxaEntrega: '19.90', diasEntrega: [SAB], exemplosAp2: ['Campo Grande', 'Bangu', 'Santa Cruz'] },
 ];
+
+type BairrosRj = {
+  fonte: { orgao: string; documento: string; url: string };
+  bairros: { bairro: string; zona: string }[];
+};
+
+function carregarBairrosPorZona(): Record<string, string[]> {
+  const caminho = join(process.cwd(), 'prisma', 'data', 'bairros-rj.json');
+  const doc = JSON.parse(readFileSync(caminho, 'utf8')) as BairrosRj;
+  if (!doc?.fonte?.orgao || !Array.isArray(doc.bairros) || doc.bairros.length === 0) {
+    throw new Error(`bairros-rj.json inválido ou sem fonte: ${caminho}`);
+  }
+  const porZona: Record<string, string[]> = {};
+  for (const item of doc.bairros) {
+    if (!item.bairro || !item.zona) continue;
+    (porZona[item.zona] ??= []).push(item.bairro);
+  }
+  return porZona;
+}
+
+function unirBairros(...listas: string[][]): string[] {
+  const visto = new Set<string>();
+  const saida: string[] = [];
+  for (const lista of listas) {
+    for (const b of lista) {
+      const chave = b.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+      if (visto.has(chave)) continue;
+      visto.add(chave);
+      saida.push(b);
+    }
+  }
+  return saida.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+}
+
+const bairrosPorZona = carregarBairrosPorZona();
+const zonas = zonasMeta.map((z) => ({
+  nome: z.nome,
+  taxaEntrega: z.taxaEntrega,
+  diasEntrega: z.diasEntrega,
+  bairros: unirBairros(z.exemplosAp2, bairrosPorZona[z.nome] ?? []),
+}));
 
 // valor = fração. Vigência aberta (ativoAte nulo) salvo a demanda de verão.
 const INICIO_VIGENCIA = '2026-01-01';
@@ -135,8 +181,9 @@ async function main() {
   const dadosCupom = { percentual: cupom.percentual, validade: data(cupom.validade), usosMax: cupom.usosMax };
   await prisma.cupom.upsert({ where: { codigo: cupom.codigo }, update: dadosCupom, create: { codigo: cupom.codigo, ...dadosCupom } });
 
+  const totalBairros = zonas.reduce((n, z) => n + z.bairros.length, 0);
   console.log(
-    `Seed ok: ${produtos.length} produtos, ${kits.length} kits, ${zonas.length} zonas, ${fatores.length} fatores, ` +
+    `Seed ok: ${produtos.length} produtos, ${kits.length} kits, ${zonas.length} zonas (${totalBairros} bairros), ${fatores.length} fatores, ` +
       `${usuarios.length} usuários (1 admin), ${enderecos.length} endereços, 1 cupom.`,
   );
 }

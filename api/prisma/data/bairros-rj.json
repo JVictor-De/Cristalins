@@ -1,0 +1,881 @@
+{
+  "fonte": {
+    "orgao": "Instituto Pereira Passos (IPP) / Prefeitura da Cidade do Rio de Janeiro",
+    "documento": "Lista de Bairros e Áreas de Planejamento (AP’s)",
+    "url": "https://www.rio.rj.gov.br/dlstatic/10112/5148142/4145881/ListadeBairroseAPs_Mapa",
+    "ano": 2012,
+    "complementoLegal": "Decreto nº 3.158/1981 (denominação e codificação dos bairros) e atualizações posteriores citadas no Anexo I"
+  },
+  "zonasComerciais": {
+    "Centro": {
+      "taxaEntregaAnexo": "9.90",
+      "dias": [
+        "SEG",
+        "QUA",
+        "SEX"
+      ]
+    },
+    "Zona Sul": {
+      "taxaEntregaAnexo": "9.90",
+      "dias": [
+        "SEG",
+        "QUA",
+        "SEX"
+      ]
+    },
+    "Barra e Recreio": {
+      "taxaEntregaAnexo": "12.90",
+      "dias": [
+        "TER",
+        "QUI",
+        "SAB"
+      ]
+    },
+    "Zona Norte": {
+      "taxaEntregaAnexo": "12.90",
+      "dias": [
+        "TER",
+        "QUI"
+      ]
+    },
+    "Zona Oeste": {
+      "taxaEntregaAnexo": "19.90",
+      "dias": [
+        "SAB"
+      ]
+    }
+  },
+  "notaMapeamento": "As APs oficiais (1–5) não coincidem 1:1 com as 5 zonas de frete do Anexo. Grande Tijuca (AP2) entra em Zona Norte comercial; taxas não foram inventadas — só as do CONTEXTO.",
+  "bairros": [
+    {
+      "bairro": "Abolição",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Acari",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Água Santa",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Alto da Boa Vista",
+      "zona": "Zona Norte",
+      "ap": 2
+    },
+    {
+      "bairro": "Anchieta",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Andaraí",
+      "zona": "Zona Norte",
+      "ap": 2
+    },
+    {
+      "bairro": "Anil",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Bairro Imperial de São Cristóvão",
+      "zona": "Centro",
+      "ap": 1,
+      "alias": true,
+      "aliasDe": "São Cristóvão",
+      "nota": "Denominação oficial alternativa (Decreto 28302/2007)."
+    },
+    {
+      "bairro": "Bancários",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Bangu",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Barra da Tijuca",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Barra de Guaratiba",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Barros Filho",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Benfica",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Bento Ribeiro",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Bonsucesso",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Botafogo",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Brás de Pina",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Cachambi",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Cacuia",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Caju",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Camorim",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Campinho",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Campo dos Afonsos",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Campo Grande",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Cascadura",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Catete",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Catumbi",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Cavalcanti",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Centro",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Cidade de Deus",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Cidade Nova",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Cidade Universitária",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Cocotá",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Coelho Neto",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Colégio",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Complexo do Alemão",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Copacabana",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Cordovil",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Cosme Velho",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Cosmos",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Costa Barros",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Curicica",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Del Castilho",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Deodoro",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Encantado",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Engenheiro Leal",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Engenho da Rainha",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Engenho de Dentro",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Engenho Novo",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Estácio",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Flamengo",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Freguesia",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Freguesia (Jacarepaguá)",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Galeão",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Gamboa",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Gardênia Azul",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Gávea",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Gericinó",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Glória",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Grajaú",
+      "zona": "Zona Norte",
+      "ap": 2
+    },
+    {
+      "bairro": "Grumari",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Guadalupe",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Guaratiba",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Higienópolis",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Honório Gurgel",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Humaitá",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Ilha do Governador",
+      "zona": "Zona Norte",
+      "ap": 3,
+      "alias": true,
+      "nota": "Região do Anexo; bairros oficiais da Ilha já estão em Zona Norte."
+    },
+    {
+      "bairro": "Inhaúma",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Inhoaíba",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Ipanema",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Irajá",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Itanhangá",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Jacaré",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Jacarepaguá",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Jacarezinho",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Jardim América",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Jardim Botânico",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Jardim Carioca",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Jardim Guanabara",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Jardim Sulacap",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Joá",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Lagoa",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Lapa",
+      "zona": "Centro",
+      "ap": 1,
+      "alias": true,
+      "nota": "Mantido do Anexo/seed AP2; aparece no mapa IPP (cód. 161) e no ViaCEP."
+    },
+    {
+      "bairro": "Laranjeiras",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Leblon",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Leme",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Lins de Vasconcelos",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Madureira",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Magalhães Bastos",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Mangueira",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Manguinhos",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Maracanã",
+      "zona": "Zona Norte",
+      "ap": 2
+    },
+    {
+      "bairro": "Maré",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Marechal Hermes",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Maria da Graça",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Méier",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Moneró",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Olaria",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Oswaldo Cruz",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Paciência",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Padre Miguel",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Paquetá",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Parada de Lucas",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Parque Anchieta",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Parque Colúmbia",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Pavuna",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Pechincha",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Pedra de Guaratiba",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Penha",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Penha Circular",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Piedade",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Pilares",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Pitangueiras",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Portuguesa",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Praça da Bandeira",
+      "zona": "Zona Norte",
+      "ap": 2
+    },
+    {
+      "bairro": "Praça Seca",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Praia da Bandeira",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Quintino Bocaiúva",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Ramos",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Realengo",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Recreio",
+      "zona": "Barra e Recreio",
+      "ap": 4,
+      "alias": true,
+      "aliasDe": "Recreio dos Bandeirantes",
+      "nota": "Nome curto usado no Anexo e às vezes no ViaCEP."
+    },
+    {
+      "bairro": "Recreio dos Bandeirantes",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Riachuelo",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Ribeira",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Ricardo de Albuquerque",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Rio Comprido",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Rocha",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Rocha Miranda",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Rocinha",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Sampaio",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Santa Cruz",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Santa Teresa",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Santíssimo",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Santo Cristo",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "São Conrado",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "São Cristóvão",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "São Francisco Xavier",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Saúde",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Senador Camará",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Senador Vasconcelos",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Sepetiba",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Tanque",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Taquara",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Tauá",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Tijuca",
+      "zona": "Zona Norte",
+      "ap": 2
+    },
+    {
+      "bairro": "Todos os Santos",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Tomás Coelho",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Turiaçu",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Urca",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Vargem Grande",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Vargem Pequena",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Vasco da Gama",
+      "zona": "Centro",
+      "ap": 1
+    },
+    {
+      "bairro": "Vaz Lobo",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Vicente de Carvalho",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Vidigal",
+      "zona": "Zona Sul",
+      "ap": 2
+    },
+    {
+      "bairro": "Vigário Geral",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Vila da Penha",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Vila Isabel",
+      "zona": "Zona Norte",
+      "ap": 2
+    },
+    {
+      "bairro": "Vila Kosmos",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Vila Militar",
+      "zona": "Zona Oeste",
+      "ap": 5
+    },
+    {
+      "bairro": "Vila Valqueire",
+      "zona": "Barra e Recreio",
+      "ap": 4
+    },
+    {
+      "bairro": "Vista Alegre",
+      "zona": "Zona Norte",
+      "ap": 3
+    },
+    {
+      "bairro": "Zumbi",
+      "zona": "Zona Norte",
+      "ap": 3
+    }
+  ]
+}

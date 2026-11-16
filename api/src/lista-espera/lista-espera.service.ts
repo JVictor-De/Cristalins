@@ -15,7 +15,7 @@ export class EntrarListaEsperaDto {
   @Matches(/^\d{5}-?\d{3}$/, { message: 'Informe o CEP com 8 dígitos.' })
   cep: string;
 
-  @ApiPropertyOptional({ example: 'Grajaú' })
+  @ApiPropertyOptional({ example: 'Morro do Teste' })
   @IsOptional()
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
@@ -27,7 +27,7 @@ export class ListaEsperaResponse {
   @ApiProperty() id: string;
   @ApiProperty({ example: 'ana@exemplo.com' }) email: string;
   @ApiProperty({ example: '20550013' }) cep: string;
-  @ApiPropertyOptional({ nullable: true, type: String, example: 'Grajaú' }) bairro: string | null;
+  @ApiPropertyOptional({ nullable: true, type: String, example: 'Morro do Teste' }) bairro: string | null;
   @ApiProperty() criadoEm: string;
 }
 

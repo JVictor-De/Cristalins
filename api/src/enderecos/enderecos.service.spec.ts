@@ -13,7 +13,8 @@ class ViaCepFake extends ViaCepClient {
   chamadas: string[] = [];
   respostas: Record<string, RespostaViaCep | null> = {
     '22041001': { cep: '22041-001', logradouro: 'Avenida Nossa Senhora de Copacabana', bairro: 'Copacabana', localidade: 'Rio de Janeiro', uf: 'RJ' },
-    '20550013': { cep: '20550-013', logradouro: 'Rua Barão de Mesquita', bairro: 'Grajaú', localidade: 'Rio de Janeiro', uf: 'RJ' },
+    // CT23: nome fora da lista oficial (Grajaú passou a ser Zona Norte em cr-8-bairros).
+    '20550013': { cep: '20550-013', logradouro: 'Rua Sem Cobertura', bairro: 'Morro do Teste', localidade: 'Rio de Janeiro', uf: 'RJ' },
     '20735040': { cep: '20735-040', logradouro: 'Rua Dias da Cruz', bairro: 'Méier', localidade: 'Rio de Janeiro', uf: 'RJ' },
     '23000000': null,
     '24020000': { cep: '24020-000', logradouro: 'Rua Qualquer', bairro: 'Centro', localidade: 'Niterói', uf: 'RJ' },
@@ -69,7 +70,7 @@ describe('CEP e endereços', () => {
       expect(await codigo(cep.consultar('23000-000'))).toBe('CEP_INVALIDO');
     });
 
-    it('CT23: bairro do Rio sem zona (Grajaú) → BAIRRO_NAO_ATENDIDO', async () => {
+    it('CT23: bairro do Rio sem zona (Morro do Teste) → BAIRRO_NAO_ATENDIDO', async () => {
       const erro = await cep.consultar('20550-013').catch((e: RegraNegocioException) => e);
       expect(erro).toBeInstanceOf(RegraNegocioException);
       expect((erro as RegraNegocioException).getResponse()).toMatchObject({

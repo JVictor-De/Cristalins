@@ -51,3 +51,16 @@
 | Foto da ocorrência | Referência interna `s3://bucket/chave` (PUT SigV4); sem `S3_*` → memória em dev | Bucket privado; resposta da API só `temFoto` (sem URL/credencial) |
 | Push FCM no app | `firebase_messaging` sem plugin Gradle/`google-services.json` nesta fase | João adiciona o projeto Firebase real; sem arquivo o app segue e só deixa de registrar token |
 | Código de recuperação de senha | HMAC do `JWT_SECRET` + id + hash atual + janela 15 min (vale 15–30 min) | Sem tabela nova; invalida ao trocar a senha |
+
+## 2026-11-15 — Bairros oficiais (`cr-8-bairros`)
+
+| Dúvida | Decisão | Motivo |
+| --- | --- | --- |
+| Fonte da lista | IPP / Prefeitura: [Lista de Bairros e APs](https://www.rio.rj.gov.br/dlstatic/10112/5148142/4145881/ListadeBairroseAPs_Mapa) (+ Decreto 3.158/1981) | Contrato exige fonte pública da prefeitura; gravada em `api/prisma/data/bairros-rj.json` |
+| AP oficial ≠ zona de frete | Mapear para as 5 zonas do Anexo sem mudar taxa/dias | CONTEXTO fixa Centro/Zona Sul R$ 9,90; Barra e Recreio / Zona Norte R$ 12,90; Zona Oeste R$ 19,90 — não inventar frete |
+| Grande Tijuca (AP2 oficial) | Entra na zona comercial **Zona Norte** (Tijuca, Vila Isabel, Andaraí, Grajaú, Maracanã, Alto da Boa Vista, Praça da Bandeira) | Anexo já coloca Tijuca e Vila Isabel em Zona Norte; manter taxa 12,90 |
+| Rocinha (AP2) | Zona Sul comercial | Contígua a São Conrado / Lagoa; mesma taxa 9,90 do Anexo |
+| Paquetá (AP1) | Centro comercial, mesma taxa 9,90 | AP oficial Centro; não criar taxa especial |
+| Lapa / Recreio / Ilha do Governador | Aliases no JSON (não são sempre a denominação IPP isolada) | Seed AP2 e ViaCEP usam esses nomes; `CepService` compara normalizado |
+| Schema | Sem migração nova: `Zona.bairros` já é `String[]` | Só upsert no seed |
+| CT23 após lista completa | Testes usam bairro **não oficial** (`Morro do Teste`) | Grajaú passou a ser atendido (Zona Norte); CT23 continua válido para nome fora do mapa |

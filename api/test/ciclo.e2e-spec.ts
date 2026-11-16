@@ -7,7 +7,7 @@ import { PrismaFake } from './support/prisma-fake';
 
 const VIACEP: Record<string, RespostaViaCep> = {
   '22041001': { cep: '22041-001', logradouro: 'Avenida Nossa Senhora de Copacabana', bairro: 'Copacabana', localidade: 'Rio de Janeiro', uf: 'RJ' },
-  '20550013': { cep: '20550-013', logradouro: 'Rua Barão de Mesquita', bairro: 'Grajaú', localidade: 'Rio de Janeiro', uf: 'RJ' },
+  '20550013': { cep: '20550-013', logradouro: 'Rua Sem Cobertura', bairro: 'Morro do Teste', localidade: 'Rio de Janeiro', uf: 'RJ' },
 };
 
 describe('Endereço, assinatura e ciclos (e2e)', () => {
@@ -58,9 +58,9 @@ describe('Endereço, assinatura e ciclos (e2e)', () => {
       expect(r.body).toMatchObject({ codigo: 'BAIRRO_NAO_ATENDIDO', campo: 'bairro' });
       const espera = await http()
         .post('/api/v1/lista-espera')
-        .send({ email: 'Ana@Exemplo.com', cep: '20550-013', bairro: 'Grajaú' })
+        .send({ email: 'Ana@Exemplo.com', cep: '20550-013', bairro: 'Morro do Teste' })
         .expect(201);
-      expect(espera.body).toMatchObject({ email: 'ana@exemplo.com', cep: '20550013', bairro: 'Grajaú' });
+      expect(espera.body).toMatchObject({ email: 'ana@exemplo.com', cep: '20550013', bairro: 'Morro do Teste' });
       expect(prisma.filaEspera).toHaveLength(1);
     });
 
