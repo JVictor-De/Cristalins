@@ -105,7 +105,7 @@ class _AbaProdutosState extends State<_AbaProdutos> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
                 children: [
-                  for (final c in Categoria.values)
+                  for (final c in Categoria.values.where((c) => c != Categoria.funcionais))
                     Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: ChoiceChip(

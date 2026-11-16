@@ -11,6 +11,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/card_proxima_entrega.dart';
 import '../../../core/widgets/card_produto.dart';
 import '../../../core/widgets/estado_vazio.dart';
+import '../../../core/widgets/estados.dart';
 import '../../../core/widgets/hero_water_protein.dart';
 import '../../../core/widgets/logo_marca.dart';
 import '../../../core/widgets/secao_com_titulo.dart';
@@ -107,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: HeroWaterProtein(
                   onAssinar: () => _abrirWpOuProdutos(sacola),
                   onVerAguas: () => widget.onAbrirProdutos(categoria: Categoria.aguas),
+                  mostrarVerAguas: sacola.produtos.any(Categoria.aguas.inclui),
                 ),
               ),
             ),
@@ -114,8 +116,12 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: SecaoComTitulo(
               titulo: modoAssinante ? 'Sua sacola recorrente' : 'Produtos',
-              acaoRotulo: 'Ver todos',
-              onAcao: () => widget.onAbrirProdutos(),
+              acaoRotulo: (!sacola.carregandoCatalogo && sacola.produtos.isEmpty)
+                  ? null
+                  : 'Ver todos',
+              onAcao: (!sacola.carregandoCatalogo && sacola.produtos.isEmpty)
+                  ? null
+                  : () => widget.onAbrirProdutos(),
               child: _CarrosselProdutos(
                 sacola: sacola,
                 onRetry: sacola.carregarCatalogo,
@@ -247,26 +253,20 @@ class _CarrosselProdutos extends StatelessWidget {
     if (sacola.erroCatalogo != null) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
-        child: EstadoVazio(
-          icone: Icons.cloud_off_outlined,
-          titulo: 'Não foi possível carregar',
-          subtitulo: sacola.erroCatalogo!,
-          rotuloAcao: 'Tentar de novo',
-          onAcao: onRetry,
+        child: EstadoErro(
+          mensagem: sacola.erroCatalogo!,
+          onTentarDeNovo: onRetry,
         ),
       );
     }
 
     final lista = sacola.produtos.take(8).toList();
     if (lista.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
-        child: EstadoVazio(
-          titulo: 'Catálogo indisponível',
-          subtitulo: 'Os produtos ainda não chegaram. Tente de novo em instantes.',
-          rotuloAcao: 'Tentar de novo',
-          onAcao: onRetry,
-        ),
+      return EstadoVazio(
+        titulo: 'Catálogo indisponível',
+        subtitulo: 'Os produtos ainda não chegaram. Tente de novo em instantes.',
+        rotuloAcao: 'Atualizar',
+        onAcao: onRetry,
       );
     }
 
@@ -344,15 +344,12 @@ class _ComoFunciona extends StatelessWidget {
             child: SizedBox(
               height: 120,
               width: double.infinity,
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                child: Image.asset(
-                  assetProdutoAguaMineral,
-                  fit: BoxFit.contain,
-                  semanticLabel: 'Água mineral Cristalins',
-                  cacheWidth: 600,
-                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                ),
+              child: Image.asset(
+                assetProdutoAguaMineral,
+                fit: BoxFit.contain,
+                semanticLabel: 'Água mineral Cristalins',
+                cacheWidth: 600,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
               ),
             ),
           ),

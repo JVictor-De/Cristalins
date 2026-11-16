@@ -88,7 +88,7 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
 
     final passo = sacola.passo(p);
     final caixas = (_qtd / passo).round();
-    final asset = assetDoProduto(p.codigo) ?? 'assets/images/produtos/wp500.webp';
+    final asset = assetDoProduto(p.codigo) ?? assetProdutoWaterProtein;
     final fundo = switch (p.codigo) {
       'WP500' => AppColors.lima,
       'FF500' => AppColors.amareloFlow.withValues(alpha: 0.35),
@@ -109,33 +109,28 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
                           ? (sacola.temItens ? 0.40 : 0.46)
                           : (sacola.temItens ? 0.36 : 0.42)),
                   pinned: true,
-                  backgroundColor: usaCenaImpactoAgua(p.codigo) ? const Color(0xFF43BDE6) : fundo,
+                  backgroundColor:
+                      usaCenaImpactoAgua(p.codigo) ? const Color(0xFF43BDE6) : fundo,
                   flexibleSpace: FlexibleSpaceBar(
                     background: usaCenaImpactoAgua(p.codigo)
-                        ? const CenaImpactoAgua()
-                        : Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              if (p.codigo == 'WP500')
-                                Image.asset(
-                                  assetHeroRespingo,
-                                  fit: BoxFit.cover,
-                                  opacity: const AlwaysStoppedAnimation(0.25),
-                                ),
-                              Padding(
-                                padding: const EdgeInsets.all(AppSpacing.secao),
-                                child: Image.asset(
-                                  p.codigo == 'WP500' ? assetProdutoWaterProtein : asset,
-                                  fit: BoxFit.contain,
-                                  semanticLabel: p.nome,
-                                  errorBuilder: (_, _, _) => Image.asset(
-                                    asset,
-                                    fit: BoxFit.contain,
-                                    semanticLabel: p.nome,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        ? CenaImpactoAgua(
+                            garrafaAsset: usaCopyImpactoMineral(p.codigo)
+                                ? null
+                                : (p.codigo == 'WP500'
+                                    ? assetProdutoWaterProtein
+                                    : asset),
+                            mostrarCopyMarca: usaCopyImpactoMineral(p.codigo),
+                            rotuloSemantico: usaCopyImpactoMineral(p.codigo)
+                                ? null
+                                : '${p.nome}. Cena Cristalins com respingo.',
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(AppSpacing.secao),
+                            child: Image.asset(
+                              asset,
+                              fit: BoxFit.contain,
+                              semanticLabel: p.nome,
+                            ),
                           ),
                   ),
                 ),

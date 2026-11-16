@@ -39,17 +39,14 @@ class EmptyAssinatura extends StatelessWidget {
                       child: SizedBox(
                         height: 120,
                         width: double.infinity,
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.sm),
-                          child: Image.asset(
-                            assetProdutoAguaMineral,
-                            fit: BoxFit.contain,
-                            semanticLabel: 'Água mineral Cristalins',
-                            errorBuilder: (_, _, _) => const Icon(
-                              Icons.water_drop_outlined,
-                              size: 64,
-                              color: AppColors.azulMarca,
-                            ),
+                        child: Image.asset(
+                          assetProdutoAguaMineral,
+                          fit: BoxFit.contain,
+                          semanticLabel: 'Água mineral Cristalins',
+                          errorBuilder: (_, _, _) => const Icon(
+                            Icons.water_drop_outlined,
+                            size: 64,
+                            color: AppColors.azulMarca,
                           ),
                         ),
                       ),

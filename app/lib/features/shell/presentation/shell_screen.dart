@@ -92,7 +92,7 @@ class _ShellScreenState extends State<ShellScreen> {
             NavigationBar(
               selectedIndex: _aba,
               backgroundColor: AppColors.superficie,
-              indicatorColor: AppColors.gelo,
+              indicatorColor: AppColors.menta,
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
               onDestinationSelected: _selecionarAba,
               destinations: const [

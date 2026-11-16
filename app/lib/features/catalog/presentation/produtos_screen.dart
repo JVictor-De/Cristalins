@@ -43,7 +43,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
     super.dispose();
   }
 
-  bool get _filtroAtivo => _filtro.isNotEmpty || _categoria != Categoria.todos;
+  bool _filtroAtivo(Categoria ativa) => _filtro.isNotEmpty || ativa != Categoria.todos;
 
   @override
   Widget build(BuildContext context) {
@@ -55,14 +55,26 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
       );
     }
 
+    final total = sacola.produtos.length;
+    final catalogoVazio = !sacola.carregandoCatalogo && total == 0;
+    final catalogoCurto = total > 0 && total <= kLimiteCatalogoCurto;
+    final mostrarBusca = !sacola.carregandoCatalogo && total > kLimiteCatalogoCurto;
+    final chips = sacola.carregandoCatalogo
+        ? const <Categoria>[]
+        : Categoria.chipsPara(totalProdutos: total, temKits: sacola.kits.isNotEmpty);
+
+    // Catálogo curto: WP/Fiber individuais → Funcionais (sem mutar state no build).
+    final categoriaAtiva = catalogoCurto &&
+            (_categoria == Categoria.waterProtein || _categoria == Categoria.flowFiber)
+        ? Categoria.funcionais
+        : _categoria;
+
     final produtos = sacola.produtos.where((p) {
-      if (!_categoria.inclui(p)) return false;
+      if (!categoriaAtiva.inclui(p)) return false;
       if (_filtro.isEmpty) return true;
       final q = _filtro.toLowerCase();
       return p.nome.toLowerCase().contains(q) || p.codigo.toLowerCase().contains(q);
     }).toList();
-
-    final catalogoVazio = !sacola.carregandoCatalogo && sacola.produtos.isEmpty;
 
     return SafeArea(
       child: CustomScrollView(
@@ -78,99 +90,98 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
               child: Text('Produtos', style: AppTypography.largeTitle.copyWith(color: AppColors.navy)),
             ),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
-              child: TextField(
-                controller: _busca,
-                onChanged: (v) => setState(() => _filtro = v.trim()),
-                style: AppTypography.body.copyWith(color: AppColors.tinta),
-                decoration: InputDecoration(
-                  hintText: 'Buscar produto',
-                  hintStyle: AppTypography.body.copyWith(color: AppColors.textoSuave),
-                  prefixIcon: const Icon(Icons.search, color: AppColors.navy),
-                  filled: true,
-                  fillColor: AppColors.superficie,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.raioBotao),
-                    borderSide: BorderSide(color: AppColors.navy.withValues(alpha: 0.25)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.raioBotao),
-                    borderSide: BorderSide(color: AppColors.navy.withValues(alpha: 0.25)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.raioBotao),
-                    borderSide: const BorderSide(color: AppColors.azulMarca, width: 1.5),
+          if (mostrarBusca)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
+                child: TextField(
+                  controller: _busca,
+                  onChanged: (v) => setState(() => _filtro = v.trim()),
+                  style: AppTypography.body.copyWith(color: AppColors.tinta),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar produto',
+                    hintStyle: AppTypography.body.copyWith(color: AppColors.textoSuave),
+                    prefixIcon: const Icon(Icons.search, color: AppColors.navy),
+                    filled: true,
+                    fillColor: AppColors.superficie,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.raioBotao),
+                      borderSide: BorderSide(color: AppColors.navy.withValues(alpha: 0.25)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.raioBotao),
+                      borderSide: BorderSide(color: AppColors.navy.withValues(alpha: 0.25)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.raioBotao),
+                      borderSide: const BorderSide(color: AppColors.azulMarca, width: 1.5),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: AppSpacing.toqueMinimo + AppSpacing.sm * 2,
-              child: Stack(
-                children: [
-                  ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.margem,
-                      AppSpacing.sm,
-                      AppSpacing.margem + 24,
-                      AppSpacing.sm,
-                    ),
-                    children: [
-                      for (final c in Categoria.values)
-                        Padding(
-                          padding: const EdgeInsets.only(right: AppSpacing.xs),
-                          child: ChipCategoria(
-                            rotulo: c.rotulo,
-                            selecionado: _categoria == c,
-                            onTap: () => setState(() => _categoria = c),
+          if (chips.isNotEmpty)
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: AppSpacing.toqueMinimo + AppSpacing.sm * 2,
+                child: Stack(
+                  children: [
+                    ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.margem,
+                        AppSpacing.sm,
+                        AppSpacing.margem + 24,
+                        AppSpacing.sm,
+                      ),
+                      children: [
+                        for (final c in chips)
+                          Padding(
+                            padding: const EdgeInsets.only(right: AppSpacing.xs),
+                            child: ChipCategoria(
+                              rotulo: c.rotulo,
+                              selecionado: categoriaAtiva == c,
+                              onTap: () => setState(() => _categoria = c),
+                            ),
                           ),
-                        ),
-                    ],
-                  ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: 28,
-                    child: IgnorePointer(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppColors.gelo.withValues(alpha: 0),
-                              AppColors.gelo,
-                            ],
+                      ],
+                    ),
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: 28,
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.gelo.withValues(alpha: 0),
+                                AppColors.gelo,
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          if (_categoria == Categoria.kits && !sacola.carregandoCatalogo)
+          if (categoriaAtiva == Categoria.kits && !sacola.carregandoCatalogo)
             SliverToBoxAdapter(
               child: sacola.kits.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
-                      child: EstadoVazio(
-                        icone: Icons.widgets_outlined,
-                        titulo: catalogoVazio ? 'Catálogo indisponível' : 'Nenhum kit no momento',
-                        subtitulo: catalogoVazio
-                            ? 'Tente de novo em instantes.'
-                            : 'Escolha produtos individuais na grade.',
-                        rotuloAcao: catalogoVazio ? 'Tentar de novo' : 'Ver todos',
-                        onAcao: catalogoVazio
-                            ? sacola.carregarCatalogo
-                            : () => setState(() => _categoria = Categoria.todos),
-                      ),
+                  ? EstadoVazio(
+                      icone: Icons.widgets_outlined,
+                      titulo: catalogoVazio ? 'Catálogo indisponível' : 'Nenhum kit no momento',
+                      subtitulo: catalogoVazio
+                          ? 'Tente de novo em instantes.'
+                          : 'Escolha produtos individuais na grade.',
+                      rotuloAcao: catalogoVazio ? 'Atualizar' : 'Ver todos',
+                      onAcao: catalogoVazio
+                          ? sacola.carregarCatalogo
+                          : () => setState(() => _categoria = Categoria.todos),
                     )
                   : SizedBox(
                       height: 140,
@@ -208,20 +219,19 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
                 ),
               ),
             )
-          else if (_categoria != Categoria.kits && produtos.isEmpty)
-            SliverFillRemaining(
-              hasScrollBody: false,
+          else if (categoriaAtiva != Categoria.kits && produtos.isEmpty)
+            SliverToBoxAdapter(
               child: catalogoVazio
                   ? EstadoVazio(
                       titulo: 'Catálogo indisponível',
                       subtitulo: 'Os produtos ainda não chegaram. Toque para tentar de novo.',
-                      rotuloAcao: 'Tentar de novo',
+                      rotuloAcao: 'Atualizar',
                       onAcao: sacola.carregarCatalogo,
                     )
                   : EstadoVazio(
                       icone: Icons.filter_alt_off_outlined,
                       titulo: 'Nada neste filtro',
-                      subtitulo: _filtroAtivo
+                      subtitulo: _filtroAtivo(categoriaAtiva)
                           ? 'Tente limpar a busca ou escolher outra categoria.'
                           : 'Nenhum produto nesta categoria.',
                       rotuloAcao: 'Limpar filtros',
@@ -232,7 +242,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
                       }),
                     ),
             )
-          else if (_categoria != Categoria.kits)
+          else if (categoriaAtiva != Categoria.kits)
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.margem,

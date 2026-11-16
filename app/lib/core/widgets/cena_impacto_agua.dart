@@ -8,16 +8,30 @@ import '../theme/app_typography.dart';
 
 /// Cena garrafa + respingo do site (CSS `cr-*-impact`, ~1,8 s).
 ///
-/// Uso: camada da foto na PDP de água mineral. Sem autoplay em home/onboarding.
+/// Uso: camada da foto na PDP. Em SKUs que não são água mineral, passe
+/// [garrafaAsset] (foto do produto) e [mostrarCopyMarca] = false para não
+/// rotular WP/Fiber como mineral. Sem autoplay em home/onboarding.
 class CenaImpactoAgua extends StatefulWidget {
   const CenaImpactoAgua({
     super.key,
     this.autoPlay = true,
     this.mostrarReplay = true,
+    this.garrafaAsset,
+    this.mostrarCopyMarca = true,
+    this.rotuloSemantico,
   });
 
   final bool autoPlay;
   final bool mostrarReplay;
+
+  /// Se null, usa [assetImpactoGarrafa] (água mineral do site).
+  final String? garrafaAsset;
+
+  /// Frase + marca do site (“Água mineral tem nome”). Desligar em WP/Fiber.
+  final bool mostrarCopyMarca;
+
+  /// Override do aria-label; default = copy mineral do site.
+  final String? rotuloSemantico;
 
   @override
   State<CenaImpactoAgua> createState() => _CenaImpactoAguaState();
@@ -65,9 +79,11 @@ class _CenaImpactoAguaState extends State<CenaImpactoAgua>
   Widget build(BuildContext context) {
     final reduzir = MediaQuery.disableAnimationsOf(context);
 
+    final rotulo = widget.rotuloSemantico ??
+        'Água mineral tem nome: Cristalins. Garrafa de água mineral sem gás toca a água com um respingo.';
+
     return Semantics(
-      label:
-          'Água mineral tem nome: Cristalins. Garrafa de água mineral sem gás toca a água com um respingo.',
+      label: rotulo,
       image: true,
       child: ColoredBox(
         color: const Color(0xFF43BDE6),
@@ -81,7 +97,11 @@ class _CenaImpactoAguaState extends State<CenaImpactoAgua>
                   animation: _ctrl,
                   builder: (context, _) {
                     final t = reduzir ? 1.0 : _ctrl.value;
-                    return _CenaLayers(t: t);
+                    return _CenaLayers(
+                      t: t,
+                      garrafaAsset: widget.garrafaAsset ?? assetImpactoGarrafa,
+                      mostrarCopyMarca: widget.mostrarCopyMarca,
+                    );
                   },
                 ),
               ),
@@ -116,9 +136,15 @@ class _CenaImpactoAguaState extends State<CenaImpactoAgua>
 }
 
 class _CenaLayers extends StatelessWidget {
-  const _CenaLayers({required this.t});
+  const _CenaLayers({
+    required this.t,
+    required this.garrafaAsset,
+    required this.mostrarCopyMarca,
+  });
 
   final double t;
+  final String garrafaAsset;
+  final bool mostrarCopyMarca;
 
   static double _lerpKeyframes(List<(double, double)> keys, double progress) {
     if (progress <= keys.first.$1) return keys.first.$2;
@@ -193,43 +219,44 @@ class _CenaLayers extends StatelessWidget {
                 height: h,
                 excludeFromSemantics: true,
               ),
-              // Frase + marca (top ~1.7%, left 13%, width 74%)
-              Positioned(
-                top: h * 0.017,
-                left: w * 0.13,
-                width: w * 0.74,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Opacity(
-                      opacity: phraseOpacity,
-                      child: Transform.translate(
-                        offset: Offset(0, phraseTy),
-                        child: Image.asset(
-                          assetImpactoFrase,
-                          fit: BoxFit.contain,
-                          excludeFromSemantics: true,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: h * 0.014),
-                    ClipRect(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: brandReveal <= 0 ? 0.001 : brandReveal,
-                        child: Opacity(
-                          opacity: brandOpacity,
+              // Frase + marca do site — só quando a SKU é água mineral.
+              if (mostrarCopyMarca)
+                Positioned(
+                  top: h * 0.017,
+                  left: w * 0.13,
+                  width: w * 0.74,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Opacity(
+                        opacity: phraseOpacity,
+                        child: Transform.translate(
+                          offset: Offset(0, phraseTy),
                           child: Image.asset(
-                            assetImpactoMarca,
+                            assetImpactoFrase,
                             fit: BoxFit.contain,
                             excludeFromSemantics: true,
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                      SizedBox(height: h * 0.014),
+                      ClipRect(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: brandReveal <= 0 ? 0.001 : brandReveal,
+                          child: Opacity(
+                            opacity: brandOpacity,
+                            child: Image.asset(
+                              assetImpactoMarca,
+                              fit: BoxFit.contain,
+                              excludeFromSemantics: true,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               // Ring — left 20%, bottom 7.5%, width 60%, height 5%
               Positioned(
                 left: w * 0.20,
@@ -260,10 +287,16 @@ class _CenaLayers extends StatelessWidget {
                   child: Transform.translate(
                     offset: Offset(0, bottleY * h),
                     child: Image.asset(
-                      assetImpactoGarrafa,
+                      garrafaAsset,
                       fit: BoxFit.contain,
                       alignment: Alignment.bottomCenter,
                       excludeFromSemantics: true,
+                      errorBuilder: (_, _, _) => Image.asset(
+                        assetImpactoGarrafa,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomCenter,
+                        excludeFromSemantics: true,
+                      ),
                     ),
                   ),
                 ),

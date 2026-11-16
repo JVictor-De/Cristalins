@@ -3,24 +3,25 @@
 /// Hero WP e origem usam fotos de produto **sem** tipografia/scrollbar de print
 /// de landing (BUGS_UX #2–5). `flow_protein.webp` / `colocar_site-fast.webp`
 /// ficam no disco só como legado — não usar na UI.
+/// Garrafas de produto: PNG transparente em `produtos/` (sem caixa opaca).
 const assetLogoMarca = 'assets/images/brand/logo.jpg';
 
 /// Recorte de produto (sem texto de site) — hero WP.
-const assetHeroFlowProtein = 'assets/images/produtos/protein.webp';
+const assetHeroFlowProtein = 'assets/images/produtos/protein.png';
 
-const assetHeroFlowFiber = 'assets/images/hero/flow_fiber-fast.webp';
+const assetHeroFlowFiber = 'assets/images/produtos/flow_fiber-fast.png';
 const assetHeroTodosProdutos = 'assets/images/hero/todos_produtos-fast.webp';
 const assetHeroAguaBokeh = 'assets/images/hero/agua-bokeh.webp';
 const assetHeroRespingo = 'assets/images/hero/impacto-respingo.webp';
 
 /// Foto limpa de produto (substitui print `colocar_site-fast.webp`).
-const assetHeroColocarSite = 'assets/images/produtos/ams500.webp';
+const assetHeroColocarSite = 'assets/images/produtos/ams500.png';
 
 const assetHeroSustentabilidade = 'assets/images/hero/sustentabilidade-v2-fast.webp';
 
 /// Alias explícito para o asset de produto no hero.
-const assetProdutoWaterProtein = 'assets/images/produtos/protein.webp';
-const assetProdutoAguaMineral = 'assets/images/produtos/ams500.webp';
+const assetProdutoWaterProtein = 'assets/images/produtos/protein.png';
+const assetProdutoAguaMineral = 'assets/images/produtos/ams500.png';
 
 /// Cena de impacto (site `#inicio` → PDP água mineral).
 const assetImpactoFundo = 'assets/images/brand/impacto/impacto-fundo.webp';
@@ -29,7 +30,7 @@ const assetImpactoRespingo = 'assets/images/brand/impacto/impacto-respingo.webp'
 const assetImpactoFrase = 'assets/images/brand/impacto/impacto-frase.webp';
 const assetImpactoMarca = 'assets/images/brand/impacto/impacto-marca.webp';
 
-/// SKUs de água mineral que usam a cena completa (não WP/Fiber).
+/// SKUs cuja garrafa do asset do site (água mineral) combina 1:1 com o produto.
 const codigosAguaMineralImpacto = {
   'AMS500',
   'AMC510',
@@ -38,4 +39,12 @@ const codigosAguaMineralImpacto = {
   'AMC200',
 };
 
-bool usaCenaImpactoAgua(String codigo) => codigosAguaMineralImpacto.contains(codigo);
+/// Copy/frase do site (“água mineral…”) só nestas SKUs.
+bool usaCopyImpactoMineral(String codigo) => codigosAguaMineralImpacto.contains(codigo);
+
+/// Toda PDP de catálogo pode usar a cena (garrafa troca para o asset do SKU se não for mineral).
+bool usaCenaImpactoAgua(String codigo) =>
+    codigosAguaMineralImpacto.contains(codigo) ||
+    codigo == 'WP500' ||
+    codigo == 'FF500' ||
+    codigo == 'GUA2000';

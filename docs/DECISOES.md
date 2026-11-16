@@ -82,5 +82,22 @@
 | Logo header | `LogoMarca` com `ColorFilter` no JPG branco → transparente aproximado | Sem flutter_svg; BUGS_UX #7 |
 | Ícone aba Assinatura | `Icons.water_drop_outlined` / `water_drop` (substitui `autorenew`) | BUGS_UX #31; recorrência de água mais legível |
 | Abrir Produtos | `AbrirProdutosCallback({Categoria?})` no shell — Montar≠Ver águas | BUGS_UX #11, #24 |
-| Animação impacto (`mk-5b`) | Cena completa **só** na PDP de água mineral (`AMS500`/`AMC510`/`AMN1500`/`AMN5000`/`AMC200`); camada da foto; WP mantém foto+respingo | Monólito animação — default B; não compete com hero WP |
+| Animação impacto (`mk-5b`+) | Cena na PDP de **todas** as SKUs do catálogo; mineral usa garrafa+copy do site; WP/Fiber/Guaraná usam foto do produto e **sem** frase “água mineral” | Pedido João 2026-11-16 — mesma cena, rótulo honesto |
 | Motion impacto | `AnimationController` 1,8 s espelhando CSS site; sem Lottie/Rive; reduced motion → frame final | A11y + parity com `impacto__*.css` |
+
+## 2026-11-16 — Polimento UX marketplace (PNG / catálogo curto)
+
+| Dúvida | Decisão | Motivo |
+| --- | --- | --- |
+| Assets de produto na UI | PNG transparente em `assets/images/produtos/` (não webp/jpg opacos) | Evitar “caixa”/halo em hero lima, cards gelo e empty |
+| WP500 | `protein.png` (não existe `wp500.png`) | Recorte compartilhado com fundo transparente |
+| FF500 | `flow_fiber-fast.png` (não existe `ff500.png`) | Idem |
+| Demais SKUs seed | `ams500.png`, `amc510.png`, `amn1500.png`, `amn5000.png`, `amc200.png`, `gua2000.png` | 1:1 com código |
+| Logo | Manter `brand/logo.jpg` + `LogoMarca` (sem `logo.png` no disco) | ColorFilter continua necessário |
+| Cena impacto | Camadas `impacto-*.webp` mantidas; garrafa do SKU na PDP usa PNG do produto | Composição ≠ foto de produto |
+| `kLimiteCatalogoCurto` | `12` | Seed ~8 SKUs: esconder busca; chips Todos \| Águas \| Funcionais (+ Kits se houver) |
+| Empty catálogo | Ícone + título + subtítulo + link “Atualizar” — **nunca** `BotaoPrincipal` filled | Densidade; retry ≠ conversão |
+| WP ausente | CTA “Assinar WP” → aba Produtos (nunca PDP órfã) | Catálogo vazio / seed pendente |
+| “Ver todas as águas” | Só se ≥1 produto `Categoria.aguas.inclui` | Evitar filtro vazio |
+| Onboarding | ≤1 filled (“Assinar Water Protein”); águas/quiz = TextButton/contorno; Pular semi-opaco | Hierarquia de CTA |
+| Seed produção | João roda `npx prisma db seed` em `apicristalins` até `GET …/produtos` ≠ `[]`; smoke em `cristalins.peladeiro.cloud` | Agente não executa Coolify/seed; detalhe operacional em `doc/prompts/.../HANDOFF.md` (gitignored) |

@@ -69,11 +69,15 @@ class Kit {
   final Dinheiro subtotalBase;
 }
 
+/// Acima deste tamanho: busca + chips por linha (WP / Fiber / Águas / Kits).
+const kLimiteCatalogoCurto = 12;
+
 /// Chips da aba Produtos (marketplace v3).
 enum Categoria {
   todos('Todos'),
   waterProtein('Water Protein'),
   flowFiber('Flow Fiber'),
+  funcionais('Funcionais'),
   aguas('Águas'),
   kits('Kits');
 
@@ -86,7 +90,31 @@ enum Categoria {
     Categoria.aguas => p.tipo == 'COMPLEMENTO' || p.tipo == 'B2B' || p.tipo == 'ADDON',
     Categoria.waterProtein => p.codigo == 'WP500',
     Categoria.flowFiber => p.codigo == 'FF500',
+    Categoria.funcionais => p.codigo == 'WP500' || p.codigo == 'FF500',
   };
+
+  /// Chips conforme tamanho do catálogo (vazio → nenhum; curto → consolidados).
+  static List<Categoria> chipsPara({
+    required int totalProdutos,
+    required bool temKits,
+  }) {
+    if (totalProdutos == 0) return const [];
+    if (totalProdutos <= kLimiteCatalogoCurto) {
+      return [
+        Categoria.todos,
+        Categoria.aguas,
+        Categoria.funcionais,
+        if (temKits) Categoria.kits,
+      ];
+    }
+    return [
+      Categoria.todos,
+      Categoria.waterProtein,
+      Categoria.flowFiber,
+      Categoria.aguas,
+      Categoria.kits,
+    ];
+  }
 }
 
 /// Linha do detalhe de preço vinda da API (`detalhePreco`).

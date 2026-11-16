@@ -198,6 +198,13 @@ void main() {
 
     await tester.pumpWidget(envelopar(const ProdutoScreen(codigo: 'WP500')));
     await tester.pump();
-    expect(find.byType(CenaImpactoAgua), findsNothing);
+    // WP também usa a cena; garrafa = PNG do SKU (sem copy “água mineral”).
+    expect(find.byType(CenaImpactoAgua), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(
+        'Água mineral tem nome: Cristalins. Garrafa de água mineral sem gás toca a água com um respingo.',
+      ),
+      findsNothing,
+    );
   });
 }

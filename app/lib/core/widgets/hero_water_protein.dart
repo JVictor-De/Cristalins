@@ -14,10 +14,14 @@ class HeroWaterProtein extends StatelessWidget {
     super.key,
     required this.onAssinar,
     required this.onVerAguas,
+    this.mostrarVerAguas = true,
   });
 
   final VoidCallback onAssinar;
   final VoidCallback onVerAguas;
+
+  /// Só exibe o link se houver ≥1 produto em [Categoria.aguas].
+  final bool mostrarVerAguas;
 
   @override
   Widget build(BuildContext context) {
@@ -90,27 +94,28 @@ class HeroWaterProtein extends StatelessWidget {
                                   },
                                   variante: VarianteBotaoPrincipal.navy,
                                 ),
-                                Align(
-                                  alignment: Alignment.center,
-                                  child: TextButton(
-                                    style: TextButton.styleFrom(
-                                      minimumSize: const Size(0, 40),
-                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                      padding: const EdgeInsets.symmetric(vertical: 4),
-                                    ),
-                                    onPressed: () {
-                                      HapticFeedback.selectionClick();
-                                      onVerAguas();
-                                    },
-                                    child: Text(
-                                      'Ver todas as águas',
-                                      style: AppTypography.subheadline.copyWith(
-                                        color: AppColors.navy,
-                                        fontWeight: FontWeight.w600,
+                                if (mostrarVerAguas)
+                                  Align(
+                                    alignment: Alignment.center,
+                                    child: TextButton(
+                                      style: TextButton.styleFrom(
+                                        minimumSize: const Size(0, 40),
+                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        padding: const EdgeInsets.symmetric(vertical: 4),
+                                      ),
+                                      onPressed: () {
+                                        HapticFeedback.selectionClick();
+                                        onVerAguas();
+                                      },
+                                      child: Text(
+                                        'Ver todas as águas',
+                                        style: AppTypography.subheadline.copyWith(
+                                          color: AppColors.navy,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                           ),

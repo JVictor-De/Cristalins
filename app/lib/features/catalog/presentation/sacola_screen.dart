@@ -24,6 +24,8 @@ class SacolaScreen extends StatelessWidget {
     final sacola = context.watch<SacolaController>();
 
     if (!sacola.temItens) {
+      final temWp = sacola.produtoDe('WP500') != null;
+      final temAguas = sacola.produtos.any(Categoria.aguas.inclui);
       return Scaffold(
         backgroundColor: AppColors.gelo,
         appBar: AppBar(title: const Text('Sacola')),
@@ -38,7 +40,7 @@ class SacolaScreen extends StatelessWidget {
                 BotaoPrincipal(
                   rotulo: 'Assinar Water Protein',
                   onPressed: () {
-                    if (sacola.produtoDe('WP500') != null) {
+                    if (temWp) {
                       Navigator.of(context).pushNamed(AppRoutes.produto, arguments: 'WP500');
                     } else {
                       Navigator.of(context).pushNamedAndRemoveUntil(
@@ -49,14 +51,24 @@ class SacolaScreen extends StatelessWidget {
                     }
                   },
                 ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
-                    AppRoutes.shell,
-                    (_) => false,
-                    arguments: const ShellArgs(abaInicial: 1, categoriaInicial: Categoria.aguas),
+                if (temAguas)
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                      AppRoutes.shell,
+                      (_) => false,
+                      arguments: const ShellArgs(abaInicial: 1, categoriaInicial: Categoria.aguas),
+                    ),
+                    child: const Text('Ver todas as águas'),
+                  )
+                else
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                      AppRoutes.shell,
+                      (_) => false,
+                      arguments: const ShellArgs(abaInicial: 1),
+                    ),
+                    child: const Text('Ver produtos'),
                   ),
-                  child: const Text('Ver todas as águas'),
-                ),
               ],
             ),
           ),
@@ -240,7 +252,11 @@ class _ItemLinha extends StatelessWidget {
               height: 56,
               child: asset == null
                   ? const ColoredBox(color: AppColors.aqua)
-                  : Image.asset(asset, semanticLabel: produto?.nome),
+                  : Image.asset(
+                      asset,
+                      fit: BoxFit.contain,
+                      semanticLabel: produto?.nome,
+                    ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(

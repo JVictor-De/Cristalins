@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
-import 'botao_principal.dart';
 
 /// Carregando: indicador centralizado.
 class Carregando extends StatelessWidget {
@@ -64,7 +63,13 @@ class EstadoErro extends StatelessWidget {
               style: AppTypography.body.copyWith(color: AppColors.texto),
             ),
             const SizedBox(height: AppSpacing.margem),
-            BotaoPrincipal(rotulo: 'Tentar de novo', onPressed: onTentarDeNovo),
+            TextButton(
+              onPressed: onTentarDeNovo,
+              child: Text(
+                'Tentar de novo',
+                style: AppTypography.headline.copyWith(color: AppColors.azulMarca),
+              ),
+            ),
           ],
         ),
       ),

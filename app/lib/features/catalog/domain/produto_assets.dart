@@ -4,24 +4,27 @@ import '../../../core/theme/app_colors.dart';
 
 /// Paths locais dos assets de produto (espelho cristalins-v2 → `assets/images/produtos/`).
 /// Alinhado aos códigos do seed da API (`WP500` … `GUA2000`).
+/// Preferir PNG com fundo transparente (sem caixa opaca em hero lima / cards gelo).
 String? assetDoProduto(String codigo) {
   switch (codigo) {
     case 'WP500':
-      return 'assets/images/produtos/wp500.webp';
+      // Não existe wp500.png — recorte transparente compartilhado.
+      return 'assets/images/produtos/protein.png';
     case 'FF500':
-      return 'assets/images/produtos/ff500.webp';
+      // Não existe ff500.png — recorte transparente compartilhado.
+      return 'assets/images/produtos/flow_fiber-fast.png';
     case 'AMS500':
-      return 'assets/images/produtos/ams500.webp';
+      return 'assets/images/produtos/ams500.png';
     case 'AMC510':
-      return 'assets/images/produtos/amc510.webp';
+      return 'assets/images/produtos/amc510.png';
     case 'AMN1500':
-      return 'assets/images/produtos/amn1500.webp';
+      return 'assets/images/produtos/amn1500.png';
     case 'AMN5000':
-      return 'assets/images/produtos/amn5000.webp';
+      return 'assets/images/produtos/amn5000.png';
     case 'AMC200':
-      return 'assets/images/produtos/amc200.webp';
+      return 'assets/images/produtos/amc200.png';
     case 'GUA2000':
-      return 'assets/images/produtos/gua2000.webp';
+      return 'assets/images/produtos/gua2000.png';
     default:
       return null;
   }
@@ -42,4 +45,4 @@ Color corDoProduto(String codigo) {
 }
 
 /// Foto de rótulo WP (opcional; preferir em login/onboarding).
-const assetProteinDetalhe = 'assets/images/produtos/protein.webp';
+const assetProteinDetalhe = 'assets/images/produtos/protein.png';
