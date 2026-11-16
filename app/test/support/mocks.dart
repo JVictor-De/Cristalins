@@ -98,8 +98,11 @@ Future<void> prepararTela(WidgetTester tester) async {
   addTearDown(tester.view.reset);
 }
 
-Widget appComMocks(Mocks m) =>
-    CristalinsApp(config: configDeTeste(), dependencias: m.dependencias, exibirSplash: false);
+Widget appComMocks(Mocks m) {
+  when(() => m.catalogo.produtos()).thenAnswer((_) async => const []);
+  when(() => m.catalogo.kits()).thenAnswer((_) async => const []);
+  return CristalinsApp(config: configDeTeste(), dependencias: m.dependencias, exibirSplash: false);
+}
 
 const simulacaoCasoA = Simulacao(
   itens: [ItemSimulado(produto: 'WP500', quantidade: 12, precoUnitario: Dinheiro(990))],

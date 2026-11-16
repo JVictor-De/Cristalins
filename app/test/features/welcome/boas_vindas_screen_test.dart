@@ -52,14 +52,14 @@ void main() {
     expect(find.text('Começar'), findsOneWidget);
   });
 
-  testWidgets('tema usa Inter, plataforma iOS e azul-800 como primária', (tester) async {
+  testWidgets('tema usa Inter, plataforma iOS e azulMarca como primária', (tester) async {
     await tester.pumpWidget(_app(abridor));
     final tema = Theme.of(tester.element(find.text('Começar')));
 
     expect(tema.platform, TargetPlatform.iOS);
     expect(tema.textTheme.bodyMedium?.fontFamily, 'Inter');
-    expect(tema.colorScheme.primary, AppColors.azul800);
-    expect(tema.cupertinoOverrideTheme?.primaryColor, AppColors.azul800);
+    expect(tema.colorScheme.primary, AppColors.azulMarca);
+    expect(tema.cupertinoOverrideTheme?.primaryColor, AppColors.azulMarca);
   });
 
   testWidgets('Começar abre a rota da Tela 2 e o voltar retorna', (tester) async {

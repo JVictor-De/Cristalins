@@ -16,7 +16,8 @@ class OcorrenciaRepository {
     required String produto,
     required int quantidade,
     required String solucao,
-    required String caminhoFoto,
+    required List<int> bytesFoto,
+    String nomeArquivo = 'foto.jpg',
   }) async {
     try {
       final form = FormData.fromMap({
@@ -25,7 +26,8 @@ class OcorrenciaRepository {
         'produto': produto,
         'quantidade': quantidade,
         'solucao': solucao,
-        'foto': await MultipartFile.fromFile(caminhoFoto, filename: 'foto.jpg'),
+        // Bytes (não File/path): funciona em Android e Flutter Web.
+        'foto': MultipartFile.fromBytes(bytesFoto, filename: nomeArquivo),
       });
       final r = await _api.dio.post<Map<String, dynamic>>('/ocorrencias', data: form);
       return _deJson(r.data!);

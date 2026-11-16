@@ -112,6 +112,16 @@ void main() {
     );
   });
 
+  testA11y('Tela 5: foto do produto anuncia o nome (não fica muda)', (tester) async {
+    await abrir(tester, AppRoutes.catalogo, args: pedido);
+    const nome = 'Water Protein (água com colágeno)';
+    final foto = find.byWidgetPredicate(
+      (w) => w is Image && (w as Image).semanticLabel == nome,
+    );
+    expect(foto, findsOneWidget);
+  });
+
+
   testA11y('Tela 6: campo de CEP com rótulo', (tester) async {
     await abrir(tester, AppRoutes.endereco, args: pedido);
     // Sem endereço salvo, a tela abre direto no formulário de CEP

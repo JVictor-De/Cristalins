@@ -8,15 +8,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Golden dos widgets de `core/widgets` (Anexo).
-/// Nomes do prompt → nomes reais: AppButton→BotaoPrincipal, QuantityStepper→SeletorQuantidade,
-/// StatusBadge→Selo, EmptyState→EstadoVazio. ProductCard não existe neste app.
+/// Golden dos widgets legados de `core/widgets` (Anexo).
+/// Marketplace: ver `marketplace_widgets_test.dart`.
 void main() {
   Widget envelopar(Widget filho) {
     return MaterialApp(
       theme: buildAppTheme(),
       home: Scaffold(
-        backgroundColor: AppColors.fundoAgrupado,
+        backgroundColor: AppColors.gelo,
         body: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 320),

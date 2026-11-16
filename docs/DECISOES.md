@@ -64,3 +64,16 @@
 | Lapa / Recreio / Ilha do Governador | Aliases no JSON (não são sempre a denominação IPP isolada) | Seed AP2 e ViaCEP usam esses nomes; `CepService` compara normalizado |
 | Schema | Sem migração nova: `Zona.bairros` já é `String[]` | Só upsert no seed |
 | CT23 após lista completa | Testes usam bairro **não oficial** (`Morro do Teste`) | Grajaú passou a ser atendido (Zona Norte); CT23 continua válido para nome fora do mapa |
+
+## 2026-11-16 — Redesign marketplace (`cristalins_marketplace`)
+
+| Dúvida | Decisão | Motivo |
+| --- | --- | --- |
+| Visual Ajustes/Cupertino da fila assinatura | Redesign marketplace **substitui** o estilo Ajustes/Cupertino (sem sombra / sem gradiente / um amarelo) nas telas desta fila | João rejeitou listas cinzas sem fotos; referência iFood + cores/fotos de `cristalins.com.br` |
+| Restrições da skill `apple-style-flutter` / seção Cores da assinatura | **Revogadas** para estas telas: sombra, gradiente (só hero/banner), cards, barra de sacola, tipografia serifada de título | Monólito `PROMPT_MONOLITO.md` §3; regras de negócio (preço/quiz/ciclo) inalteradas |
+| O que continua proibido | SF Pro, SF Symbols, blur no Android, promessa de saúde, vender Cristalins Ultra, calcular preço/quiz/ciclo no app | Mesmas proibições do CONTEXTO assinatura que o monólito mantém |
+| `azulMarca` CTA | Manter `#087FAE` (site); contraste branco ≈ **4,51** (AA ≥ 4,5). Fallback `#076A94` não necessário | Validação WCAG 2.1 AA na fase `mk-1-tokens` |
+| `verdeProtein` | `#95CC3C` (média da tampa em `protein.webp`; rótulo iluminado ~`#9DE365`) | Amostra factual do asset; ≈ `#8CC63F` do CONTEXTO |
+| Tipografia hero | DM Serif Display Regular (OFL) embarcada; corpo Inter | Monólito §3.2 |
+| `flow_protein.webp` | Redimensionado para largura 1200 (~64 KB no app) | Monólito pede ≤ ~1200 px / evitar ~1,8 MB |
+| UX v3 (registrar) | Home bifurcada; cards sem preço; frequência só na sacola; mínimo com sugestão; login contextual | Monólito v3 missão / §2 |

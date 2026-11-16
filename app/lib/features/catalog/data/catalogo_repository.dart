@@ -20,6 +20,7 @@ abstract final class CatalogoJson {
     volumeMl: j['volumeMl'] as int,
     embalagemQtd: j['embalagemQtd'] as int,
     precoBase: Dinheiro.daApi(j['precoBase'] as num),
+    descricao: j['descricao'] as String?,
   );
 
   static Kit kit(Map<String, dynamic> j) => Kit(
@@ -52,6 +53,12 @@ abstract final class CatalogoJson {
     total: Dinheiro.daApi(j['total'] as num),
     detalhe: (j['detalhePreco'] as List).map((e) => linha(e as Map<String, dynamic>)).toList(),
     zona: (j['zona'] as Map<String, dynamic>?)?['nome'] as String?,
+    ueMinima: (j['ueMinima'] as num?) ?? 12,
+    ueMaxima: (j['ueMaxima'] as num?) ?? 120,
+    faltaUeParaMinimo: (j['faltaUeParaMinimo'] as num?) ?? 0,
+    freteGratisAcima: (j['freteGratisAcima'] as num?) ?? 250,
+    faltaParaFreteGratis: (j['faltaParaFreteGratis'] as num?) ?? 0,
+    economiaPlano: (j['economiaPlano'] as num?) ?? 0,
   );
 }
 

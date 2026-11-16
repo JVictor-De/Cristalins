@@ -6,11 +6,12 @@ import '../network/api_client.dart';
 
 /// RF51: registra o token FCM em `PUT /notificacoes/push-token`.
 /// Sem `google-services.json` / Firebase configurado, falha em silêncio e o app segue.
+/// No Flutter Web (demo) o push fica desligado — FCM web exige config própria.
 class PushRegistro {
   const PushRegistro();
 
   Future<void> registrarSePossivel(ApiClient? api) async {
-    if (api == null) return;
+    if (api == null || kIsWeb) return;
     try {
       if (Firebase.apps.isEmpty) {
         await Firebase.initializeApp();

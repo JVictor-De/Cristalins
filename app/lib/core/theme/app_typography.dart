@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
-/// Escala tipográfica da HIG em Inter (skill apple-style-flutter, seção 4).
+import 'app_colors.dart';
+
+/// Tipografia: Inter no corpo; DM Serif Display só hero visitante e nome WP/Fiber na PDP.
 abstract final class AppTypography {
   static const familia = 'Inter';
+  static const familiaSerif = 'DMSerifDisplay';
 
   static TextStyle _estilo(double tamanho, double altura, FontWeight peso, double espacamento) {
     return TextStyle(
@@ -13,6 +16,15 @@ abstract final class AppTypography {
       letterSpacing: espacamento,
     );
   }
+
+  /// Título do hero visitante e nome WP/Fiber na PDP (OFL).
+  static const heroTitle = TextStyle(
+    fontFamily: familiaSerif,
+    fontSize: 34,
+    height: 41 / 34,
+    fontWeight: FontWeight.w400,
+    color: AppColors.tinta,
+  );
 
   static final largeTitle = _estilo(34, 41, FontWeight.w700, -0.6);
   static final title1 = _estilo(28, 34, FontWeight.w700, -0.4);
@@ -26,8 +38,7 @@ abstract final class AppTypography {
   static final caption1 = _estilo(12, 16, FontWeight.w400, 0);
   static final caption2 = _estilo(11, 13, FontWeight.w500, 0.1);
 
-  /// Mapeia a escala da Apple para os papéis do Material.
-  /// `bodyMedium` é o estilo padrão de `Text`, por isso recebe `body`.
+  /// Mapeia a escala para os papéis do Material. `bodyMedium` = padrão de `Text`.
   static TextTheme get textTheme => TextTheme(
     displaySmall: largeTitle,
     headlineMedium: title1,

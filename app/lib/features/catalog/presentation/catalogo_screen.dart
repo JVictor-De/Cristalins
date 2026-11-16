@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
@@ -9,24 +9,30 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/botao_principal.dart';
-import '../../../core/widgets/controle_segmentado.dart';
-import '../../../core/widgets/controles.dart';
+import '../../../core/widgets/card_produto.dart';
 import '../../../core/widgets/estados.dart';
-import '../../../core/widgets/secao_agrupada.dart';
-import '../../../core/widgets/tela_titulo_grande.dart';
 import '../../subscription/domain/assinatura.dart';
 import '../domain/catalogo.dart';
 import 'cesta_controller.dart';
+import 'sacola_controller.dart';
 
-/// Tela 5 — Catálogo e cesta. Recebe um [PedidoAssinatura] (fluxo novo) ou uma [AlteracaoDeCesta] (Tela 8).
+/// Aba Produtos (marketplace) ou fluxo legado de cesta (pedido/alteração).
 class CatalogoScreen extends StatelessWidget {
-  const CatalogoScreen({super.key, this.pedido, this.alteracao});
+  const CatalogoScreen({
+    super.key,
+    this.pedido,
+    this.alteracao,
+    this.modoAba = false,
+  });
 
   final PedidoAssinatura? pedido;
   final AlteracaoDeCesta? alteracao;
+  final bool modoAba;
 
   @override
   Widget build(BuildContext context) {
+    if (modoAba) return const _AbaProdutos();
+
     final dep = context.read<Dependencias>();
     return ChangeNotifierProvider(
       create: (_) => CestaController(
@@ -37,13 +43,173 @@ class CatalogoScreen extends StatelessWidget {
         plano: alteracao?.plano ?? 'FLEX',
         assinaturaId: alteracao?.assinaturaId,
       ),
-      child: _Conteudo(pedido: pedido),
+      child: _FluxoLegado(pedido: pedido),
     );
   }
 }
 
-class _Conteudo extends StatelessWidget {
-  const _Conteudo({this.pedido});
+class _AbaProdutos extends StatefulWidget {
+  const _AbaProdutos();
+
+  @override
+  State<_AbaProdutos> createState() => _AbaProdutosState();
+}
+
+class _AbaProdutosState extends State<_AbaProdutos> {
+  Categoria _cat = Categoria.todos;
+  String _busca = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final sacola = context.watch<SacolaController>();
+    final q = _busca.trim().toLowerCase();
+    final lista = _cat == Categoria.kits
+        ? <Produto>[]
+        : sacola.produtos.where((p) {
+            if (!_cat.inclui(p)) return false;
+            if (q.isEmpty) return true;
+            return p.nome.toLowerCase().contains(q) || p.codigo.toLowerCase().contains(q);
+          }).toList();
+
+    return Scaffold(
+      backgroundColor: AppColors.gelo,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.margem, AppSpacing.sm, AppSpacing.margem, 0),
+              child: Text('Produtos', style: AppTypography.title2.copyWith(color: AppColors.navy)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.margem),
+              child: TextField(
+                onChanged: (v) => setState(() => _busca = v),
+                decoration: InputDecoration(
+                  hintText: 'Buscar Water Protein, água com gás…',
+                  prefixIcon: const Icon(Icons.search, color: AppColors.textoSuave),
+                  filled: true,
+                  fillColor: AppColors.superficie,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.raioChip),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 44,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
+                children: [
+                  for (final c in Categoria.values)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(c.rotulo),
+                        selected: _cat == c,
+                        onSelected: (_) {
+                          HapticFeedback.selectionClick();
+                          setState(() => _cat = c);
+                        },
+                        selectedColor: AppColors.aqua,
+                        labelStyle: AppTypography.caption1.copyWith(
+                          color: _cat == c ? AppColors.navy : AppColors.textoSuave,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: sacola.carregandoCatalogo
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.azulMarca))
+                  : sacola.erroCatalogo != null
+                      ? EstadoErro(
+                          mensagem: sacola.erroCatalogo!,
+                          onTentarDeNovo: sacola.carregarCatalogo,
+                        )
+                      : _cat == Categoria.kits
+                          ? _GradeKits(kits: sacola.kits, onUsar: sacola.usarKit)
+                          : lista.isEmpty
+                              ? Center(
+                                  child: TextButton(
+                                    onPressed: () => setState(() => _cat = Categoria.todos),
+                                    child: const Text('Ver todos'),
+                                  ),
+                                )
+                              : GridView.builder(
+                                  padding: const EdgeInsets.all(AppSpacing.margem),
+                                  gridDelegate: const ContagemGrade(
+                                    crossAxisCount: 2,
+                                    mainAxisSpacing: AppSpacing.sm,
+                                    crossAxisSpacing: AppSpacing.sm,
+                                    childAspectRatio: 0.62,
+                                  ),
+                                  itemCount: lista.length,
+                                  itemBuilder: (context, i) {
+                                    final p = lista[i];
+                                    return CardProduto(
+                                      produto: p,
+                                      quantidade: sacola.quantidadeDe(p.codigo),
+                                      onAbrir: () => Navigator.of(context).pushNamed(
+                                        AppRoutes.produto,
+                                        arguments: p.codigo,
+                                      ),
+                                      onAdicionar: () => sacola.adicionarPasso(p),
+                                    );
+                                  },
+                                ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+typedef ContagemGrade = SliverGridDelegateWithFixedCrossAxisCount;
+
+class _GradeKits extends StatelessWidget {
+  const _GradeKits({required this.kits, required this.onUsar});
+
+  final List<Kit> kits;
+  final void Function(Kit) onUsar;
+
+  @override
+  Widget build(BuildContext context) {
+    if (kits.isEmpty) {
+      return const Center(child: Text('Nenhum kit disponível.'));
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.all(AppSpacing.margem),
+      itemCount: kits.length,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (context, i) {
+        final k = kits[i];
+        return ListTile(
+          tileColor: AppColors.superficie,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.raioCard)),
+          title: Text(k.nome, style: AppTypography.headline),
+          subtitle: Text('${k.itens.length} produtos na cesta'),
+          trailing: IconButton.filled(
+            style: IconButton.styleFrom(backgroundColor: AppColors.azulMarca),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              onUsar(k);
+            },
+            icon: const Icon(Icons.add, color: Colors.white),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _FluxoLegado extends StatelessWidget {
+  const _FluxoLegado({this.pedido});
 
   final PedidoAssinatura? pedido;
 
@@ -71,213 +237,34 @@ class _Conteudo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.watch<CestaController>();
-    final titulo = c.assinaturaId == null ? 'Sua cesta' : 'Alterar cesta';
-
-    if (c.carregando) {
-      return TelaTituloGrande(
-        titulo: titulo,
-        slivers: const [SliverFillRemaining(hasScrollBody: false, child: Carregando())],
-      );
-    }
-    if (c.erroCarregar != null) {
-      return TelaTituloGrande(
-        titulo: titulo,
-        slivers: [
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: EstadoErro(mensagem: c.erroCarregar!, onTentarDeNovo: c.carregar),
-          ),
-        ],
-      );
-    }
-
-    final margem = margemDaTela(context);
-    return TelaTituloGrande(
-      titulo: titulo,
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(margem, AppSpacing.xs, margem, 0),
-            child: ControleSegmentado<Categoria>(
-              opcoes: {for (final cat in Categoria.values) cat: cat.rotulo},
-              valor: c.categoria,
-              onEscolher: c.escolherCategoria,
-            ),
-          ),
-        ),
-        if (c.categoria == Categoria.todos && c.kits.isNotEmpty)
-          SliverToBoxAdapter(
-            child: SecaoAgrupada(
-              cabecalho: 'Kits prontos',
-              rodape: 'Toque em um kit para trocar a cesta inteira por ele.',
+    return Scaffold(
+      backgroundColor: AppColors.gelo,
+      appBar: AppBar(title: Text(c.assinaturaId == null ? 'Sua cesta' : 'Alterar cesta')),
+      body: c.carregando
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.all(AppSpacing.margem),
               children: [
-                for (final k in c.kits)
-                  LinhaLista(
-                    titulo: k.nome,
-                    subtitulo:
-                        '${k.itens.map((i) => '${i.quantidade} ${i.produto}').join(' + ')} · ${k.subtotalBase.formatado} sem descontos',
-                    trailing: const CupertinoListTileChevron(),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      c.usarKit(k);
-                    },
+                for (final p in c.visiveis)
+                  ListTile(
+                    title: Text(p.nome),
+                    subtitle: Text('${c.quantidades[p.codigo] ?? 0} un.'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: () => c.alterar(p.codigo, (c.quantidades[p.codigo] ?? 0) + c.passo(p)),
+                    ),
                   ),
               ],
             ),
-          ),
-        SliverPadding(
-          padding: EdgeInsets.fromLTRB(margem, AppSpacing.secao, margem, 0),
-          sliver: SliverList.separated(
-            itemCount: c.visiveis.length,
-            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-            itemBuilder: (_, i) => _CardProduto(produto: c.visiveis[i]),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(margem, AppSpacing.sm, margem, 0),
-            child: Text(
-              'Water Protein e Flow Fiber dividem a caixa de 6: a soma dos dois fecha caixas de 6. '
-              'As águas vêm na embalagem de venda.',
-              style: AppTypography.footnote.copyWith(color: AppColors.textoSecundario),
-            ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.margem),
+          child: BotaoPrincipal(
+            rotulo: c.assinaturaId == null ? 'Continuar' : 'Salvar',
+            onPressed: c.podeContinuar ? () => _confirmar(context, c) : null,
           ),
         ),
-        SliverToBoxAdapter(child: _Resumo(controller: c)),
-      ],
-      rodape: BotaoPrincipal(
-        rotulo: c.assinaturaId == null ? 'Continuar' : 'Salvar cesta',
-        carregando: c.salvando,
-        onPressed: c.podeContinuar ? () => _confirmar(context, c) : null,
       ),
-    );
-  }
-}
-
-/// Card de produto: imagem 1:1, rótulo do tipo, nome, volume, preço e seletor (Anexo).
-class _CardProduto extends StatelessWidget {
-  const _CardProduto({required this.produto});
-
-  final Produto produto;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.watch<CestaController>();
-    final quantidade = c.quantidades[produto.codigo] ?? 0;
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: AppColors.superficie,
-        borderRadius: BorderRadius.circular(AppSpacing.raioCelula),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Sem fotos da marca no repositório: ícone no lugar da imagem 1:1.
-              Container(
-                width: AppSpacing.imagemProduto,
-                height: AppSpacing.imagemProduto,
-                decoration: BoxDecoration(
-                  color: AppColors.azul50,
-                  borderRadius: BorderRadius.circular(AppSpacing.raioCelula),
-                ),
-                child: const Icon(
-                  CupertinoIcons.drop,
-                  size: AppSpacing.iconeProduto,
-                  color: AppColors.azul700,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      produto.rotuloTipo,
-                      style: AppTypography.caption1.copyWith(color: AppColors.textoSecundario),
-                    ),
-                    Text(
-                      produto.nome,
-                      style: AppTypography.headline.copyWith(color: AppColors.texto),
-                    ),
-                    Text(
-                      '${produto.volume} · ${produto.embalagem}',
-                      style: AppTypography.subheadline.copyWith(color: AppColors.textoSecundario),
-                    ),
-                    Text(
-                      '${produto.precoBase.formatado} por unidade',
-                      style: AppTypography.subheadline.copyWith(
-                        color: AppColors.texto,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: SeletorQuantidade(
-              rotulo: produto.nome,
-              quantidade: quantidade,
-              passo: c.passo(produto),
-              onAlterar: (q) => c.alterar(produto.codigo, q),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Resumo extends StatelessWidget {
-  const _Resumo({required this.controller});
-
-  final CestaController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = controller.simulacao;
-    final valor = AppTypography.body.copyWith(
-      color: AppColors.texto,
-      fontFeatures: const [FontFeature.tabularFigures()],
-    );
-    return SecaoAgrupada(
-      cabecalho: 'Resumo da cesta',
-      rodape:
-          controller.erroSimulacao ??
-          'Preço no plano Flex, sem a taxa de entrega. O plano e o frete entram na próxima etapa.',
-      rodapeErro: controller.erroSimulacao != null,
-      children: [
-        if (controller.simulando)
-          const Padding(
-            padding: EdgeInsets.all(AppSpacing.margem),
-            child: CupertinoActivityIndicator(),
-          )
-        else if (s != null) ...[
-          LinhaLista(
-            titulo: 'Unidades equivalentes',
-            trailing: Text('${s.ue}', style: valor),
-          ),
-          for (final l in s.detalhe.where((l) => l.fator != 'FRETE'))
-            LinhaLista(
-              titulo: l.rotulo,
-              trailing: Text(l.valorFormatado, style: valor),
-            ),
-          LinhaLista(
-            titulo: 'Total estimado',
-            trailing: Text(
-              s.total.formatado,
-              style: AppTypography.headline.copyWith(color: AppColors.texto),
-            ),
-          ),
-        ] else
-          const LinhaLista(titulo: 'Ajuste a cesta para ver o preço.'),
-      ],
     );
   }
 }

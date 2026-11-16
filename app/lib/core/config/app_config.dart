@@ -1,18 +1,22 @@
-/// Ambiente do build (flavor Android `dev`, `hml`, `prod`).
+import 'package:flutter/foundation.dart';
+
+/// Ambiente do build (flavor Android `dev`, `hml`, `prod`; web usa `-t lib/main_*.dart`).
 enum Ambiente { dev, hml, prod }
 
 /// Configuração lida de `--dart-define`. Nada de segredo aqui.
 ///
-/// - `API_URL`: base da API sem o prefixo (emulador: `http://10.0.2.2:3000`).
+/// - `API_URL`: base da API sem o prefixo (emulador Android: `http://10.0.2.2:3000`;
+///   Chrome local: `http://localhost:3000`; hml web: `https://apicristalins.peladeiro.cloud`).
 /// - `SUPORTE_WHATSAPP`: número do suporte; vazio = não exibir (não inventar número).
 class AppConfig {
   const AppConfig({required this.ambiente, required this.apiUrl, required this.suporteWhatsapp});
 
   factory AppConfig.doAmbiente(Ambiente ambiente) {
     const apiUrl = String.fromEnvironment('API_URL');
+    final fallbackDev = kIsWeb ? 'http://localhost:3000' : 'http://10.0.2.2:3000';
     return AppConfig(
       ambiente: ambiente,
-      apiUrl: apiUrl.isNotEmpty ? apiUrl : (ambiente == Ambiente.dev ? 'http://10.0.2.2:3000' : ''),
+      apiUrl: apiUrl.isNotEmpty ? apiUrl : (ambiente == Ambiente.dev ? fallbackDev : ''),
       suporteWhatsapp: const String.fromEnvironment('SUPORTE_WHATSAPP'),
     );
   }

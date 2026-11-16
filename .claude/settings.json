@@ -6,34 +6,27 @@
       "Grep",
       "Edit",
       "Write",
-
       "Bash(pytest *)",
       "Bash(python -m pytest *)",
       "PowerShell(pytest *)",
       "PowerShell(python -m pytest *)",
-
       "Bash(alembic *)",
       "Bash(python -m alembic *)",
       "PowerShell(alembic *)",
       "PowerShell(python -m alembic *)",
-
       "Bash(pip install *)",
       "Bash(python -m pip install *)",
       "PowerShell(pip install *)",
-
       "Bash(npm *)",
       "Bash(npx *)",
       "PowerShell(npm *)",
       "PowerShell(npx *)",
-
       "Bash(flutter *)",
       "Bash(dart *)",
       "PowerShell(flutter *)",
       "PowerShell(dart *)",
-
       "Bash(python *)",
       "PowerShell(python *)",
-
       "Bash(.venv/Scripts/python.exe *)",
       "Bash(.venv/Scripts/pytest.exe *)",
       "Bash(.venv/bin/python *)",
@@ -42,7 +35,6 @@
       "PowerShell(.venv\\Scripts\\pytest.exe *)",
       "PowerShell(.venv/Scripts/python.exe *)",
       "PowerShell(& .venv\\Scripts\\python.exe *)",
-
       "Bash(cd *)",
       "Bash(grep *)",
       "Bash(ls *)",
@@ -55,7 +47,6 @@
       "PowerShell(Get-ChildItem *)",
       "PowerShell(Select-String *)",
       "PowerShell(Test-Path *)",
-
       "Bash(git status*)",
       "Bash(git diff*)",
       "Bash(git log*)",
@@ -79,6 +70,42 @@
       "PowerShell(git reset --hard*)",
       "PowerShell(git clean*)",
       "PowerShell(Remove-Item -Recurse -Force *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "graphify hook-guard search",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "graphify hook-guard read",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "graphify hook-guard compact",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }

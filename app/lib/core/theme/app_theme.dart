@@ -5,35 +5,36 @@ import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
 
-/// ThemeData único do app: plataforma iOS, Inter, transição Cupertino,
-/// sem ripple, `cupertinoOverrideTheme` com a primária da marca.
+/// ThemeData do app: marketplace (gelo, azulMarca) + transição Cupertino, sem ripple.
+///
+/// Contraste do botão primário: branco peso ≥ 600 sobre [AppColors.azulMarca] (~4,51 AA).
 ThemeData buildAppTheme() {
   const scheme = ColorScheme(
     brightness: Brightness.light,
-    primary: AppColors.azul800,
+    primary: AppColors.azulMarca,
     onPrimary: AppColors.sobrePrimaria,
-    primaryContainer: AppColors.azul100,
-    onPrimaryContainer: AppColors.azul900,
-    secondary: AppColors.azul500,
+    primaryContainer: AppColors.menta,
+    onPrimaryContainer: AppColors.navy,
+    secondary: AppColors.navy,
     onSecondary: AppColors.sobrePrimaria,
     tertiary: AppColors.amareloFlow,
-    onTertiary: AppColors.azul900,
+    onTertiary: AppColors.navy,
     error: AppColors.erro,
     onError: AppColors.sobrePrimaria,
     surface: AppColors.superficie,
-    onSurface: AppColors.texto,
-    onSurfaceVariant: AppColors.textoSecundario,
-    outline: AppColors.borda,
+    onSurface: AppColors.tinta,
+    onSurfaceVariant: AppColors.textoSuave,
+    outline: AppColors.linha,
   );
 
   return ThemeData(
     useMaterial3: true,
-    platform: TargetPlatform.iOS, // comportamento iOS nos widgets Material
-    fontFamily: AppTypography.familia, // cobre textos sem estilo explícito
+    platform: TargetPlatform.iOS,
+    fontFamily: AppTypography.familia,
     colorScheme: scheme,
-    scaffoldBackgroundColor: AppColors.fundoAgrupado,
+    scaffoldBackgroundColor: AppColors.gelo,
     textTheme: AppTypography.textTheme,
-    splashFactory: NoSplash.splashFactory, // sem ripple do Android
+    splashFactory: NoSplash.splashFactory,
     highlightColor: Colors.transparent,
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: <TargetPlatform, PageTransitionsBuilder>{
@@ -42,23 +43,21 @@ ThemeData buildAppTheme() {
       },
     ),
     cupertinoOverrideTheme: CupertinoThemeData(
-      primaryColor: AppColors.azul800,
+      primaryColor: AppColors.azulMarca,
       primaryContrastingColor: AppColors.sobrePrimaria,
-      scaffoldBackgroundColor: AppColors.fundoAgrupado,
-      barBackgroundColor: AppColors.fundoAgrupado, // opaco: sem blur
-      // inherit: false em todos, como os padrões do Cupertino: a transição da barra
-      // interpola título grande → botão voltar e falha se os `inherit` diferirem.
+      scaffoldBackgroundColor: AppColors.gelo,
+      barBackgroundColor: AppColors.gelo, // opaco: sem blur
       textTheme: CupertinoTextThemeData(
-        primaryColor: AppColors.azul800,
-        textStyle: AppTypography.body.copyWith(color: AppColors.texto, inherit: false),
+        primaryColor: AppColors.azulMarca,
+        textStyle: AppTypography.body.copyWith(color: AppColors.tinta, inherit: false),
         actionTextStyle: AppTypography.body.copyWith(
           color: AppColors.linkSobreSuperficie,
           inherit: false,
         ),
-        navActionTextStyle: AppTypography.body.copyWith(color: AppColors.azul800, inherit: false),
-        navTitleTextStyle: AppTypography.headline.copyWith(color: AppColors.texto, inherit: false),
+        navActionTextStyle: AppTypography.body.copyWith(color: AppColors.navy, inherit: false),
+        navTitleTextStyle: AppTypography.headline.copyWith(color: AppColors.tinta, inherit: false),
         navLargeTitleTextStyle: AppTypography.largeTitle.copyWith(
-          color: AppColors.texto,
+          color: AppColors.tinta,
           inherit: false,
         ),
       ),
@@ -66,23 +65,23 @@ ThemeData buildAppTheme() {
     dividerTheme: const DividerThemeData(
       thickness: AppSpacing.divisoria,
       space: AppSpacing.divisoria,
-      color: AppColors.borda,
+      color: AppColors.linha,
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: AppColors.texto,
+      backgroundColor: AppColors.tinta,
       contentTextStyle: AppTypography.subheadline.copyWith(color: AppColors.sobrePrimaria),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.raioAviso)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.raioCard)),
     ),
     progressIndicatorTheme: const ProgressIndicatorThemeData(
-      color: AppColors.azul500,
-      linearTrackColor: AppColors.azul100,
+      color: AppColors.azulMarca,
+      linearTrackColor: AppColors.menta,
       linearMinHeight: 4,
     ),
   );
 }
 
-/// Rolagem elástica do iOS também no Android, sem o brilho de overscroll.
+/// Rolagem elástica também no Android, sem brilho de overscroll.
 class AppScrollBehavior extends MaterialScrollBehavior {
   const AppScrollBehavior();
 

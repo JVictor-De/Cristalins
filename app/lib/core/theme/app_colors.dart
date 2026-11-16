@@ -1,32 +1,72 @@
 import 'package:flutter/painting.dart';
 
-/// Cores da marca Cristalins (CONTEXTO.md, seção Cores).
+/// Cores da marca Cristalins — tokens marketplace (site + CONTEXTO).
 ///
-/// Contraste: texto branco sobre [azul800] e [azul500]; [azul900] sobre
-/// [amareloFlow]; link [azul500] só sobre branco; sobre [fundoAgrupado], [azul700].
-/// No máximo um amarelo por tela. Sem sombra, sem gradiente.
+/// Contraste AA: branco sobre [azulMarca]/~4,51) e [navy]; [tinta]/[navy] sobre
+/// [lima]/[amareloFlow]/[aqua]. Nunca texto branco sobre lima ou amarelo.
+/// Gradiente só em hero/banner; sombra via [AppSombras].
 abstract final class AppColors {
+  // --- Marketplace (CSS cristalins.com.br) ---
+  /// Títulos, tab ativa, botão escuro (= [azul800]).
+  static const navy = Color(0xFF073B53);
+  static const azul800 = navy;
+
+  /// CTA primária. Hex do site `#087FAE`; contraste branco ≈ 4,51 (AA).
+  static const azulMarca = Color(0xFF087FAE);
+
+  static const azulPetroleo = Color(0xFF087E9B);
+  static const ceu = Color(0xFF9FE4FB);
+  static const aqua = Color(0xFFBDE9E8);
+  static const menta = Color(0xFFE9F7F3);
+
+  /// Fundo de tela e fundo padrão dos cards na grade.
+  static const gelo = Color(0xFFEDF8FD);
+
+  static const tinta = Color(0xFF17333D);
+  static const textoSuave = Color(0xFF5C7076);
+  static const linha = Color(0xFFD8E6E4);
+
+  /// Família Water Protein (hero / chip / PDP) — não parede de card na grade.
+  static const lima = Color(0xFFDCF078);
+
+  /// Rótulo WP — média da tampa em `protein.webp` (rótulo iluminado ~`#9DE365`).
+  static const verdeProtein = Color(0xFF95CC3C);
+
+  /// Só Flow Fiber.
+  static const amareloFlow = Color(0xFFF5C518);
+
+  /// Badge contador sacola / “Novo” pontual.
+  static const promo = Color(0xFFB51E2E);
+
+  // --- Escala auxiliar (telas ainda não redesenhadas) ---
   static const azul900 = Color(0xFF04263A);
-  static const azul800 = Color(0xFF073B53); // primária
   static const azul700 = Color(0xFF0B4F6E);
   static const azul500 = Color(0xFF1A7BA3);
   static const azul300 = Color(0xFF7FB8D1);
   static const azul100 = Color(0xFFD9ECF4);
   static const azul50 = Color(0xFFF2F8FB);
-  static const fundoAgrupado = Color(0xFFF2F5F7);
+
+  /// Alias legado → [gelo] (marketplace).
+  static const fundoAgrupado = gelo;
   static const superficie = Color(0xFFFFFFFF);
-  static const amareloFlow = Color(0xFFF5C518);
-  static const texto = Color(0xFF1A1A1A);
-  static const textoSecundario = Color(0xFF4A5A63);
-  static const borda = Color(0xFFD5DDE2);
+
+  /// Texto principal (= [tinta]).
+  static const texto = tinta;
+
+  /// Texto secundário (= [textoSuave]).
+  static const textoSecundario = textoSuave;
+
+  /// Divisória (= [linha]).
+  static const borda = linha;
+
   static const sucesso = Color(0xFF2E7D32);
   static const alerta = Color(0xFFB54708);
   static const erro = Color(0xFFC62828);
 
-  /// Texto sobre fundos escuros da marca ([azul800], [azul500]).
+  /// Texto sobre CTA / fundos escuros da marca.
   static const sobrePrimaria = Color(0xFFFFFFFF);
 
-  /// Link/ação de texto conforme o fundo (regra de contraste acima).
-  static const linkSobreSuperficie = azul500;
+  /// Link/ação: preferir [azulMarca] sobre superfície clara.
+  static const linkSobreSuperficie = azulMarca;
   static const linkSobreFundoAgrupado = azul700;
 }

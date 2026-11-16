@@ -8,6 +8,8 @@ services:
     environment:
       TZ: ${TZ:-America/Sao_Paulo}
       DATABASE_URL: ${DATABASE_URL}
+      ASAAS_MODE: ${ASAAS_MODE:-sandbox}
+      ASAAS_API_URL: ${ASAAS_API_URL:-https://api-sandbox.asaas.com/v3}
     depends_on:
       postgres:
         condition: service_healthy

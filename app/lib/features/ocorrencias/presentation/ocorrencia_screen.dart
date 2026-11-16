@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -47,6 +46,12 @@ class _Conteudo extends StatelessWidget {
   const _Conteudo();
 
   Future<void> _foto(BuildContext context, OcorrenciaController c) async {
+    // Na web a câmera nativa é limitada; prioriza arquivo/galeria.
+    if (kIsWeb) {
+      HapticFeedback.selectionClick();
+      await c.escolherFoto(ImageSource.gallery);
+      return;
+    }
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
@@ -131,20 +136,20 @@ class _Conteudo extends StatelessWidget {
                 rodape: 'A foto fica só no servidor, sem link público.',
                 children: [
                   LinhaLista(
-                    titulo: c.caminhoFoto == null ? 'Adicionar foto' : 'Trocar foto',
+                    titulo: c.temFoto ? 'Trocar foto' : 'Adicionar foto',
                     icone: CupertinoIcons.camera,
                     trailing: const CupertinoListTileChevron(),
                     onTap: () => _foto(context, c),
                   ),
                 ],
               ),
-              if (c.caminhoFoto != null)
+              if (c.bytesFoto != null)
                 Padding(
                   padding: EdgeInsets.fromLTRB(margem, AppSpacing.sm, margem, 0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(AppSpacing.raioCelula),
-                    child: Image.file(
-                      File(c.caminhoFoto!),
+                    child: Image.memory(
+                      c.bytesFoto!,
                       height: 180,
                       width: double.infinity,
                       fit: BoxFit.cover,

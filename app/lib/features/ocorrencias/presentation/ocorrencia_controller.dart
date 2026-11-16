@@ -18,9 +18,12 @@ class OcorrenciaController extends ChangeNotifier {
   String? produto;
   int quantidade = 1;
   String solucao = 'REPOSICAO';
-  String? caminhoFoto;
+  Uint8List? bytesFoto;
+  String nomeArquivo = 'foto.jpg';
   bool enviando = false;
   String? erro;
+
+  bool get temFoto => bytesFoto != null;
 
   int get maxQuantidade {
     for (final i in ciclo.itens) {
@@ -33,7 +36,8 @@ class OcorrenciaController extends ChangeNotifier {
     erro = null;
     final x = await _picker.pickImage(source: origem, imageQuality: 85, maxWidth: 1600);
     if (x == null) return;
-    caminhoFoto = x.path;
+    bytesFoto = await x.readAsBytes();
+    nomeArquivo = x.name.trim().isNotEmpty ? x.name : 'foto.jpg';
     notifyListeners();
   }
 
@@ -59,7 +63,7 @@ class OcorrenciaController extends ChangeNotifier {
   }
 
   Future<OcorrenciaCriada?> enviar() async {
-    if (caminhoFoto == null) {
+    if (bytesFoto == null) {
       erro = 'Tire ou escolha uma foto do problema.';
       notifyListeners();
       return null;
@@ -79,7 +83,8 @@ class OcorrenciaController extends ChangeNotifier {
         produto: produto!,
         quantidade: quantidade,
         solucao: solucao,
-        caminhoFoto: caminhoFoto!,
+        bytesFoto: bytesFoto!,
+        nomeArquivo: nomeArquivo,
       );
       return r;
     } on ApiErro catch (e) {

@@ -38,7 +38,8 @@ flutter:
   assets:
     - assets/images/produtos/
     - assets/images/brand/
-  # Inter (SIL OFL 1.1, licença em assets/fonts/OFL.txt). Nunca SF Pro / SF Symbols.
+    - assets/images/hero/
+  # Inter + DM Serif Display (SIL OFL 1.1). Nunca SF Pro / SF Symbols.
   fonts:
     - family: Inter
       fonts:
@@ -52,3 +53,7 @@ flutter:
           style: italic
         - asset: assets/fonts/Inter-Bold.ttf
           weight: 700
+    - family: DMSerifDisplay
+      fonts:
+        - asset: assets/fonts/DMSerifDisplay-Regular.ttf
+          weight: 400

@@ -5,7 +5,7 @@ import 'package:flutter/services.dart'; // SystemChrome não sai de material.dar
 
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
-import 'boas_vindas_screen.dart';
+import '../data/onboarding_prefs.dart';
 
 /// Abertura: água em tela cheia que vira a garrafa e segue para boas-vindas.
 class SplashScreen extends StatefulWidget {
@@ -58,16 +58,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     await Future<void>.delayed(const Duration(milliseconds: 700));
     if (!mounted) return;
 
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder<void>(
-        settings: const RouteSettings(name: AppRoutes.boasVindas),
-        transitionDuration: const Duration(milliseconds: 550),
-        pageBuilder: (_, _, _) => const BoasVindasScreen(),
-        transitionsBuilder: (_, animation, _, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
+    final destino = await OnboardingPrefs.visto() ? AppRoutes.shell : AppRoutes.onboarding;
+    if (!mounted) return;
+    Navigator.of(context).pushReplacementNamed(destino);
   }
 
   @override

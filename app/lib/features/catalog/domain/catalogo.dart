@@ -23,6 +23,7 @@ class Produto {
     required this.volumeMl,
     required this.embalagemQtd,
     required this.precoBase,
+    this.descricao,
   });
 
   final String codigo;
@@ -33,6 +34,9 @@ class Produto {
   final int volumeMl;
   final int embalagemQtd;
   final Dinheiro precoBase;
+
+  /// Texto do catálogo (API); sem promessa de saúde.
+  final String? descricao;
 
   /// Volume legível: 500 ml, 1,5 L.
   String get volume {
@@ -65,19 +69,21 @@ class Kit {
   final Dinheiro subtotalBase;
 }
 
-/// Categorias do controle segmentado da Tela 5.
+/// Chips da aba Produtos (marketplace v3).
 enum Categoria {
   todos('Todos'),
-  aguas('Águas'),
   waterProtein('Water Protein'),
-  flowFiber('Flow Fiber');
+  flowFiber('Flow Fiber'),
+  aguas('Águas'),
+  kits('Kits');
 
   const Categoria(this.rotulo);
   final String rotulo;
 
   bool inclui(Produto p) => switch (this) {
     Categoria.todos => true,
-    Categoria.aguas => p.tipo == 'COMPLEMENTO' || p.tipo == 'B2B',
+    Categoria.kits => false, // kits são outra lista
+    Categoria.aguas => p.tipo == 'COMPLEMENTO' || p.tipo == 'B2B' || p.tipo == 'ADDON',
     Categoria.waterProtein => p.codigo == 'WP500',
     Categoria.flowFiber => p.codigo == 'FF500',
   };
@@ -133,6 +139,12 @@ class Simulacao {
     required this.total,
     required this.detalhe,
     this.zona,
+    this.ueMinima = 12,
+    this.ueMaxima = 120,
+    this.faltaUeParaMinimo = 0,
+    this.freteGratisAcima = 250,
+    this.faltaParaFreteGratis = 0,
+    this.economiaPlano = 0,
   });
 
   final List<ItemSimulado> itens;
@@ -142,4 +154,12 @@ class Simulacao {
   final Dinheiro total;
   final List<LinhaPreco> detalhe;
   final String? zona;
+  final num ueMinima;
+  final num ueMaxima;
+  final num faltaUeParaMinimo;
+  final num freteGratisAcima;
+  final num faltaParaFreteGratis;
+  final num economiaPlano;
+
+  bool get abaixoDoMinimo => faltaUeParaMinimo > 0;
 }

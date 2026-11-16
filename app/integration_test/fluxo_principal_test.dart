@@ -139,7 +139,9 @@ void main() {
   testWidgets('quiz → resultado → cesta → endereço → plano contra a API local', (tester) async {
     final config = const AppConfig(ambiente: Ambiente.dev, apiUrl: _apiUrl, suporteWhatsapp: '');
     final dependencias = Dependencias.reais(config, tokens: ArmazenamentoEmMemoria());
-    await tester.pumpWidget(CristalinsApp(config: config, dependencias: dependencias));
+    await tester.pumpWidget(
+      CristalinsApp(config: config, dependencias: dependencias, exibirSplash: false),
+    );
     await tester.pumpAndSettle();
 
     // Tela 1 → Tela 2: cria um cliente novo (POST /clientes)

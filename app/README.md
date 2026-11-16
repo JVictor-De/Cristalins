@@ -1,17 +1,16 @@
 # cristalins_assinatura
 
-A new Flutter project.
+App Flutter da assinatura Cristalins (Android + **Web** para demo/hml).
 
-## Getting Started
+## Entradas
 
-This project is a starting point for a Flutter application.
+| Ambiente | Comando |
+| --- | --- |
+| Dev Android | `flutter run --flavor dev -t lib/main_dev.dart` |
+| Hml Android | `flutter run --flavor hml -t lib/main_hml.dart --dart-define=API_URL=https://apicristalins.peladeiro.cloud` |
+| Dev Web | `flutter run -d chrome -t lib/main_dev.dart` |
+| Build Web hml | `flutter build web -t lib/main_hml.dart --release --base-href=/ --dart-define=API_URL=https://apicristalins.peladeiro.cloud` |
 
-A few resources to get you started if this is your first Flutter project:
+Deploy Coolify / DNS / CORS: ver [`docs/DEPLOY.md`](../docs/DEPLOY.md).
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Dockerfile web: [`Dockerfile`](Dockerfile) (Nginx, porta 80).

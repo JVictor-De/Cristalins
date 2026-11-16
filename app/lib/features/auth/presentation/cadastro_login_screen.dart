@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
@@ -262,6 +263,27 @@ class _ConteudoState extends State<_Conteudo> {
                       ],
                     ),
                   if (c.erro != null) TextoDeApoio(c.erro!, erro: true),
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.margem),
+                    child: Center(
+                      child: TextButton(
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            AppRoutes.shell,
+                            (r) => false,
+                          );
+                        },
+                        child: Text(
+                          'Explorar sem entrar',
+                          style: AppTypography.subheadline.copyWith(
+                            color: AppColors.azulMarca,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

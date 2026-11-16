@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/intents/abridor_links.dart';
+import '../../../core/marca_assets.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -12,6 +13,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/botao_principal.dart';
 
 /// Tela 1 — Boas-vindas. Proposta, ação principal para a Tela 2 e link do site (Intent implícita).
+
 /// Não chama a API.
 class BoasVindasScreen extends StatelessWidget {
   const BoasVindasScreen({super.key});
@@ -63,12 +65,26 @@ class BoasVindasScreen extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          const CupertinoSliverNavigationBar(
-            largeTitle: Text('Cristalins'),
+          CupertinoSliverNavigationBar(
+            largeTitle: Image.asset(
+              assetLogoMarca,
+              height: 36,
+              fit: BoxFit.contain,
+              alignment: Alignment.centerLeft,
+              semanticLabel: 'Cristalins',
+            ),
+            middle: Image.asset(
+              assetLogoMarca,
+              height: 22,
+              fit: BoxFit.contain,
+              semanticLabel: 'Cristalins',
+            ),
+            alwaysShowMiddle: false,
             backgroundColor: AppColors.fundoAgrupado, // opaco: sem blur no Android
             border: null,
             automaticallyImplyLeading: false,
           ),
+
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(margem, AppSpacing.xs, margem, 0),

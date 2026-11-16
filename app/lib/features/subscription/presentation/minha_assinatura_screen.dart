@@ -192,7 +192,7 @@ class _Conteudo extends StatelessWidget {
       await context.read<Dependencias>().auth.excluirConta();
       if (!context.mounted) return;
       HapticFeedback.mediumImpact();
-      Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.boasVindas, (_) => false);
+      Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.shell, (_) => false);
       mostrarAviso(context, 'Conta excluída.');
     } catch (e) {
       if (context.mounted) {
@@ -232,7 +232,7 @@ class _Conteudo extends StatelessWidget {
     HapticFeedback.selectionClick();
     await context.read<Dependencias>().auth.sair();
     if (context.mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.boasVindas, (_) => false);
+      Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.shell, (_) => false);
     }
   }
 
