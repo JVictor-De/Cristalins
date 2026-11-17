@@ -12,6 +12,7 @@ RUN apk add --no-cache openssl libc6-compat
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
 COPY prisma.config.ts ./
+# Node 22 / npm 10: lock precisa listar peers opcionais (chokidar/readdirp). Ver package-lock-sync.spec.ts.
 RUN npm ci
 
 COPY . .
