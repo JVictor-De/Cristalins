@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -180,17 +181,21 @@ class _ConteudoState extends State<_Conteudo> {
                         ),
                         onTap: kIsWeb ? null : () => _copiar(pix.copiaECola),
                         trailing: kIsWeb
-                            ? CupertinoButton(
-                                padding: EdgeInsets.zero,
-                                minimumSize: const Size(
-                                  AppSpacing.toqueMinimo,
-                                  AppSpacing.toqueMinimo,
-                                ),
-                                onPressed: () => _copiar(pix.copiaECola),
-                                child: Text(
-                                  'Copiar',
-                                  style: AppTypography.subheadline.copyWith(
-                                    color: AppColors.linkSobreSuperficie,
+                            ? GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => _copiar(pix.copiaECola),
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    minWidth: AppSpacing.toqueMinimo,
+                                    minHeight: AppSpacing.toqueMinimo,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Copiar',
+                                      style: AppTypography.subheadline.copyWith(
+                                        color: AppColors.linkSobreSuperficie,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               )
