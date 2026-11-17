@@ -17,7 +17,7 @@ Status: **Atende** | **Parcial** | **Não atende** — sem “Atende” sem path
 | API REST + Swagger | 1,0 | **Atende** | Nest + `@nestjs/swagger`; `api/src/configurar-app.ts`; CRUD em controllers (`assinaturas`, `enderecos`, `clientes`, …). Local `/docs`; público `https://apicristalins.peladeiro.cloud/docs` (200 em 2026-11-17) |
 | BD relacional via API | 1,0 | **Atende** | `api/prisma/schema.prisma` + PostgreSQL; app só via `ApiClient` / repositórios |
 | Qualidade de código | 1,0 | **Parcial** | CI `.github/workflows/{api,app}.yml`; Jest + Flutter tests (ex. Manifest/channel); regra de negócio na API. Sem meta de cobertura 70% nesta fila |
-| Oral | 2,5 | **Parcial / preparado** | `docs/APRESENTACAO.md` + `docs/ESTUDO.md` + demo Activities/Intents. Falta João ensaiar com device; prints **3/8** |
+| Oral | 2,5 | **Parcial / preparado** | `docs/APRESENTACAO.md` + `docs/ESTUDO.md` + demo Activities/Intents. Falta João ensaiar com device; prints **4/8** |
 | Bônus | +0,5 | **Atende** | API na nuvem — `docs/AP2_BONUS_CHECKLIST.md`; health/docs/web 200. Play fora. APK físico opcional (pendente João) |
 
 ---
@@ -30,7 +30,7 @@ Status: **Atende** | **Parcial** | **Não atende** — sem “Atende” sem path
 | Proposta | **Atende** | README § Proposta |
 | Tecnologias | **Atende** | README § Tecnologias |
 | Execução (API + app) | **Atende** | README §§ Como rodar |
-| Prints (8 PNG embutidos) | **Parcial** | **3/8** canônicos: `01`, `02`, `05` no README. Extras: `home-inicio`, `sacola-checkout`, `pdp-*`. Faltam `03`, `04`, `06`–`08` |
+| Prints (8 PNG embutidos) | **Parcial** | **4/8** canônicos: `01`, `02`, `05`, `08` no README. Extras: `home-inicio`, `sacola-checkout`, `pdp-*`. Faltam `03`, `04`, `06`, `07` |
 | Descrição da API | **Atende** | README § Descrição da API |
 | Link Swagger | **Atende** | README § Swagger: localhost + `https://apicristalins.peladeiro.cloud/docs` |
 | GitHub público | **Atende** | https://github.com/JVictor-De/Cristalins |
@@ -42,7 +42,7 @@ Status: **Atende** | **Parcial** | **Não atende** — sem “Atende” sem path
 - [x] Manifest ≥5 Activities AP2 + launcher — **9** activities  
 - [x] Intent explícita Activity→Activity demonstrável — channel + doc oral  
 - [x] ≥1 Intent implícita — share / geo / site  
-- [ ] 8 PNG em `docs/prints/` no README — **3/8** (`01`, `02`, `05`); faltam `03`, `04`, `06`–`08` (João)  
+- [ ] 8 PNG em `docs/prints/` no README — **4/8** (`01`, `02`, `05`, `08`); faltam `03`, `04`, `06`, `07` (João)  
 - [x] README 7 itens **exceto prints PNG** + Swagger local/público  
 - [x] `AP2_ACTIVITIES_INTENTS.md` + esta matriz + `AP2_BONUS_CHECKLIST.md`  
 - [x] App/API arquitetura no ar (hml 200); smoke Manifest/channel tests OK  
@@ -54,7 +54,7 @@ Status: **Atende** | **Parcial** | **Não atende** — sem “Atende” sem path
 
 | Achado | Severidade | Ação |
 | --- | --- | --- |
-| Prints 3/8 PNG | Parcial (README prints) | Completar `03`, `04`, `06`–`08`; não inventar. Guia `COMO_CAPTURAR.md` |
+| Prints 4/8 PNG | Parcial (README prints) | Completar `03`, `04`, `06`, `07`; não inventar. Guia `COMO_CAPTURAR.md` |
 | Inventário (`artefatos/INVENTARIO.md`) desatualizado (ainda fala 1 Activity) | Baixa (artefato histórico) | Não reescrever inventário nesta fase; matriz é a fonte atual |
 | Oral sem bloco Activities no roteiro 5 min | Média | **Correção única:** acrescentar demo 30–60s em `docs/APRESENTACAO.md` |
 | Qualidade / cobertura 70% | Fora de escopo fila | Status Parcial honesto |
@@ -72,6 +72,6 @@ Invoke-WebRequest https://apicristalins.peladeiro.cloud/api/v1/health -UseBasicP
 
 ## Pendências honestas para o João
 
-1. Capturar 8 PNG e retomar `ap2-3-prints-readme` (embeds no README).  
+1. Capturar PNG restantes (`03`, `04`, `06`, `07`) e completar embeds no README.  
 2. Opcional: APK `hml` no físico + ensaiar oral com `dumpsys activity`.  
 3. Não Coolify write sem pedido explícito.

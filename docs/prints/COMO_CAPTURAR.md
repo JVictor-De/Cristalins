@@ -1,8 +1,8 @@
 # Como capturar os 8 PNG da AP2
 
-**Status (2026-11-17):** **parcial — 3/8** canônicos no repo e no README (`01`, `02`, `05`).
+**Status (2026-11-17):** **parcial — 4/8** canônicos no repo e no README (`01`, `02`, `05`, `08`).
 
-Não gerar PNG fake. Extras marketplace (`home-inicio`, `pdp-*`, `sacola-checkout`) **não** substituem `03`, `04`, `06`–`08`.
+Não gerar PNG fake. Extras marketplace (`home-inicio`, `pdp-*`, `sacola-checkout`) **não** substituem `03`, `04`, `06`, `07`.
 
 > Nota rubrica Dontpad: **não exige quiz** (só exemplo de tema). Os 8 nomes abaixo são o checklist interno da entrega Cristalins; o enunciado pede prints no README, sem lista fixa de telas.
 
@@ -17,7 +17,7 @@ Não gerar PNG fake. Extras marketplace (`home-inicio`, `pdp-*`, `sacola-checkou
 | 5 | `05-catalogo-cesta.png` | **ok** (sacola / cesta) |
 | 6 | `06-endereco.png` | **falta** |
 | 7 | `07-plano-pagamento.png` | **falta** |
-| 8 | `08-minha-assinatura.png` | **falta** |
+| 8 | `08-minha-assinatura.png` | **ok** |
 
 Extras: `home-inicio.png`, `pdp-water-protein.png`, `pdp-flow-fiber.png`, `sacola-checkout.png`.
 
@@ -47,7 +47,6 @@ adb exec-out screencap -p > "$out\03-quiz.png"
 adb exec-out screencap -p > "$out\04-resultado.png"
 adb exec-out screencap -p > "$out\06-endereco.png"
 adb exec-out screencap -p > "$out\07-plano-pagamento.png"
-adb exec-out screencap -p > "$out\08-minha-assinatura.png"
 ```
 
 ## Depois dos PNG restantes
