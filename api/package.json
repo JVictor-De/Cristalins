@@ -38,6 +38,10 @@
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2"
   },
+  "optionalDependencies": {
+    "chokidar": "4.0.3",
+    "readdirp": "4.1.2"
+  },
   "devDependencies": {
     "@eslint/js": "9.39.5",
     "@nestjs/cli": "11.0.24",
