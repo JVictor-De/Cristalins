@@ -25,15 +25,17 @@ if (!connectionString) {
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
+// estoque: demo AP2 (gates). GUA2000 = 0 mostra “Esgotado” + Avise-me; os demais têm folga
+// para a separação (RN06) não pular itens na apresentação. Igual a scripts/sql/seed_gates_demo_produtos.sql.
 const produtos = [
-  { codigo: 'WP500', nome: 'Water Protein (água com colágeno)', tipo: TipoProduto.PRINCIPAL, volumeMl: 500, ue: '1', embalagemQtd: 6, precoBase: '9.90', precoPiso: '7.50', pesoKg: '0.53' },
-  { codigo: 'FF500', nome: 'Flow Fiber', tipo: TipoProduto.PRINCIPAL, volumeMl: 500, ue: '1', embalagemQtd: 6, precoBase: '8.90', precoPiso: '6.70', pesoKg: '0.53' },
-  { codigo: 'AMS500', nome: 'Água mineral sem gás', tipo: TipoProduto.COMPLEMENTO, volumeMl: 500, ue: '1', embalagemQtd: 12, precoBase: '2.20', precoPiso: '1.50', pesoKg: '0.52' },
-  { codigo: 'AMC510', nome: 'Água mineral com gás', tipo: TipoProduto.COMPLEMENTO, volumeMl: 510, ue: '1.02', embalagemQtd: 12, precoBase: '2.90', precoPiso: '2.00', pesoKg: '0.53' },
-  { codigo: 'AMN1500', nome: 'Água mineral natural', tipo: TipoProduto.COMPLEMENTO, volumeMl: 1500, ue: '3', embalagemQtd: 6, precoBase: '3.90', precoPiso: '2.70', pesoKg: '1.55' },
-  { codigo: 'AMN5000', nome: 'Água mineral natural (galão)', tipo: TipoProduto.COMPLEMENTO, volumeMl: 5000, ue: '10', embalagemQtd: 1, precoBase: '9.90', precoPiso: '7.00', pesoKg: '5.20' },
-  { codigo: 'AMC200', nome: 'Água mineral no copo', tipo: TipoProduto.B2B, volumeMl: 200, ue: '0.4', embalagemQtd: 48, precoBase: '0.90', precoPiso: '0.60', pesoKg: '0.21' },
-  { codigo: 'GUA2000', nome: 'Guaraná Cristalins', tipo: TipoProduto.ADDON, volumeMl: 2000, ue: '4', embalagemQtd: 1, precoBase: '7.90', precoPiso: '5.50', pesoKg: '2.10' },
+  { codigo: 'WP500', nome: 'Water Protein (água com colágeno)', tipo: TipoProduto.PRINCIPAL, volumeMl: 500, ue: '1', embalagemQtd: 6, precoBase: '9.90', precoPiso: '7.50', pesoKg: '0.53', estoque: 1200 },
+  { codigo: 'FF500', nome: 'Flow Fiber', tipo: TipoProduto.PRINCIPAL, volumeMl: 500, ue: '1', embalagemQtd: 6, precoBase: '8.90', precoPiso: '6.70', pesoKg: '0.53', estoque: 900 },
+  { codigo: 'AMS500', nome: 'Água mineral sem gás', tipo: TipoProduto.COMPLEMENTO, volumeMl: 500, ue: '1', embalagemQtd: 12, precoBase: '2.20', precoPiso: '1.50', pesoKg: '0.52', estoque: 2400 },
+  { codigo: 'AMC510', nome: 'Água mineral com gás', tipo: TipoProduto.COMPLEMENTO, volumeMl: 510, ue: '1.02', embalagemQtd: 12, precoBase: '2.90', precoPiso: '2.00', pesoKg: '0.53', estoque: 1800 },
+  { codigo: 'AMN1500', nome: 'Água mineral natural', tipo: TipoProduto.COMPLEMENTO, volumeMl: 1500, ue: '3', embalagemQtd: 6, precoBase: '3.90', precoPiso: '2.70', pesoKg: '1.55', estoque: 1200 },
+  { codigo: 'AMN5000', nome: 'Água mineral natural (galão)', tipo: TipoProduto.COMPLEMENTO, volumeMl: 5000, ue: '10', embalagemQtd: 1, precoBase: '9.90', precoPiso: '7.00', pesoKg: '5.20', estoque: 400 },
+  { codigo: 'AMC200', nome: 'Água mineral no copo', tipo: TipoProduto.B2B, volumeMl: 200, ue: '0.4', embalagemQtd: 48, precoBase: '0.90', precoPiso: '0.60', pesoKg: '0.21', estoque: 4800 },
+  { codigo: 'GUA2000', nome: 'Guaraná Cristalins', tipo: TipoProduto.ADDON, volumeMl: 2000, ue: '4', embalagemQtd: 1, precoBase: '7.90', precoPiso: '5.50', pesoKg: '2.10', estoque: 0 },
 ];
 
 const kits: { codigo: string; nome: string; objetivo: ObjetivoKit; itens: Record<string, number> }[] = [

@@ -3,7 +3,21 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { dec } from '../precos/preco.tipos';
 import { TipoProduto } from '../../prisma/generated/prisma/client';
-import { DESCRICOES_PRODUTO } from './produto-descricoes';
+import { CLAIMS_PRODUTO, DESCRICOES_PRODUTO, PRECOS_AVULSO, TABELAS_NUTRICIONAIS } from './produto-descricoes';
+
+export class LinhaNutricionalResponse {
+  @ApiProperty({ example: 'Proteínas' })
+  nutriente: string;
+  @ApiProperty({ example: '5 g' })
+  valor: string;
+}
+
+export class TabelaNutricionalResponse {
+  @ApiProperty({ example: '500 ml (1 garrafa)' })
+  porcao: string;
+  @ApiProperty({ type: [LinhaNutricionalResponse] })
+  linhas: LinhaNutricionalResponse[];
+}
 
 export class ProdutoResponse {
   @ApiProperty()
@@ -31,6 +45,32 @@ export class ProdutoResponse {
   precoPiso: number;
   @ApiProperty({ example: 0.53 })
   pesoKg: number;
+  @ApiProperty({
+    example: 1200,
+    nullable: true,
+    type: Number,
+    description: 'Unidades em estoque; null = sem controle de estoque (sempre disponível). 0 = esgotado.',
+  })
+  estoque: number | null;
+  @ApiProperty({
+    example: 11.9,
+    nullable: true,
+    type: Number,
+    description: 'Preço unitário avulso (fora da assinatura). Demo AP2 — mapa sem coluna Prisma.',
+  })
+  precoAvulso: number | null;
+  @ApiProperty({
+    example: ['5 g de proteína', 'Com colágeno'],
+    type: [String],
+    description: 'Destaques do rótulo. Demo AP2 — sem alegação de registro ou benefício terapêutico.',
+  })
+  claims: string[];
+  @ApiProperty({
+    type: TabelaNutricionalResponse,
+    nullable: true,
+    description: 'Tabela nutricional por porção (WP/FF). Demo AP2 — o rótulo da embalagem prevalece.',
+  })
+  tabelaNutricional: TabelaNutricionalResponse | null;
 }
 
 const num = (v: { toString(): string }) => dec(v).toNumber();
@@ -45,18 +85,26 @@ export class ProdutosService {
       where: { ativo: true, ...(tipo && { tipo }) },
       orderBy: [{ tipo: 'asc' }, { codigo: 'asc' }],
     });
-    return produtos.map((p) => ({
-      id: p.id,
-      codigo: p.codigo,
-      nome: p.nome,
-      descricao: DESCRICOES_PRODUTO[p.codigo] ?? p.nome,
-      tipo: p.tipo,
-      volumeMl: p.volumeMl,
-      ue: num(p.ue),
-      embalagemQtd: p.embalagemQtd,
-      precoBase: num(p.precoBase),
-      precoPiso: num(p.precoPiso),
-      pesoKg: num(p.pesoKg),
-    }));
+    return produtos.map((p) => {
+      const avulso = PRECOS_AVULSO[p.codigo];
+      const tabela = TABELAS_NUTRICIONAIS[p.codigo];
+      return {
+        id: p.id,
+        codigo: p.codigo,
+        nome: p.nome,
+        descricao: DESCRICOES_PRODUTO[p.codigo] ?? p.nome,
+        tipo: p.tipo,
+        volumeMl: p.volumeMl,
+        ue: num(p.ue),
+        embalagemQtd: p.embalagemQtd,
+        precoBase: num(p.precoBase),
+        precoPiso: num(p.precoPiso),
+        pesoKg: num(p.pesoKg),
+        estoque: p.estoque ?? null,
+        precoAvulso: avulso ? num(avulso) : null,
+        claims: [...(CLAIMS_PRODUTO[p.codigo] ?? [])],
+        tabelaNutricional: tabela ? { porcao: tabela.porcao, linhas: tabela.linhas.map((l) => ({ ...l })) } : null,
+      };
+    });
   }
 }

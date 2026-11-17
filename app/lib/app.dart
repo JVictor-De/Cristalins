@@ -32,7 +32,7 @@ class CristalinsApp extends StatefulWidget {
   /// (`pumpAndSettle` não termina com o `AnimationController.repeat` dela).
   final bool exibirSplash;
 
-  /// Sobrescreve a rota inicial (ex.: testes da Tela 1 usam [AppRoutes.boasVindas]).
+  /// Sobrescreve a rota inicial (ex.: testes usam [AppRoutes.onboarding] / [AppRoutes.boasVindas]).
   /// Se nulo: splash ou shell conforme [exibirSplash].
   final String? rotaInicial;
 

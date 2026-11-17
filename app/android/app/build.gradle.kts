@@ -30,16 +30,16 @@ android {
         create("dev") {
             dimension = "ambiente"
             applicationIdSuffix = ".dev"
-            resValue("string", "app_name", "Cristalins Dev")
+            manifestPlaceholders["appName"] = "Cristalins Dev"
         }
         create("hml") {
             dimension = "ambiente"
             applicationIdSuffix = ".hml"
-            resValue("string", "app_name", "Cristalins Hml")
+            manifestPlaceholders["appName"] = "Cristalins Hml"
         }
         create("prod") {
             dimension = "ambiente"
-            resValue("string", "app_name", "Cristalins")
+            manifestPlaceholders["appName"] = "Cristalins"
         }
     }
 

@@ -59,6 +59,34 @@ describe('Catálogo, quiz e preço (e2e)', () => {
       expect(erro.body).toMatchObject({ codigo: 'DADOS_INVALIDOS', campo: 'tipo' });
     });
 
+    it('gates demo: estoque, precoAvulso, claims e tabela nutricional na vitrine', async () => {
+      prisma.produtos.find((p) => p.codigo === 'GUA2000')!.estoque = 0;
+      prisma.produtos.find((p) => p.codigo === 'WP500')!.estoque = 1200;
+      const r = await http().get('/api/v1/produtos').expect(200);
+      const porCodigo = Object.fromEntries(r.body.map((p: { codigo: string }) => [p.codigo, p]));
+
+      expect(porCodigo.GUA2000.estoque).toBe(0);
+      expect(porCodigo.WP500.estoque).toBe(1200);
+      expect(porCodigo.AMS500.estoque).toBeNull();
+
+      expect(porCodigo.WP500.precoAvulso).toBe(11.9);
+      expect(porCodigo.WP500.precoAvulso).toBeGreaterThan(porCodigo.WP500.precoBase);
+      expect(porCodigo.AMC200.precoAvulso).toBeNull();
+
+      expect(porCodigo.WP500.claims).toEqual(['5 g de proteína', 'Com colágeno', 'Zero açúcar', 'Zero gordura']);
+      expect(porCodigo.AMS500.claims).toEqual([]);
+      for (const p of r.body as { claims: string[] }[]) {
+        expect(p.claims.join(' ')).not.toMatch(/anvisa|registrad|cura|trata|previne/i);
+      }
+
+      expect(porCodigo.WP500.tabelaNutricional).toMatchObject({
+        porcao: '500 ml (1 garrafa)',
+        linhas: expect.arrayContaining([{ nutriente: 'Proteínas', valor: '5 g' }]),
+      });
+      expect(porCodigo.FF500.tabelaNutricional.linhas).toHaveLength(1);
+      expect(porCodigo.AMS500.tabelaNutricional).toBeNull();
+    });
+
     it('não lista produto inativo', async () => {
       prisma.produtos.find((p) => p.codigo === 'GUA2000')!.ativo = false;
       const r = await http().get('/api/v1/produtos').expect(200);

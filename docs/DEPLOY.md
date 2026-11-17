@@ -142,7 +142,7 @@ GET https://apicristalins.peladeiro.cloud/docs
 → Swagger
 
 GET https://cristalins.peladeiro.cloud/
-→ app Flutter Web (tela de boas-vindas)
+→ app Flutter Web (splash → onboarding marketplace; `/boas-vindas` é alias)
 ```
 
 No browser: login / quiz / cesta / Pix.  
@@ -175,8 +175,8 @@ Saída: `app/build/web/` (servir com Nginx ou `python -m http.server` só para i
 ### Smoke checklist (web)
 
 1. `GET` health da API 200  
-2. Abrir UI → boas-vindas  
-3. Cadastro/login  
+2. Abrir UI → onboarding (ou shell se já visto)  
+3. Cadastro/login (quando for assinar / conta)  
 4. Quiz → recomendação  
 5. Endereço (CEP RJ) → cesta → plano → Pix / aguardando  
 6. (Opcional) ocorrência com foto via arquivo  
@@ -209,6 +209,22 @@ APK típico:
 4. `applicationId`: `br.com.cristalins.assinatura.hml` (instala ao lado de `dev` / `prod`).
 
 Opcional: `--dart-define=SUPORTE_WHATSAPP=` (vazio até haver número; não inventar).
+
+### Publicar no site (banner “Baixar app”)
+
+1. Copie o APK para o static do Flutter Web:
+
+```powershell
+New-Item -ItemType Directory -Force -Path web\downloads | Out-Null
+Copy-Item build\app\outputs\flutter-apk\app-hml-release.apk web\downloads\cristalins-hml.apk -Force
+```
+
+2. Rebuild/redeploy o **web** (Coolify app `cristalins` / domínio `cristalins.peladeiro.cloud`).  
+   O `index.html` mostra um banner em **Android** se `GET /downloads/cristalins-hml.apk` retornar 200.  
+   URL pública: `https://cristalins.peladeiro.cloud/downloads/cristalins-hml.apk`
+
+3. Sem o arquivo no image do Coolify, o banner **não** aparece (HEAD falha de propósito).
+4. O APK (~67 MB) está no `.gitignore` (`app/web/downloads/*.apk`). Para o Coolify incluir no build: copie o arquivo para `app/web/downloads/` **antes** do deploy (contexto Docker faz `COPY . .` e o `flutter build web` copia `web/` → `build/web/`). Ou force-add no git se preferir versionar.
 
 ---
 

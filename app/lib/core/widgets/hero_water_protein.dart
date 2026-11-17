@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../formatacao.dart';
 import '../marca_assets.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
 
 /// Hero da home visitante — Water Protein (layout em código + PNG da garrafa).
 class HeroWaterProtein extends StatefulWidget {
@@ -34,8 +35,7 @@ class HeroWaterProtein extends StatefulWidget {
   State<HeroWaterProtein> createState() => _HeroWaterProteinState();
 }
 
-class _HeroWaterProteinState extends State<HeroWaterProtein>
-    with SingleTickerProviderStateMixin {
+class _HeroWaterProteinState extends State<HeroWaterProtein> with SingleTickerProviderStateMixin {
   late final AnimationController _entrada;
   late final Animation<double> _fade;
   late final Animation<double> _deslocamento;
@@ -44,10 +44,7 @@ class _HeroWaterProteinState extends State<HeroWaterProtein>
   @override
   void initState() {
     super.initState();
-    _entrada = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 450),
-    );
+    _entrada = AnimationController(vsync: this, duration: const Duration(milliseconds: 450));
     final curva = CurvedAnimation(parent: _entrada, curve: Curves.easeOutCubic);
     _fade = curva;
     _deslocamento = Tween<double>(begin: 12, end: 0).animate(curva);
@@ -120,9 +117,7 @@ class _HeroWaterProteinState extends State<HeroWaterProtein>
                         ),
                         child: Stack(
                           children: [
-                            const Positioned.fill(
-                              child: CustomPaint(painter: _OndasHeroPainter()),
-                            ),
+                            const Positioned.fill(child: CustomPaint(painter: _OndasHeroPainter())),
                             Positioned(
                               left: w * garrafaCentroFrac - luzDiametro / 2,
                               top: 0,
@@ -215,9 +210,15 @@ class _TextoHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tituloSize = horizontal ? 44.0 : 30.0;
-    final linhaSize = horizontal ? 18.0 : 15.0;
-    final precoSize = horizontal ? 30.0 : 26.0;
+    // P1.2: escala do DS (largeTitle 34 / title1 28) em vez de 44/30 avulsos.
+    final titulo = (horizontal ? AppTypography.largeTitle : AppTypography.title1).copyWith(
+      color: HeroWaterProtein.ink,
+    );
+    final linha = (horizontal ? AppTypography.body : AppTypography.subheadline).copyWith(
+      color: HeroWaterProtein.verdeTexto,
+    );
+    final precoEstilo = AppTypography.title1.copyWith(color: HeroWaterProtein.ink);
+    final apoio = AppTypography.footnote.copyWith(color: HeroWaterProtein.verdeTexto);
     final gapAntesPreco = horizontal ? 22.0 : 18.0;
     final gapAntesBotoes = horizontal ? 22.0 : 16.0;
     final alturaAssinar = horizontal ? 52.0 : 48.0;
@@ -226,37 +227,12 @@ class _TextoHero extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color: HeroWaterProtein.navyEscuro,
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: const Text(
-            'Mais vendido',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              height: 1.2,
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
-          child: Text(
-            'Water Protein',
-            maxLines: 1,
-            softWrap: false,
-            style: TextStyle(
-              fontSize: tituloSize,
-              fontWeight: FontWeight.w700,
-              height: 1.05,
-              letterSpacing: tituloSize * -0.02,
-              color: HeroWaterProtein.ink,
-            ),
+          child: Semantics(
+            header: true,
+            child: Text('Water Protein', maxLines: 1, softWrap: false, style: titulo),
           ),
         ),
         const SizedBox(height: 8),
@@ -267,14 +243,11 @@ class _TextoHero extends StatelessWidget {
             'Água com proteína e colágeno · 500 ml',
             maxLines: 1,
             softWrap: false,
-            style: TextStyle(
-              fontSize: linhaSize,
-              height: 1.35,
-              color: HeroWaterProtein.verdeTexto,
-            ),
+            style: linha,
           ),
         ),
         const SizedBox(height: 14),
+        // P1.2: claims = lote PDP (composição). “Zero açúcar” só com rótulo confirmado (gate).
         const FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
@@ -283,25 +256,16 @@ class _TextoHero extends StatelessWidget {
             children: [
               _ChipHero(rotulo: '5 g de proteína'),
               SizedBox(width: 6),
-              _ChipHero(rotulo: '0 açúcar'),
+              _ChipHero(rotulo: 'Com colágeno'),
             ],
           ),
         ),
         SizedBox(height: gapAntesPreco),
         if (preco != null) ...[
-          const FittedBox(
+          FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(
-              'Na assinatura, a partir de',
-              maxLines: 1,
-              softWrap: false,
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.3,
-                color: HeroWaterProtein.verdeTexto,
-              ),
-            ),
+            child: Text('Na assinatura, a partir de', maxLines: 1, softWrap: false, style: apoio),
           ),
           FittedBox(
             fit: BoxFit.scaleDown,
@@ -309,23 +273,8 @@ class _TextoHero extends StatelessWidget {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: preco!.formatado,
-                    style: TextStyle(
-                      fontSize: precoSize,
-                      fontWeight: FontWeight.w700,
-                      height: 1.15,
-                      color: HeroWaterProtein.ink,
-                    ),
-                  ),
-                  const TextSpan(
-                    text: ' /garrafa',
-                    style: TextStyle(
-                      fontSize: 13,
-                      height: 1.3,
-                      color: HeroWaterProtein.verdeTexto,
-                    ),
-                  ),
+                  TextSpan(text: preco!.formatado, style: precoEstilo),
+                  TextSpan(text: ' /garrafa', style: apoio),
                 ],
               ),
               maxLines: 1,
@@ -337,11 +286,7 @@ class _TextoHero extends StatelessWidget {
         if (horizontal)
           Row(
             children: [
-              _BotaoAssinar(
-                altura: alturaAssinar,
-                expandido: false,
-                onPressed: onAssinar,
-              ),
+              _BotaoAssinar(altura: alturaAssinar, expandido: false, onPressed: onAssinar),
               const SizedBox(width: 12),
               Flexible(child: _BotaoConhecer(onPressed: onConhecer)),
             ],
@@ -349,11 +294,7 @@ class _TextoHero extends StatelessWidget {
         else
           SizedBox(
             width: double.infinity,
-            child: _BotaoAssinar(
-              altura: alturaAssinar,
-              expandido: true,
-              onPressed: onAssinar,
-            ),
+            child: _BotaoAssinar(altura: alturaAssinar, expandido: true, onPressed: onAssinar),
           ),
       ],
     );
@@ -375,10 +316,8 @@ class _ChipHero extends StatelessWidget {
       ),
       child: Text(
         rotulo,
-        style: const TextStyle(
-          fontSize: 12.5,
+        style: AppTypography.footnote.copyWith(
           fontWeight: FontWeight.w500,
-          height: 1.2,
           color: HeroWaterProtein.ink,
         ),
       ),
@@ -387,11 +326,7 @@ class _ChipHero extends StatelessWidget {
 }
 
 class _BotaoAssinar extends StatelessWidget {
-  const _BotaoAssinar({
-    required this.altura,
-    required this.expandido,
-    required this.onPressed,
-  });
+  const _BotaoAssinar({required this.altura, required this.expandido, required this.onPressed});
 
   final double altura;
   final bool expandido;
@@ -462,10 +397,7 @@ class _GarrafaHero extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
                 color: HeroWaterProtein.ink.withValues(alpha: 0.10),
                 boxShadow: [
-                  BoxShadow(
-                    color: HeroWaterProtein.ink.withValues(alpha: 0.28),
-                    blurRadius: 12,
-                  ),
+                  BoxShadow(color: HeroWaterProtein.ink.withValues(alpha: 0.28), blurRadius: 12),
                 ],
               ),
             ),
@@ -489,11 +421,7 @@ class _GarrafaHero extends StatelessWidget {
   }
 
   static Widget _garrafaFallback(BuildContext context, Object error, StackTrace? stackTrace) {
-    return const Icon(
-      Icons.water_drop_outlined,
-      size: 72,
-      color: HeroWaterProtein.ink,
-    );
+    return const Icon(Icons.water_drop_outlined, size: 72, color: HeroWaterProtein.ink);
   }
 }
 
@@ -513,12 +441,7 @@ class _OndasHeroPainter extends CustomPainter {
         size.width * 0.55,
         size.height * 0.78,
       )
-      ..quadraticBezierTo(
-        size.width * 0.82,
-        size.height * 0.86,
-        size.width,
-        size.height * 0.74,
-      )
+      ..quadraticBezierTo(size.width * 0.82, size.height * 0.86, size.width, size.height * 0.74)
       ..lineTo(size.width, size.height)
       ..lineTo(0, size.height)
       ..close();
@@ -531,12 +454,7 @@ class _OndasHeroPainter extends CustomPainter {
         size.width * 0.48,
         size.height * 0.87,
       )
-      ..quadraticBezierTo(
-        size.width * 0.78,
-        size.height * 0.94,
-        size.width,
-        size.height * 0.84,
-      )
+      ..quadraticBezierTo(size.width * 0.78, size.height * 0.94, size.width, size.height * 0.84)
       ..lineTo(size.width, size.height)
       ..lineTo(0, size.height)
       ..close();

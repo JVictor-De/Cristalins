@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/dependencias.dart';
+import '../../../core/intents/navegacao_nativa.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -45,7 +46,14 @@ class _Conteudo extends StatelessWidget {
       );
       return;
     }
-    Navigator.of(context).pushNamed(AppRoutes.resultado, arguments: recomendacao.id);
+    await NavegacaoNativa.instancia.abrir(
+      context,
+      activity: NavegacaoNativa.resultado,
+      rota: AppRoutes.resultado,
+      arguments: recomendacao.id,
+      extras: {'recomendacaoId': recomendacao.id},
+      finish: true,
+    );
   }
 
   @override

@@ -5,6 +5,7 @@ import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/botao_sacola_badge.dart';
 import '../../../core/widgets/card_kit.dart';
 import '../../../core/widgets/card_produto.dart';
 import '../../../core/widgets/chip_categoria.dart';
@@ -12,9 +13,34 @@ import '../../../core/widgets/estado_vazio.dart';
 import '../../../core/widgets/estados.dart';
 import '../../../core/widgets/skeleton_card.dart';
 import '../domain/catalogo.dart';
+import '../domain/produto_assets.dart';
 import 'sacola_controller.dart';
 
-/// Aba Produtos — grade 2 colunas, sem preço.
+/// Fonte ≥ 160% do sistema: 1 coluna (nome curto 1 linha não cabe em ~170 dp).
+const kEscalaFonteUmaColuna = 1.6;
+
+/// Grade P1.4: espelha o card foto-âncora da Home (bloco 164:200 + texto fora),
+/// gap 16, altura pelo [CardProduto.alturaPara]; 1 coluna com fonte grande.
+SliverGridDelegateWithFixedCrossAxisCount gradeProdutosPara(double larguraTela, TextScaler escala) {
+  const gap = AppSpacing.margem;
+  final colunas = escala.scale(16) / 16 >= kEscalaFonteUmaColuna ? 1 : 2;
+  final larguraCard = (larguraTela - AppSpacing.margem * 2 - gap * (colunas - 1)) / colunas;
+  // Em 1 coluna o bloco para em 1,3× o alvo (260 dp) — evita foto gigante.
+  final alturaBloco = (larguraCard * AppSpacing.alturaBlocoProduto / AppSpacing.larguraBlocoProduto)
+      .clamp(0.0, AppSpacing.alturaBlocoProduto * 1.3);
+  return SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: colunas,
+    mainAxisSpacing: gap,
+    crossAxisSpacing: gap,
+    mainAxisExtent: CardProduto.alturaPara(alturaBloco, escala),
+  );
+}
+
+/// Resumo do kit com nomes curtos (P5.2): `6× Water Protein + 2× Galão`.
+String resumoDoKit(Kit kit) =>
+    kit.itens.map((e) => '${e.quantidade}× ${nomeCurtoPorCodigo(e.produto)}').join(' + ');
+
+/// Aba Produtos — grade 2 colunas (1 com fonte grande); âncora `precoBase` nos cards.
 class ProdutosScreen extends StatefulWidget {
   const ProdutosScreen({super.key, this.categoriaInicial});
 
@@ -64,17 +90,24 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
         : Categoria.chipsPara(totalProdutos: total, temKits: sacola.kits.isNotEmpty);
 
     // Catálogo curto: WP/Fiber individuais → Funcionais (sem mutar state no build).
-    final categoriaAtiva = catalogoCurto &&
-            (_categoria == Categoria.waterProtein || _categoria == Categoria.flowFiber)
+    final categoriaAtiva =
+        catalogoCurto && (_categoria == Categoria.waterProtein || _categoria == Categoria.flowFiber)
         ? Categoria.funcionais
         : _categoria;
 
-    final produtos = sacola.produtos.where((p) {
-      if (!categoriaAtiva.inclui(p)) return false;
-      if (_filtro.isEmpty) return true;
-      final q = _filtro.toLowerCase();
-      return p.nome.toLowerCase().contains(q) || p.codigo.toLowerCase().contains(q);
-    }).toList();
+    final produtos = ordenarGradeProdutos(
+      sacola.produtos.where((p) {
+        if (!categoriaAtiva.inclui(p)) return false;
+        if (_filtro.isEmpty) return true;
+        final q = _filtro.toLowerCase();
+        return p.nome.toLowerCase().contains(q) || p.codigo.toLowerCase().contains(q);
+      }),
+    );
+
+    final grade = gradeProdutosPara(
+      MediaQuery.sizeOf(context).width,
+      MediaQuery.textScalerOf(context),
+    );
 
     return SafeArea(
       child: CustomScrollView(
@@ -84,10 +117,27 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.margem,
                 AppSpacing.sm,
-                AppSpacing.margem,
+                AppSpacing.xs,
                 AppSpacing.xs,
               ),
-              child: Text('Produtos', style: AppTypography.largeTitle.copyWith(color: AppColors.navy)),
+              // P1.4: header com sacola + contador (mesmo widget da Home).
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      header: true,
+                      child: Text(
+                        'Produtos',
+                        style: AppTypography.largeTitle.copyWith(color: AppColors.navy),
+                      ),
+                    ),
+                  ),
+                  BotaoSacolaBadge(
+                    totalItens: sacola.totalItens,
+                    onTap: () => Navigator.of(context).pushNamed(AppRoutes.sacola),
+                  ),
+                ],
+              ),
             ),
           ),
           if (mostrarBusca)
@@ -123,48 +173,26 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
             ),
           if (chips.isNotEmpty)
             SliverToBoxAdapter(
+              // P1.4: sem fade lateral (o corte do último chip já indica rolagem).
               child: SizedBox(
                 height: AppSpacing.toqueMinimo + AppSpacing.sm * 2,
-                child: Stack(
+                child: ListView(
+                  key: const ValueKey('chips-produtos'),
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.margem,
+                    vertical: AppSpacing.sm,
+                  ),
                   children: [
-                    ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.margem,
-                        AppSpacing.sm,
-                        AppSpacing.margem + 24,
-                        AppSpacing.sm,
-                      ),
-                      children: [
-                        for (final c in chips)
-                          Padding(
-                            padding: const EdgeInsets.only(right: AppSpacing.xs),
-                            child: ChipCategoria(
-                              rotulo: c.rotulo,
-                              selecionado: categoriaAtiva == c,
-                              onTap: () => setState(() => _categoria = c),
-                            ),
-                          ),
-                      ],
-                    ),
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      bottom: 0,
-                      width: 28,
-                      child: IgnorePointer(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.gelo.withValues(alpha: 0),
-                                AppColors.gelo,
-                              ],
-                            ),
-                          ),
+                    for (final c in chips)
+                      Padding(
+                        padding: const EdgeInsets.only(right: AppSpacing.xs),
+                        child: ChipCategoria(
+                          rotulo: c.rotulo,
+                          selecionado: categoriaAtiva == c,
+                          onTap: () => setState(() => _categoria = c),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -184,18 +212,19 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
                           : () => setState(() => _categoria = Categoria.todos),
                     )
                   : SizedBox(
-                      height: 176,
+                      height: CardKit.alturaPara(MediaQuery.textScalerOf(context)),
                       child: ListView.separated(
+                        key: const ValueKey('lista-kits'),
                         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
                         scrollDirection: Axis.horizontal,
                         itemCount: sacola.kits.length,
                         separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
                         itemBuilder: (context, i) {
                           final k = sacola.kits[i];
-                          final resumo = k.itens.map((e) => e.produto).join(', ');
                           return CardKit(
                             nome: k.nome,
-                            resumoItens: resumo,
+                            resumoItens: resumoDoKit(k),
+                            precoBase: k.subtotalBase,
                             codigosItens: [for (final e in k.itens) e.produto],
                             onTap: () => sacola.usarKit(k),
                             onAdicionar: () => sacola.usarKit(k),
@@ -208,14 +237,9 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
             SliverPadding(
               padding: const EdgeInsets.all(AppSpacing.margem),
               sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: AppSpacing.sm,
-                  crossAxisSpacing: AppSpacing.sm,
-                  childAspectRatio: 0.72,
-                ),
+                gridDelegate: grade,
                 delegate: SliverChildBuilderDelegate(
-                  (_, _) => const SkeletonCard(altura: 200),
+                  (_, _) => const SkeletonCard(altura: AppSpacing.alturaBlocoProduto),
                   childCount: 6,
                 ),
               ),
@@ -252,27 +276,20 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
                 AppSpacing.secaoGrande,
               ),
               sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: AppSpacing.sm,
-                  crossAxisSpacing: AppSpacing.sm,
-                  childAspectRatio: 0.72,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, i) {
-                    final p = produtos[i];
-                    return CardProduto(
-                      produto: p,
-                      quantidade: sacola.quantidadeDe(p.codigo),
-                      passo: sacola.passo(p),
-                      onAbrir: () =>
-                          Navigator.of(context).pushNamed(AppRoutes.produto, arguments: p.codigo),
-                      onAdicionar: () => sacola.adicionarPasso(p),
-                      onAlterar: (q) => sacola.alterar(p.codigo, q),
-                    );
-                  },
-                  childCount: produtos.length,
-                ),
+                key: const ValueKey('grade-produtos'),
+                gridDelegate: grade,
+                delegate: SliverChildBuilderDelegate((context, i) {
+                  final p = produtos[i];
+                  return CardProduto(
+                    produto: p,
+                    quantidade: sacola.quantidadeDe(p.codigo),
+                    passo: sacola.passo(p),
+                    onAbrir: () =>
+                        Navigator.of(context).pushNamed(AppRoutes.produto, arguments: p.codigo),
+                    onAdicionar: () => sacola.adicionarPasso(p),
+                    onAlterar: (q) => sacola.alterar(p.codigo, q),
+                  );
+                }, childCount: produtos.length),
               ),
             ),
         ],

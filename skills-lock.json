@@ -1,6 +1,13 @@
 {
   "version": 2,
   "skills": {
+    "design-critique": {
+      "source": "anthropics/knowledge-work-plugins",
+      "commit": "e91a134584eb798bac7fb0379358006a2b63b965",
+      "sourceType": "github",
+      "skillPath": "design/skills/design-critique/SKILL.md",
+      "computedHash": "b9647396db0c7a2208519ae3e8313646705aef4b9a2ddab82088b54fe2404f05"
+    },
     "prisma-cli": {
       "source": "prisma/skills",
       "sourceType": "github",

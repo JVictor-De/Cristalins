@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/dependencias.dart';
 import '../../../core/formatacao.dart';
+import '../../../core/intents/navegacao_nativa.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -59,9 +60,14 @@ class _ConteudoState extends State<_Conteudo> {
 
   void _irParaMinhaAssinatura(String id) {
     HapticFeedback.lightImpact();
-    Navigator.of(
+    NavegacaoNativa.instancia.abrir(
       context,
-    ).pushNamedAndRemoveUntil(AppRoutes.minhaAssinatura, (_) => false, arguments: id);
+      activity: NavegacaoNativa.minhaAssinatura,
+      rota: AppRoutes.minhaAssinatura,
+      arguments: id,
+      extras: {'assinaturaId': id},
+      limparPilha: true,
+    );
   }
 
   Future<void> _copiar(String codigo) async {

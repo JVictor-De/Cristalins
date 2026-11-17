@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/dependencias.dart';
+import '../../../core/intents/navegacao_nativa.dart';
 import '../../../core/network/api_erro.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
@@ -191,13 +192,16 @@ class _Conteudo extends StatelessWidget {
               rotulo: 'Montar minha cesta',
               onPressed: () {
                 HapticFeedback.lightImpact();
-                Navigator.of(context).pushNamed(
-                  AppRoutes.catalogo,
+                NavegacaoNativa.instancia.abrir(
+                  context,
+                  activity: NavegacaoNativa.catalogo,
+                  rota: AppRoutes.catalogo,
                   arguments: PedidoAssinatura(
                     itens: r.itens,
                     frequencia: r.frequencia,
                     recomendacaoId: r.id,
                   ),
+                  finish: true,
                 );
               },
             ),

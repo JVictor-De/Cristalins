@@ -1,6 +1,9 @@
+import 'package:cristalins_assinatura/app.dart';
+import 'package:cristalins_assinatura/core/routes.dart';
 import 'package:cristalins_assinatura/features/auth/presentation/esqueci_senha_screen.dart';
 import 'package:cristalins_assinatura/features/auth/presentation/redefinir_senha_screen.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fakes.dart';
@@ -11,12 +14,17 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(360, 780));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    await tester.pumpWidget(appDeTeste(f));
+    await tester.pumpWidget(
+      CristalinsApp(
+        config: configDeTeste(),
+        dependencias: f.dependencias,
+        exibirSplash: false,
+        rotaInicial: AppRoutes.cadastroLogin,
+      ),
+    );
     await tester.pumpAndSettle();
 
-    // Vai ao login → Esqueci a senha
-    await tester.tap(find.text('Começar'));
-    await tester.pumpAndSettle();
+    // Login → Esqueci a senha (entry guest-first não passa mais por "Começar")
     await tester.tap(find.text('Já tenho conta'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Esqueci a senha'));

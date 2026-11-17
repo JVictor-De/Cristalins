@@ -12,6 +12,9 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/botao_principal.dart';
 import '../../../core/widgets/estados.dart';
+import '../../../core/widgets/folha_lista_espera.dart';
+import '../../address/domain/cep_sessao.dart';
+import '../../auth/domain/perfil_cliente.dart';
 import '../../auth/domain/validadores.dart';
 
 /// Perfil — guest (P4) + logado com rotas/API existentes.
@@ -27,6 +30,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   var _carregando = true;
   var _iniciou = false;
   String? _rotuloCep;
+  PerfilCliente? _perfil;
 
   @override
   void didChangeDependencies() {
@@ -38,12 +42,20 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
 
   Future<void> _checarSessao() async {
-    final token = await context.read<Dependencias>().api?.tokens.lerAcesso();
+    final dep = context.read<Dependencias>();
+    final token = await dep.api?.tokens.lerAcesso();
     if (mounted) {
       setState(() {
         _logado = token != null && token.isNotEmpty;
         _carregando = false;
       });
+    }
+    if (!_logado) return;
+    try {
+      final perfil = await dep.auth.perfil();
+      if (mounted) setState(() => _perfil = perfil);
+    } catch (_) {
+      // Sem perfil: a seção mostra o texto genérico.
     }
   }
 
@@ -70,6 +82,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
       ),
     );
     if (!mounted || resultado == null) return;
+    if (resultado.cepForaDaArea != null) {
+      await abrirFolhaListaEspera(context, cepForaDaArea: resultado.cepForaDaArea);
+      return;
+    }
+    CepDaSessao.valor = resultado.cep;
     setState(() => _rotuloCep = resultado.rotulo);
   }
 
@@ -163,6 +180,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
             else
               _Logado(
                 config: config,
+                perfil: _perfil,
                 rotuloCep: _rotuloCep,
                 onFaq: _abrirFaq,
                 onWhatsApp: () => _abrirWhatsApp(config),
@@ -252,10 +270,12 @@ class _Logado extends StatelessWidget {
     required this.onAssinatura,
     required this.onSair,
     required this.onExcluir,
+    this.perfil,
     this.rotuloCep,
   });
 
   final AppConfig config;
+  final PerfilCliente? perfil;
   final String? rotuloCep;
   final VoidCallback onFaq;
   final VoidCallback onWhatsApp;
@@ -267,16 +287,20 @@ class _Logado extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final nome = perfil?.nome.trim() ?? '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Sua conta',
+          nome.isEmpty ? 'Sua conta' : nome,
+          key: const ValueKey('perfil-nome'),
           style: AppTypography.headline.copyWith(color: AppColors.navy),
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Gerencie assinatura e faturas. Nome e status detalhados entram quando /clientes/me estiver ligado nesta tela.',
+          perfil == null || perfil!.email.isEmpty
+              ? 'Gerencie assinatura e faturas.'
+              : '${perfil!.email} · gerencie assinatura e faturas.',
           style: AppTypography.footnote.copyWith(color: AppColors.textoSuave),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -371,17 +395,9 @@ class _BlocoSuporteSobre extends StatelessWidget {
       children: [
         Text('Suporte', style: AppTypography.headline.copyWith(color: AppColors.navy)),
         const SizedBox(height: AppSpacing.xs),
-        _Linha(
-          icone: Icons.help_outline,
-          titulo: 'Ajuda e perguntas frequentes',
-          onTap: onFaq,
-        ),
+        _Linha(icone: Icons.help_outline, titulo: 'Ajuda e perguntas frequentes', onTap: onFaq),
         if (config.suporteWhatsapp.isNotEmpty)
-          _Linha(
-            icone: Icons.chat_outlined,
-            titulo: 'Fale conosco no WhatsApp',
-            onTap: onWhatsApp,
-          ),
+          _Linha(icone: Icons.chat_outlined, titulo: 'Fale conosco no WhatsApp', onTap: onWhatsApp),
         _Linha(
           icone: Icons.location_on_outlined,
           titulo: 'Área de entrega',
@@ -466,9 +482,18 @@ class _FolhaFaq extends StatelessWidget {
   const _FolhaFaq();
 
   static const _faqs = [
-    ('Onde vocês entregam?', 'Atendemos bairros oficiais do município do Rio de Janeiro. Confirme pelo CEP na home ou no checkout.'),
-    ('Posso pausar a assinatura?', 'Sim. Na área logada você pausa ou ajusta a frequência conforme as regras da assinatura.'),
-    ('Como cancelo?', 'Pelo app, em Minha assinatura, com confirmação. Sem taxa inventada nesta tela.'),
+    (
+      'Onde vocês entregam?',
+      'Atendemos bairros oficiais do município do Rio de Janeiro. Confirme pelo CEP na home ou no checkout.',
+    ),
+    (
+      'Posso pausar a assinatura?',
+      'Sim. Na área logada você pausa ou ajusta a frequência conforme as regras da assinatura.',
+    ),
+    (
+      'Como cancelo?',
+      'Pelo app, em Minha assinatura, com confirmação. Sem taxa inventada nesta tela.',
+    ),
   ];
 
   @override
@@ -496,7 +521,10 @@ class _FolhaFaq extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            Text('Perguntas frequentes', style: AppTypography.title3.copyWith(color: AppColors.navy)),
+            Text(
+              'Perguntas frequentes',
+              style: AppTypography.title3.copyWith(color: AppColors.navy),
+            ),
             const SizedBox(height: AppSpacing.sm),
             for (final (q, a) in _faqs) ...[
               Text(q, style: AppTypography.headline.copyWith(color: AppColors.tinta)),
@@ -512,8 +540,13 @@ class _FolhaFaq extends StatelessWidget {
 }
 
 class _ResultadoCepPerfil {
-  const _ResultadoCepPerfil({required this.rotulo});
+  const _ResultadoCepPerfil({required this.cep, required this.rotulo}) : cepForaDaArea = null;
+  const _ResultadoCepPerfil.foraDaArea(String cep) : cep = cep, rotulo = '', cepForaDaArea = cep;
+  final String cep;
   final String rotulo;
+
+  /// CEP_FORA_AREA / BAIRRO_NAO_ATENDIDO: o perfil abre a lista de espera.
+  final String? cepForaDaArea;
 }
 
 class _FolhaCepPerfil extends StatefulWidget {
@@ -527,6 +560,7 @@ class _FolhaCepPerfilState extends State<_FolhaCepPerfil> {
   final _ctrl = TextEditingController();
   var _carregando = false;
   String? _erro;
+  String? _cepForaDaArea;
 
   @override
   void dispose() {
@@ -543,19 +577,24 @@ class _FolhaCepPerfilState extends State<_FolhaCepPerfil> {
     setState(() {
       _carregando = true;
       _erro = null;
+      _cepForaDaArea = null;
     });
+    final digitos = Validadores.digitos(_ctrl.text);
     try {
-      final digitos = Validadores.digitos(_ctrl.text);
       final r = await context.read<Dependencias>().enderecos.consultarCep(digitos);
       if (!mounted) return;
-      Navigator.of(context).pop(
-        _ResultadoCepPerfil(rotulo: 'Entrega em ${r.bairro} · ${r.zona.nome}'),
-      );
+      Navigator.of(
+        context,
+      ).pop(_ResultadoCepPerfil(cep: digitos, rotulo: 'Entrega em ${r.bairro} · ${r.zona.nome}'));
     } catch (e) {
       if (!mounted) return;
+      final erro = ApiErro.de(e);
       setState(() {
         _carregando = false;
-        _erro = ApiErro.de(e).mensagem;
+        _erro = erro.mensagem;
+        if (erro.codigo == 'CEP_FORA_AREA' || erro.codigo == 'BAIRRO_NAO_ATENDIDO') {
+          _cepForaDaArea = digitos;
+        }
       });
     }
   }
@@ -605,7 +644,9 @@ class _FolhaCepPerfilState extends State<_FolhaCepPerfil> {
                 labelText: 'CEP',
                 hintText: '00000000',
                 errorText: _erro,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.raioCard)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.raioCard),
+                ),
               ),
               onSubmitted: (_) => _consultar(),
             ),
@@ -620,10 +661,26 @@ class _FolhaCepPerfilState extends State<_FolhaCepPerfil> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.sobrePrimaria),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.sobrePrimaria,
+                      ),
                     )
                   : const Text('Confirmar CEP'),
             ),
+            if (_cepForaDaArea != null)
+              TextButton(
+                key: const ValueKey('perfil-cep-lista-espera'),
+                onPressed: () =>
+                    Navigator.of(context).pop(_ResultadoCepPerfil.foraDaArea(_cepForaDaArea!)),
+                child: Text(
+                  'Entrar na lista de espera',
+                  style: AppTypography.subheadline.copyWith(
+                    color: AppColors.azulMarca,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(

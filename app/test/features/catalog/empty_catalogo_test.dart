@@ -100,12 +100,12 @@ void main() {
     expect(find.byType(BotaoPrincipal), findsNothing);
   });
 
-  testWidgets('catálogo curto esconde busca e mostra Funcionais', (tester) async {
+  testWidgets('catálogo curto esconde busca e mostra Proteína e fibras', (tester) async {
     await tester.pumpWidget(enveloparProdutos(controller(produtos: [agua, wp])));
     await tester.pump();
 
     expect(find.text('Buscar produto'), findsNothing);
-    expect(find.text('Funcionais'), findsOneWidget);
+    expect(find.text('Proteína e fibras'), findsOneWidget);
     expect(find.text('Águas'), findsOneWidget);
     expect(find.text('Flow Fiber'), findsNothing); // chip individual oculto no curto
   });
@@ -156,10 +156,10 @@ void main() {
     await tester.pump();
 
     expect(find.byType(BotaoPrincipal), findsOneWidget);
-    expect(find.text('Ver todas as águas'), findsNothing);
+    expect(find.text('Ver todos os produtos'), findsOneWidget);
   });
 
-  testWidgets('onboarding com águas: link terciário, sem OutlinedButton', (tester) async {
+  testWidgets('onboarding P4: 1 CTA + secundário, sem kit', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: buildAppTheme(),
@@ -172,10 +172,10 @@ void main() {
     await tester.pump();
 
     expect(find.byType(BotaoPrincipal), findsOneWidget);
-    expect(find.text('Ver todas as águas'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, 'Ver todas as águas'), findsOneWidget);
+    expect(find.text('Montar minha assinatura'), findsOneWidget);
+    expect(find.text('Ver todos os produtos'), findsOneWidget);
     expect(find.byType(OutlinedButton), findsNothing);
-    expect(find.text('Descobrir meu kit'), findsOneWidget);
+    expect(find.text('Descobrir meu kit'), findsNothing);
   });
 
   testWidgets('catálogo longo (>12) mostra busca e chips WP/Fiber', (tester) async {
@@ -196,7 +196,7 @@ void main() {
     expect(find.text('Buscar produto'), findsOneWidget);
     expect(find.text('Water Protein'), findsOneWidget);
     expect(find.text('Flow Fiber'), findsOneWidget);
-    expect(find.text('Funcionais'), findsNothing);
+    expect(find.text('Proteína e fibras'), findsNothing);
   });
 
   testWidgets('home vazia esconde Ver todas as águas no hero', (tester) async {

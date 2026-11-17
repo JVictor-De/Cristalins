@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/dependencias.dart';
 import '../../../core/formatacao.dart';
+import '../../../core/intents/navegacao_nativa.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -72,9 +73,14 @@ class _ConteudoState extends State<_Conteudo> {
       context,
       'Assinatura criada. Primeira entrega prevista para ${Datas.curta(criada.dataEntrega)}, depois do pagamento por Pix.',
     );
-    Navigator.of(
+    await NavegacaoNativa.instancia.abrir(
       context,
-    ).pushNamedAndRemoveUntil(AppRoutes.minhaAssinatura, (_) => false, arguments: criada.id);
+      activity: NavegacaoNativa.minhaAssinatura,
+      rota: AppRoutes.minhaAssinatura,
+      arguments: criada.id,
+      extras: {'assinaturaId': criada.id},
+      limparPilha: true,
+    );
   }
 
   @override

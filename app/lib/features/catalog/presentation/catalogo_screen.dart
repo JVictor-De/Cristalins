@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/dependencias.dart';
 import '../../../core/formatacao.dart';
+import '../../../core/intents/navegacao_nativa.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -18,11 +19,7 @@ import 'cesta_controller.dart';
 
 /// Fluxo legado de cesta (pedido/alteração). A aba marketplace é [ProdutosScreen].
 class CatalogoScreen extends StatelessWidget {
-  const CatalogoScreen({
-    super.key,
-    this.pedido,
-    this.alteracao,
-  });
+  const CatalogoScreen({super.key, this.pedido, this.alteracao});
 
   final PedidoAssinatura? pedido;
   final AlteracaoDeCesta? alteracao;
@@ -53,7 +50,12 @@ class _FluxoLegado extends StatelessWidget {
     HapticFeedback.lightImpact();
     if (c.assinaturaId == null) {
       final base = pedido ?? const PedidoAssinatura(itens: []);
-      Navigator.of(context).pushNamed(AppRoutes.endereco, arguments: base.copyWith(itens: c.itens));
+      await NavegacaoNativa.instancia.abrir(
+        context,
+        activity: NavegacaoNativa.endereco,
+        rota: AppRoutes.endereco,
+        arguments: base.copyWith(itens: c.itens),
+      );
       return;
     }
     final aPartirDe = await c.salvarAlteracao();
@@ -165,11 +167,11 @@ class _LinhaCestaLegado extends StatelessWidget {
                           style: AppTypography.caption1.copyWith(color: AppColors.textoSuave),
                         ),
                         Text(
-                          produto.nome,
+                          nomeCardProduto(produto),
                           style: AppTypography.headline.copyWith(color: AppColors.tinta),
                         ),
                         Text(
-                          '${produto.volume} · ${produto.embalagem}',
+                          produto.pack,
                           style: AppTypography.subheadline.copyWith(color: AppColors.textoSuave),
                         ),
                       ],
@@ -180,7 +182,7 @@ class _LinhaCestaLegado extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: SeletorQuantidade(
-                  rotulo: produto.nome,
+                  rotulo: nomeCardProduto(produto),
                   quantidade: quantidade,
                   passo: c.passo(produto),
                   onAlterar: (q) => c.alterar(produto.codigo, q),

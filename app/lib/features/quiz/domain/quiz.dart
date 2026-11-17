@@ -1,5 +1,6 @@
 import '../../../core/formatacao.dart';
 import '../../catalog/domain/catalogo.dart';
+import '../../catalog/domain/produto_assets.dart';
 
 /// Opção de resposta: rótulo para a tela e valor enviado à API.
 class Opcao {
@@ -99,18 +100,8 @@ class Recomendacao {
   };
 }
 
-/// Nomes de produto para o texto (a API manda o código).
-String nomeDoProduto(String codigo) => switch (codigo) {
-  'WP500' => 'Water Protein 500 ml',
-  'FF500' => 'Flow Fiber 500 ml',
-  'AMS500' => 'Água mineral sem gás 500 ml',
-  'AMC510' => 'Água mineral com gás 510 ml',
-  'AMN1500' => 'Água mineral 1,5 L',
-  'AMN5000' => 'Água mineral 5 L',
-  'AMC200' => 'Água no copo 200 ml',
-  'GUA2000' => 'Guaraná Cristalins 2 L',
-  _ => codigo,
-};
+/// Nomes curtos para listas (API manda o código). Alias de [nomeCurtoPorCodigo] (P5.2).
+String nomeDoProduto(String codigo) => nomeCurtoPorCodigo(codigo);
 
 String rotuloFrequencia(String f) => switch (f) {
   'SEMANAL' => 'Semanal',

@@ -51,6 +51,24 @@ const PREFIXO_DEMANDA = 'DEMANDA_';
 const ehAddon = (tipo: TipoProduto) => tipo === TipoProduto.ADDON;
 const dataIso = (d: Date) => d.toISOString().slice(0, 10);
 
+/** Nome curto por SKU da caixa mista (só para a mensagem). */
+const NOME_CAIXA_MISTA: Record<string, string> = { WP500: 'Water Protein', FF500: 'Flow Fiber' };
+
+/**
+ * Mensagem da RN04 sem citar produto ausente: com só um dos dois na cesta, fala só dele;
+ * sempre diz quantas garrafas faltam para fechar a caixa. A regra não muda.
+ */
+export function mensagemCaixaMista(itens: { produto: { codigo: string } }[], soma: number): string {
+  const tamanho = CAIXA_MISTA.tamanho;
+  const falta = tamanho - (soma % tamanho);
+  const garrafas = `${falta} ${falta === 1 ? 'garrafa' : 'garrafas'}`;
+  const presentes = CAIXA_MISTA.codigos.filter((c) => itens.some((i) => i.produto.codigo === c));
+  if (presentes.length === 1) {
+    return `${NOME_CAIXA_MISTA[presentes[0]]} vem em caixas de ${tamanho}: faltam ${garrafas} para completar a caixa.`;
+  }
+  return `Water Protein e Flow Fiber dividem caixas de ${tamanho}: faltam ${garrafas} para completar a caixa.`;
+}
+
 function erro(codigo: string, mensagem: string, campo = 'itens'): RegraNegocioException {
   return new RegraNegocioException(codigo, mensagem, HttpStatus.UNPROCESSABLE_ENTITY, campo);
 }
@@ -116,10 +134,7 @@ export class PrecoService {
       }
     }
     if (caixaMista % CAIXA_MISTA.tamanho !== 0) {
-      throw erro(
-        'EMBALAGEM_INVALIDA',
-        `Water Protein e Flow Fiber vêm em caixas de ${CAIXA_MISTA.tamanho}; a soma dos dois precisa ser múltiplo de ${CAIXA_MISTA.tamanho}.`,
-      );
+      throw erro('EMBALAGEM_INVALIDA', mensagemCaixaMista(itens, caixaMista));
     }
   }
 

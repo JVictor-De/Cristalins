@@ -51,6 +51,14 @@ abstract final class AppColors {
   /// Só Flow Fiber.
   static const amareloFlow = Color(0xFFF5C518);
 
+  /// Bloco foto-âncora do card (P0 design_ux_ui): águas / WP / FF.
+  static const blocoAgua = Color(0xFFE8F3F8);
+  static const blocoWaterProtein = Color(0xFFE6F3D8);
+  static const blocoFlowFiber = Color(0xFFFBEFD9);
+
+  /// Indicador da aba ativa no shell (P1.4) — azul suave, não menta.
+  static const indicadorAba = Color(0xFFE3EEF3);
+
   /// Badge contador sacola / “Novo” pontual.
   static const promo = Color(0xFFB51E2E);
 

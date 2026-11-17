@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../features/catalog/domain/catalogo.dart';
+import '../../features/catalog/domain/produto_assets.dart';
 import '../../features/catalog/presentation/sacola_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
@@ -26,11 +27,13 @@ class SugestaoMinimoCesta extends StatelessWidget {
       );
     }
 
+    final curto = nomeCardProduto(p);
     return Align(
       alignment: Alignment.centerLeft,
       child: Semantics(
         button: true,
-        label: 'Adicionar ${p.nome} à assinatura',
+        label: 'Adicionar ${p.nome}, ${p.pack}, à assinatura',
+        excludeSemantics: true,
         child: TextButton.icon(
           style: TextButton.styleFrom(
             minimumSize: const Size(0, AppSpacing.toqueMinimo),
@@ -42,7 +45,7 @@ class SugestaoMinimoCesta extends StatelessWidget {
           },
           icon: const Icon(Icons.add_circle_outline, color: AppColors.azulMarca),
           label: Text(
-            'Adicionar ${p.nome} (${p.embalagem})',
+            'Adicionar $curto (${p.pack})',
             style: AppTypography.subheadline.copyWith(
               color: AppColors.azulMarca,
               fontWeight: FontWeight.w600,

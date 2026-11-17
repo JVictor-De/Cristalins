@@ -11,8 +11,19 @@ abstract final class AppSpacing {
   /// Card marketplace (CSS `--radius: 24px`).
   static const raioCard = 24.0;
 
+  /// Bloco foto-âncora do card de produto (P0): alvo ~164 × 200, raio 28.
+  static const raioBlocoProduto = 28.0;
+  static const larguraBlocoProduto = 164.0;
+  static const alturaBlocoProduto = 200.0;
+
+  /// “+” do card: 40 visível / 48 de toque.
+  static const botaoAdicionarCard = 40.0;
+
   /// Botão marketplace (não cápsula).
   static const raioBotao = 16.0;
+
+  /// CTA principal de compra (PDP/hero/onboarding) — P2.2.
+  static const raioCta = 14.0;
 
   /// Chip / pílula.
   static const raioChip = 999.0;

@@ -18,7 +18,11 @@ class CenaImpactoAgua extends StatefulWidget {
     this.garrafaAsset,
     this.mostrarCopyMarca = true,
     this.rotuloSemantico,
+    this.fullBleed = false,
   });
+
+  /// P2.1: ocupa 100% da área (sem faixas laterais do `AspectRatio` nem raio no topo).
+  final bool fullBleed;
 
   final bool autoPlay;
   final bool mostrarReplay;
@@ -36,8 +40,7 @@ class CenaImpactoAgua extends StatefulWidget {
   State<CenaImpactoAgua> createState() => _CenaImpactoAguaState();
 }
 
-class _CenaImpactoAguaState extends State<CenaImpactoAgua>
-    with SingleTickerProviderStateMixin {
+class _CenaImpactoAguaState extends State<CenaImpactoAgua> with SingleTickerProviderStateMixin {
   static const _duracao = Duration(milliseconds: 1800);
 
   late final AnimationController _ctrl;
@@ -88,7 +91,8 @@ class _CenaImpactoAguaState extends State<CenaImpactoAgua>
   Widget build(BuildContext context) {
     final reduzir = MediaQuery.disableAnimationsOf(context);
 
-    final rotulo = widget.rotuloSemantico ??
+    final rotulo =
+        widget.rotuloSemantico ??
         'Água mineral tem nome: Cristalins. Garrafa de água mineral sem gás toca a água com um respingo.';
 
     return Semantics(
@@ -99,37 +103,49 @@ class _CenaImpactoAguaState extends State<CenaImpactoAgua>
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Center(
-              child: AspectRatio(
-                aspectRatio: 580 / 708,
-                child: AnimatedBuilder(
-                  animation: _ctrl,
-                  builder: (context, _) {
-                    final t = reduzir ? 1.0 : _ctrl.value;
-                    return _CenaLayers(
-                      t: t,
-                      garrafaAsset: widget.garrafaAsset ?? assetImpactoGarrafa,
-                      mostrarCopyMarca: widget.mostrarCopyMarca,
-                    );
-                  },
+            if (widget.fullBleed)
+              AnimatedBuilder(
+                animation: _ctrl,
+                builder: (context, _) => _CenaLayers(
+                  t: reduzir ? 1.0 : _ctrl.value,
+                  garrafaAsset: widget.garrafaAsset ?? assetImpactoGarrafa,
+                  mostrarCopyMarca: widget.mostrarCopyMarca,
+                  raio: 0,
+                ),
+              )
+            else
+              Center(
+                child: AspectRatio(
+                  aspectRatio: 580 / 708,
+                  child: AnimatedBuilder(
+                    animation: _ctrl,
+                    builder: (context, _) {
+                      final t = reduzir ? 1.0 : _ctrl.value;
+                      return _CenaLayers(
+                        t: t,
+                        garrafaAsset: widget.garrafaAsset ?? assetImpactoGarrafa,
+                        mostrarCopyMarca: widget.mostrarCopyMarca,
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
             if (widget.mostrarReplay && !reduzir)
+              // P2.1: ≥ 16 px das bordas; alvo 48 dp.
               Positioned(
-                right: AppSpacing.xs,
-                bottom: AppSpacing.xs,
+                right: AppSpacing.margem,
+                bottom: AppSpacing.margem,
                 child: TextButton(
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.navy,
-                    backgroundColor: AppColors.superficie.withValues(alpha: 0.82),
-                    minimumSize: const Size(0, 36),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    backgroundColor: AppColors.superficie.withValues(alpha: 0.88),
+                    minimumSize: const Size(0, AppSpacing.toqueMinimo),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   onPressed: _replay,
                   child: Text(
-                    'Ver de novo',
+                    'Repetir animação',
                     style: AppTypography.caption1.copyWith(
                       color: AppColors.navy,
                       fontWeight: FontWeight.w600,
@@ -149,11 +165,13 @@ class _CenaLayers extends StatelessWidget {
     required this.t,
     required this.garrafaAsset,
     required this.mostrarCopyMarca,
+    this.raio = AppSpacing.raioCard,
   });
 
   final double t;
   final String garrafaAsset;
   final bool mostrarCopyMarca;
+  final double raio;
 
   static double _lerpKeyframes(List<(double, double)> keys, double progress) {
     if (progress <= keys.first.$1) return keys.first.$2;
@@ -213,7 +231,7 @@ class _CenaLayers extends StatelessWidget {
     final brandReveal = brandT <= 0 ? 0.0 : brandT.clamp(0.0, 1.0);
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(AppSpacing.raioCard),
+      borderRadius: BorderRadius.circular(raio),
       child: LayoutBuilder(
         builder: (context, c) {
           final w = c.maxWidth;

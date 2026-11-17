@@ -94,23 +94,25 @@ class _ShellScreenState extends State<ShellScreen> {
               data: NavigationBarThemeData(
                 labelTextStyle: WidgetStateProperty.resolveWith((states) {
                   final selected = states.contains(WidgetState.selected);
+                  // P5.1: inativas em heroInk (não tinta clara) — ≥ 4,5:1 sobre superficie.
                   return AppTypography.caption2.copyWith(
-                    color: selected ? AppColors.navy : AppColors.tinta,
+                    color: selected ? AppColors.navy : AppColors.heroInk,
                     fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                   );
                 }),
                 iconTheme: WidgetStateProperty.resolveWith((states) {
                   final selected = states.contains(WidgetState.selected);
                   return IconThemeData(
-                    color: selected ? AppColors.navy : AppColors.tinta,
+                    color: selected ? AppColors.navy : AppColors.heroInk,
                     size: 24,
                   );
                 }),
               ),
               child: NavigationBar(
+                key: const ValueKey('shell-nav'),
                 selectedIndex: _aba,
                 backgroundColor: AppColors.superficie,
-                indicatorColor: AppColors.menta,
+                indicatorColor: AppColors.indicadorAba,
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                 onDestinationSelected: _selecionarAba,
                 destinations: const [

@@ -1,3 +1,4 @@
+import 'package:cristalins_assinatura/app.dart';
 import 'package:cristalins_assinatura/core/routes.dart';
 import 'package:cristalins_assinatura/features/address/domain/endereco.dart';
 import 'package:cristalins_assinatura/features/catalog/domain/catalogo.dart';
@@ -26,7 +27,7 @@ void main() {
   const pedido = PedidoAssinatura(itens: [ItemCesta('WP500', 12)], endereco: endereco);
 
   final telas = <String, (String, Object?)>{
-    '1 Boas-vindas': (AppRoutes.boasVindas, null),
+    '1 Onboarding': (AppRoutes.onboarding, null),
     '2 Cadastro e login': (AppRoutes.cadastroLogin, null),
     '3 Quiz': (AppRoutes.quiz, null),
     '4 Resultado': (AppRoutes.resultado, 'rec-1'),
@@ -50,20 +51,30 @@ void main() {
           final semantica = tester.ensureSemantics();
 
           final f = Falsos()..assinaturas.comAssinaturaAtiva();
-          await tester.pumpWidget(appDeTeste(f));
+          await tester.pumpWidget(
+            CristalinsApp(
+              config: configDeTeste(),
+              dependencias: f.dependencias,
+              exibirSplash: false,
+              rotaInicial: args == null ? rota : AppRoutes.shell,
+            ),
+          );
           await tester.pumpAndSettle();
-          if (rota != AppRoutes.boasVindas) {
+          if (args != null) {
             tester.state<NavigatorState>(find.byType(Navigator)).pushNamed(rota, arguments: args);
             await tester.pumpAndSettle();
           }
 
           expect(tester.takeException(), isNull);
-          // Rola até o fim: nada pode estourar em nenhuma parte da tela.
-          await tester.fling(find.byType(Scrollable).first, const Offset(0, -3000), 3000);
-          await tester.pumpAndSettle();
-          expect(tester.takeException(), isNull);
-          await tester.fling(find.byType(Scrollable).first, const Offset(0, 3000), 3000);
-          await tester.pumpAndSettle();
+          // Rola até o fim quando a tela tem scroll (onboarding é Stack fixo).
+          final scroll = find.byType(Scrollable);
+          if (scroll.evaluate().isNotEmpty) {
+            await tester.fling(scroll.first, const Offset(0, -3000), 3000);
+            await tester.pumpAndSettle();
+            expect(tester.takeException(), isNull);
+            await tester.fling(scroll.first, const Offset(0, 3000), 3000);
+            await tester.pumpAndSettle();
+          }
 
           await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
           await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));

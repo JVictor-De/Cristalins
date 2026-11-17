@@ -8,6 +8,7 @@ import 'package:cristalins_assinatura/core/network/api_erro.dart';
 import 'package:cristalins_assinatura/features/address/data/endereco_repository.dart';
 import 'package:cristalins_assinatura/features/address/domain/endereco.dart';
 import 'package:cristalins_assinatura/features/auth/data/auth_repository.dart';
+import 'package:cristalins_assinatura/features/auth/domain/perfil_cliente.dart';
 import 'package:cristalins_assinatura/features/catalog/data/catalogo_repository.dart';
 import 'package:cristalins_assinatura/features/catalog/domain/catalogo.dart';
 import 'package:cristalins_assinatura/features/ocorrencias/data/ocorrencia_repository.dart';
@@ -43,6 +44,18 @@ class AuthFalso implements AuthRepository {
   int cadastros = 0;
   int logins = 0;
   ApiErro? erro;
+
+  /// `GET /clientes/me`; nulo = sem sessão (NAO_AUTENTICADO), como visitante.
+  PerfilCliente? perfilAtual;
+
+  @override
+  Future<PerfilCliente> perfil({bool forcar = false}) async {
+    final p = perfilAtual;
+    if (p == null) {
+      throw const ApiErro(codigo: 'NAO_AUTENTICADO', mensagem: 'Entre na sua conta.', status: 401);
+    }
+    return p;
+  }
 
   @override
   Future<void> cadastrar(DadosCadastro dados) async {
@@ -236,6 +249,7 @@ class CatalogoFalso implements CatalogoRepository {
 class EnderecosFalsos implements EnderecoRepository {
   final salvos = <Endereco>[];
   final listaDeEspera = <String>[];
+  final cepsListaDeEspera = <String>[];
 
   @override
   Future<CepConsultado> consultarCep(String cep) async {
@@ -279,6 +293,7 @@ class EnderecosFalsos implements EnderecoRepository {
     String? bairro,
   }) async {
     listaDeEspera.add(email);
+    cepsListaDeEspera.add(cep);
   }
 }
 

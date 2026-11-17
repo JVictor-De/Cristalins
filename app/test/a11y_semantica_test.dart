@@ -47,10 +47,8 @@ void main() {
     final f = Falsos()..assinaturas.comAssinaturaAtiva();
     await tester.pumpWidget(appDeTeste(f));
     await tester.pumpAndSettle();
-    if (rota != AppRoutes.boasVindas) {
-      tester.state<NavigatorState>(find.byType(Navigator)).pushNamed(rota, arguments: args);
-      await tester.pumpAndSettle();
-    }
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed(rota, arguments: args);
+    await tester.pumpAndSettle();
   }
 
   SemanticsNode campo(WidgetTester tester, int indice) =>

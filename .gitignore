@@ -129,22 +129,34 @@ ehthumbs.db
 *.swp
 *~
 
-# --- Claude / Cursor locais (não versionar) ---
-.claude/settings.local.json
-.cursor/hooks/__pycache__/
+# --- Claude / Cursor / IA (não versionar) ---
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.cursorrules
+.aider*
+.continue/
+.copilot/
+.windsurf/
+.agent/
+.claude/
+.cursor/
 
-# --- Prompts (não versionar) ---
-# Super prompt / anexo
+# --- Prompts / filas de agente (não versionar) ---
 super-prompt-cristalins.md
-docs/SUPER_PROMPT.md
+docs/SUPER_PROMPT*.md
+docs/PROMPT_*.md
 docs/ANEXO.md
 doc/Assinatura Cristalins Water Protein — Rio de Janeiro.md
-# Fila nova (passo_*.md, ORQUESTRADOR, TRACKER, HANDOFF, fila.json, logs, etc.)
 doc/prompts/
+doc/apple-style-flutter/
 scripts/*_run_auto.ps1
 .cristalins_assinatura_prompts_state.json
 .onda_paralela.json
 GATE_APROVADO.md
+**/GATE_APROVADO.md
+**/.cristalins_assinatura_prompts_state.json
+**/.onda_paralela.json
 
 # --- Artefatos locais de mídia / fora do seed (não versionar) ---
 app/assets/images/produtos/Gemini_Generated_*
@@ -166,3 +178,8 @@ cristalins.com.br/
 *.tmp
 *.temp
 .cache/
+
+# APK grande (~67MB) � manter local em app/web/downloads para deploy; nao versionar por padrao
+app/web/downloads/*.apk
+!app/web/downloads/.gitkeep
+

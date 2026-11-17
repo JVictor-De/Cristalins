@@ -59,7 +59,12 @@ void main() {
 
     final storage = _MockStorage();
     when(() => storage.read(key: any(named: 'key'))).thenAnswer((_) async => null);
-    when(() => storage.write(key: any(named: 'key'), value: any(named: 'value'))).thenAnswer((_) async {});
+    when(
+      () => storage.write(
+        key: any(named: 'key'),
+        value: any(named: 'value'),
+      ),
+    ).thenAnswer((_) async {});
     final sacola = SacolaController(mocks.catalogo, storage: storage, atraso: Duration.zero);
     sacola.produtos = [produto];
     sacola.carregandoCatalogo = false;
@@ -85,18 +90,18 @@ void main() {
           Provider.value(value: dep),
           ChangeNotifierProvider.value(value: sacola),
         ],
-        child: MaterialApp(
-          theme: buildAppTheme(),
-          home: const SacolaScreen(),
-        ),
+        child: MaterialApp(theme: buildAppTheme(), home: const SacolaScreen()),
       ),
     );
     await tester.pump();
 
     expect(find.text('Configuração da assinatura'), findsOneWidget);
     expect(find.textContaining('por entrega'), findsWidgets);
-    expect(find.text(sim.total.formatado), findsWidgets);
-    expect(find.widgetWithText(BotaoPrincipal, 'Continuar'), findsOneWidget);
+    expect(find.textContaining(sim.total.formatado), findsWidgets);
+    expect(
+      tester.widget<BotaoPrincipal>(find.byKey(const ValueKey('sacola-continuar'))).rotulo,
+      'Continuar · ${sim.total.formatado} por entrega',
+    );
     expect(find.text('Adicionar mais produtos'), findsOneWidget);
     expect(find.text('Pagamento'), findsOneWidget);
     expect(find.textContaining('%'), findsNothing);
@@ -120,7 +125,12 @@ void main() {
     mocks.simularDevolve(sim);
     final storage = _MockStorage();
     when(() => storage.read(key: any(named: 'key'))).thenAnswer((_) async => null);
-    when(() => storage.write(key: any(named: 'key'), value: any(named: 'value'))).thenAnswer((_) async {});
+    when(
+      () => storage.write(
+        key: any(named: 'key'),
+        value: any(named: 'value'),
+      ),
+    ).thenAnswer((_) async {});
     final sacola = SacolaController(mocks.catalogo, storage: storage, atraso: Duration.zero);
     sacola.quantidades['AMS500'] = 12;
     sacola.simulacao = sim;
@@ -139,9 +149,6 @@ void main() {
     await tester.pump();
 
     expect(find.textContaining(total.formatado), findsOneWidget);
-    expect(
-      SacolaCopy.itensETotalPorEntrega(12, total),
-      contains(total.formatado),
-    );
+    expect(SacolaCopy.itensETotalPorEntrega(12, total), contains(total.formatado));
   });
 }

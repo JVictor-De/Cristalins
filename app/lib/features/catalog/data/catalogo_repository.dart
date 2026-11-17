@@ -21,6 +21,22 @@ abstract final class CatalogoJson {
     embalagemQtd: j['embalagemQtd'] as int,
     precoBase: Dinheiro.daApi(j['precoBase'] as num),
     descricao: j['descricao'] as String?,
+    estoque: (j['estoque'] as num?)?.toInt(),
+    precoAvulso: j['precoAvulso'] == null ? null : Dinheiro.daApi(j['precoAvulso'] as num),
+    claims: ((j['claims'] as List?) ?? const []).cast<String>(),
+    tabelaNutricional: j['tabelaNutricional'] == null
+        ? null
+        : tabela(j['tabelaNutricional'] as Map<String, dynamic>),
+  );
+
+  static TabelaNutricional tabela(Map<String, dynamic> j) => TabelaNutricional(
+    porcao: j['porcao'] as String,
+    linhas: (j['linhas'] as List)
+        .map((e) => e as Map<String, dynamic>)
+        .map(
+          (e) => LinhaNutricional(nutriente: e['nutriente'] as String, valor: e['valor'] as String),
+        )
+        .toList(),
   );
 
   static Kit kit(Map<String, dynamic> j) => Kit(
@@ -56,7 +72,7 @@ abstract final class CatalogoJson {
     ueMinima: (j['ueMinima'] as num?) ?? 12,
     ueMaxima: (j['ueMaxima'] as num?) ?? 120,
     faltaUeParaMinimo: (j['faltaUeParaMinimo'] as num?) ?? 0,
-    freteGratisAcima: (j['freteGratisAcima'] as num?) ?? 250,
+    freteGratisAcima: (j['freteGratisAcima'] as num?) ?? kFreteGratisAcimaPadrao,
     faltaParaFreteGratis: (j['faltaParaFreteGratis'] as num?) ?? 0,
     economiaPlano: (j['economiaPlano'] as num?) ?? 0,
   );

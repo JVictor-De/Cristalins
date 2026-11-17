@@ -18,6 +18,7 @@ import 'package:cristalins_assinatura/core/widgets/skeleton_card.dart';
 import 'package:cristalins_assinatura/core/widgets/stepper_quantidade.dart';
 import 'package:cristalins_assinatura/core/widgets/sugestao_minimo_cesta.dart';
 import 'package:cristalins_assinatura/features/catalog/domain/catalogo.dart';
+import 'package:cristalins_assinatura/features/catalog/presentation/produtos_screen.dart';
 import 'package:cristalins_assinatura/features/catalog/presentation/sacola_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -71,7 +72,10 @@ void main() {
     }
     return MaterialApp(
       theme: buildAppTheme(),
-      home: MediaQuery(data: MediaQueryData(size: size), child: home),
+      home: MediaQuery(
+        data: MediaQueryData(size: size),
+        child: home,
+      ),
     );
   }
 
@@ -93,7 +97,12 @@ void main() {
     );
     final storage = _MockStorage();
     when(() => storage.read(key: any(named: 'key'))).thenAnswer((_) async => null);
-    when(() => storage.write(key: any(named: 'key'), value: any(named: 'value'))).thenAnswer((_) async {});
+    when(
+      () => storage.write(
+        key: any(named: 'key'),
+        value: any(named: 'value'),
+      ),
+    ).thenAnswer((_) async {});
     final s = SacolaController(mocks.catalogo, storage: storage, atraso: Duration.zero);
     s.produtos = [wp, agua];
     s.quantidades['AMS500'] = 12;
@@ -118,14 +127,14 @@ void main() {
     await expectLater(find.byType(BotaoPrincipal), matchesGoldenFile('mk_botao_principal.png'));
   });
 
-  testWidgets('golden CardProduto sem preço', (tester) async {
+  testWidgets('golden CardProduto com âncora precoBase', (tester) async {
     await tester.binding.setSurfaceSize(const Size(200, 280));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       envelopar(
         SizedBox(
           width: 160,
-          height: 240,
+          height: 260,
           child: CardProduto(
             produto: wp,
             passo: 3,
@@ -136,12 +145,13 @@ void main() {
         ),
       ),
     );
-    expect(find.textContaining('R\$'), findsNothing);
+    expect(find.textContaining('A partir de'), findsOneWidget);
+    expect(find.textContaining('R\$'), findsOneWidget);
     await expectLater(find.byType(CardProduto), matchesGoldenFile('mk_card_produto.png'));
   });
 
-  testWidgets('golden CardKit sem preço', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(280, 260));
+  testWidgets('golden CardKit com âncora subtotalBase (≈, preço base)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(280, 280));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       envelopar(
@@ -149,13 +159,47 @@ void main() {
           nome: 'Kit Treino',
           resumoItens: '12× Water Protein',
           codigosItens: const ['WP500', 'FF500'],
+          precoBase: const Dinheiro(11880),
+          onTap: () {},
+          onAdicionar: () {},
+        ),
+      ),
+    );
+    expect(find.textContaining('≈ R\$'), findsOneWidget);
+    expect(find.textContaining('/entrega'), findsOneWidget);
+    expect(find.text('Preço base, antes dos descontos'), findsOneWidget);
+    // Sem “a partir de” no total do kit: DEMANDA (até +8%) pode subir a simulação.
+    expect(find.textContaining('A partir de'), findsNothing);
+    expect(
+      find.bySemanticsLabel(RegExp(r'^Kit Treino, 12× Water Protein, cerca de R\$')),
+      findsOneWidget,
+    );
+    await expectLater(find.byType(CardKit), matchesGoldenFile('mk_card_kit.png'));
+  });
+
+  testWidgets('CardKit sem precoBase não mostra preço', (tester) async {
+    await tester.pumpWidget(
+      envelopar(
+        CardKit(
+          nome: 'Kit Treino',
+          resumoItens: '12× Water Protein',
           onTap: () {},
           onAdicionar: () {},
         ),
       ),
     );
     expect(find.textContaining('R\$'), findsNothing);
-    await expectLater(find.byType(CardKit), matchesGoldenFile('mk_card_kit.png'));
+    expect(tester.takeException(), isNull);
+  });
+
+  test('resumoDoKit usa nomes curtos e quantidades', () {
+    const kit = Kit(
+      codigo: 'KIT-CASA',
+      nome: 'Kit Casa',
+      itens: [ItemCesta('WP500', 6), ItemCesta('AMN5000', 2)],
+      subtotalBase: Dinheiro(7920),
+    );
+    expect(resumoDoKit(kit), '6× Water Protein + 2× Galão');
   });
 
   testWidgets('golden HeroWaterProtein', (tester) async {
@@ -291,7 +335,10 @@ void main() {
     final sacola = sacolaComItens();
     await tester.pumpWidget(envelopar(const SugestaoMinimoCesta(), sacola: sacola));
     await tester.pump();
-    await expectLater(find.byType(SugestaoMinimoCesta), matchesGoldenFile('mk_sugestao_minimo.png'));
+    await expectLater(
+      find.byType(SugestaoMinimoCesta),
+      matchesGoldenFile('mk_sugestao_minimo.png'),
+    );
   });
 
   testWidgets('golden BarraSacola', (tester) async {
@@ -329,7 +376,10 @@ void main() {
     );
     await tester.tap(find.text('Ver detalhes do preço'));
     await tester.pumpAndSettle();
-    await expectLater(find.byType(DetalhePrecoExpansivel), matchesGoldenFile('mk_detalhe_preco.png'));
+    await expectLater(
+      find.byType(DetalhePrecoExpansivel),
+      matchesGoldenFile('mk_detalhe_preco.png'),
+    );
   });
 
   testWidgets('semantics + do CardProduto', (tester) async {
@@ -357,7 +407,10 @@ void main() {
     );
     expect(
       find.byWidgetPredicate(
-        (w) => w is Semantics && (w.properties.label?.contains('Adicionar Flow Fiber') ?? false),
+        (w) =>
+            w is Semantics &&
+            (w.properties.label?.contains('Adicionar Flow Fiber') ?? false) &&
+            (w.properties.label?.contains('a partir de') ?? false),
       ),
       findsOneWidget,
     );

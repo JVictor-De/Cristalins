@@ -47,11 +47,7 @@ const _fiber = Produto(
   precoBase: Dinheiro(990),
 );
 
-Simulacao _sim({
-  required List<ItemSimulado> itens,
-  required num ue,
-  num falta = 0,
-}) {
+Simulacao _sim({required List<ItemSimulado> itens, required num ue, num falta = 0}) {
   return Simulacao(
     itens: itens,
     ue: ue,
@@ -80,8 +76,12 @@ void main() {
     mocks = Mocks();
     storage = _MockStorage();
     when(() => storage.read(key: any(named: 'key'))).thenAnswer((_) async => null);
-    when(() => storage.write(key: any(named: 'key'), value: any(named: 'value')))
-        .thenAnswer((_) async {});
+    when(
+      () => storage.write(
+        key: any(named: 'key'),
+        value: any(named: 'value'),
+      ),
+    ).thenAnswer((_) async {});
     when(() => mocks.catalogo.produtos()).thenAnswer((_) async => [_agua, _wp, _fiber]);
     when(() => mocks.catalogo.kits()).thenAnswer((_) async => <Kit>[]);
     sacola = SacolaController(mocks.catalogo, storage: storage, atraso: Duration.zero);
@@ -122,21 +122,21 @@ void main() {
     expect(sacola.sugerirParaMinimo()?.codigo, 'AMS500');
 
     await tester.pumpWidget(
-      envelopar(
-        ListView(
-          children: const [
-            Text('abaixo'),
-            SugestaoMinimoCesta(),
-          ],
-        ),
-      ),
+      envelopar(ListView(children: const [Text('abaixo'), SugestaoMinimoCesta()])),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('Adicionar Água mineral'), findsOneWidget);
+    // P5.2: copy visível usa nome curto; Semantics guarda o nome API completo.
+    expect(find.textContaining('Adicionar Sem gás'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp(r'Adicionar Água mineral')),
+      findsOneWidget,
+    );
 
     mocks.simularDevolve(
       _sim(
-        itens: const [ItemSimulado(produto: 'AMS500', quantidade: 12, precoUnitario: Dinheiro(220))],
+        itens: const [
+          ItemSimulado(produto: 'AMS500', quantidade: 12, precoUnitario: Dinheiro(220)),
+        ],
         ue: 12,
       ),
     );
@@ -188,11 +188,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.byType(CenaImpactoAgua), findsOneWidget);
-    expect(find.text('Ver de novo'), findsOneWidget);
+    // P2.1: “Ver de novo” → “Repetir animação”.
+    expect(find.text('Repetir animação'), findsOneWidget);
+    // Rótulo da cena mineral = nome API do SKU (a PDP passa `PdpCopy.altFoto`).
     expect(
-      find.bySemanticsLabel(
-        'Água mineral tem nome: Cristalins. Garrafa de água mineral sem gás toca a água com um respingo.',
-      ),
+      find.bySemanticsLabel('Água mineral 500 ml. Garrafa toca a água com um respingo.'),
       findsOneWidget,
     );
 
@@ -200,11 +200,7 @@ void main() {
     await tester.pump();
     // WP também usa a cena; garrafa = PNG do SKU (sem copy “água mineral”).
     expect(find.byType(CenaImpactoAgua), findsOneWidget);
-    expect(
-      find.bySemanticsLabel(
-        'Água mineral tem nome: Cristalins. Garrafa de água mineral sem gás toca a água com um respingo.',
-      ),
-      findsNothing,
-    );
+    expect(find.bySemanticsLabel('Garrafa de Water Protein Cristalins 500 ml'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('água mineral', caseSensitive: false)), findsNothing);
   });
 }

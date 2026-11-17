@@ -11,6 +11,14 @@ abstract final class AppSombras {
     ),
   ];
 
+  /// Sombra elíptica de contato sob a garrafa (card foto-âncora): blur 12, α 0,12.
+  static const List<BoxShadow> garrafaContato = [
+    BoxShadow(
+      color: Color.fromRGBO(11, 46, 63, 0.12),
+      blurRadius: 12,
+    ),
+  ];
+
   /// Grade de produtos/kits — menos densidade visual na home e aba.
   static const List<BoxShadow> cardGrade = [
     BoxShadow(

@@ -62,6 +62,39 @@ class SacolaController extends ChangeNotifier {
 
   int quantidadeDe(String codigo) => quantidades[codigo] ?? 0;
 
+  /// Garrafas que faltam para fechar a embalagem de [p] (P3.1 — **só exibição**;
+  /// a API continua sendo quem valida, `EMBALAGEM_INVALIDA`). Caixa mista: conta a
+  /// soma WP+FF na caixa de 6 (RN04); demais: múltiplo de `embalagemQtd`.
+  int faltaParaCompletarCaixa(Produto p) {
+    final tamanho = p.embalagemQtd;
+    if (tamanho <= 1) return 0;
+    final soma = caixaMista.contains(p.codigo)
+        ? caixaMista.fold(0, (a, c) => a + quantidadeDe(c))
+        : quantidadeDe(p.codigo);
+    if (soma == 0) return 0;
+    final resto = soma % tamanho;
+    return resto == 0 ? 0 : tamanho - resto;
+  }
+
+  /// SKUs de caixa mista presentes na sacola (para a copy não citar FF ausente).
+  List<String> get caixaMistaNaSacola => [
+    for (final c in caixaMista)
+      if (quantidadeDe(c) > 0) c,
+  ];
+
+  /// “Completar caixa”: soma ao **mesmo** SKU o que falta para fechar a caixa.
+  void completarCaixa(Produto p) {
+    final falta = faltaParaCompletarCaixa(p);
+    if (falta <= 0) return;
+    alterar(p.codigo, quantidadeDe(p.codigo) + falta);
+  }
+
+  /// Algum SKU da sacola com caixa incompleta (bloqueia “Continuar” com motivo).
+  bool get temCaixaIncompleta => itens.any((i) {
+    final p = produtoDe(i.produto);
+    return p != null && faltaParaCompletarCaixa(p) > 0;
+  });
+
   Future<void> carregarCatalogo() async {
     carregandoCatalogo = true;
     erroCatalogo = null;
@@ -147,11 +180,7 @@ class SacolaController extends ChangeNotifier {
     simulando = true;
     notifyListeners();
     try {
-      final s = await _catalogo.simular(
-        itens: atuais,
-        frequencia: frequencia,
-        plano: plano,
-      );
+      final s = await _catalogo.simular(itens: atuais, frequencia: frequencia, plano: plano);
       if (versao != _versao) return;
       simulacao = s;
       erroSimulacao = null;
@@ -175,8 +204,7 @@ class SacolaController extends ChangeNotifier {
       if (p.codigo == 'WP500') return false;
       if (p.tipo == 'ADDON') return false;
       return true;
-    }).toList()
-      ..sort((a, b) => a.precoBase.centavos.compareTo(b.precoBase.centavos));
+    }).toList()..sort((a, b) => a.precoBase.centavos.compareTo(b.precoBase.centavos));
     return candidatos.isEmpty ? null : candidatos.first;
   }
 
@@ -203,11 +231,7 @@ class SacolaController extends ChangeNotifier {
     try {
       await _storage.write(
         key: _chave,
-        value: jsonEncode({
-          'frequencia': frequencia,
-          'plano': plano,
-          'itens': quantidades,
-        }),
+        value: jsonEncode({'frequencia': frequencia, 'plano': plano, 'itens': quantidades}),
       );
     } catch (_) {}
   }

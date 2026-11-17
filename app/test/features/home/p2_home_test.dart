@@ -67,7 +67,12 @@ void main() {
     );
     final storage = _MockStorage();
     when(() => storage.read(key: any(named: 'key'))).thenAnswer((_) async => null);
-    when(() => storage.write(key: any(named: 'key'), value: any(named: 'value'))).thenAnswer((_) async {});
+    when(
+      () => storage.write(
+        key: any(named: 'key'),
+        value: any(named: 'value'),
+      ),
+    ).thenAnswer((_) async {});
     final sacola = SacolaController(mocks.catalogo, storage: storage, atraso: Duration.zero);
     sacola.produtos = produtos;
     sacola.carregandoCatalogo = false;
@@ -88,17 +93,16 @@ void main() {
     await tester.pumpWidget(
       MultiProvider(
         providers: [
-          Provider.value(value: const AppConfig(ambiente: Ambiente.dev, apiUrl: '', suporteWhatsapp: '')),
+          Provider.value(
+            value: const AppConfig(ambiente: Ambiente.dev, apiUrl: '', suporteWhatsapp: ''),
+          ),
           Provider.value(value: dep),
           ChangeNotifierProvider.value(value: sacola),
         ],
         child: MaterialApp(
           theme: buildAppTheme(),
           home: Scaffold(
-            body: HomeScreen(
-              onAbrirProdutos: ({categoria}) {},
-              onAbrirAssinatura: () {},
-            ),
+            body: HomeScreen(onAbrirProdutos: ({categoria}) {}, onAbrirAssinatura: () {}),
           ),
         ),
       ),
@@ -108,10 +112,21 @@ void main() {
 
     expect(find.textContaining('primeira assinatura'), findsOneWidget);
     expect(find.textContaining('%'), findsNothing);
-    expect(find.text('Sem gás'), findsOneWidget);
-    expect(find.text('Galão'), findsOneWidget);
+    // Chip de filtro + nome curto do card (P0.5).
+    expect(find.text('Sem gás'), findsNWidgets(2));
+    expect(find.text('Galão'), findsNWidgets(2));
     // Banner/selo promocionais removidos na crítica de hierarquia.
     expect(find.text('Da fonte ao Rio'), findsNothing);
+    // P1.2: hint de frete grátis above-the-fold (RN18).
+    expect(
+      find.text('Frete grátis acima de ${const Dinheiro(25000).formatado} por entrega'),
+      findsOneWidget,
+    );
+    // P1.1: “Alterar” não duplicado no chip CEP; logo no eixo da tela.
+    expect(find.textContaining('Alterar CEP'), findsNothing);
+    expect(find.text('Alterar'), findsOneWidget);
+    final logo = tester.getCenter(find.byKey(const ValueKey('logo-home')));
+    expect(logo.dx, closeTo(390 / 2, 1));
 
     await tester.scrollUntilVisible(
       find.text('Como funciona'),
@@ -119,8 +134,15 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Como funciona'), findsOneWidget);
-    // Copy leve permanece em "Como funciona"; não é o banner full-bleed.
-    expect(find.textContaining('Da fonte ao Rio'), findsOneWidget);
+    // P1.3: rodapé “água mineral natural” removido (seção cobre WP/FF); “Flow Fiber” completo.
+    expect(find.textContaining('Da fonte ao Rio'), findsNothing);
+    expect(find.textContaining('Water Protein ou Flow Fiber'), findsOneWidget);
+    // Lista vertical numerada: passos empilhados (x igual, y crescente).
+    final p1 = tester.getTopLeft(find.text('Monte sua sacola'));
+    final p2 = tester.getTopLeft(find.text('Escolha a frequência'));
+    expect(p1.dx, p2.dx);
+    expect(p2.dy, greaterThan(p1.dy));
+    expect(find.text('1'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Perguntas frequentes'),

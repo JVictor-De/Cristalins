@@ -27,6 +27,7 @@ class BarraSacola extends StatelessWidget {
         : (sim.ue / sim.ueMinima).clamp(0.0, 1.0).toDouble();
     final n = sacola.totalItens;
     final itensLabel = SacolaCopy.itens(n);
+    final freteHint = sim == null ? null : SacolaCopy.faltaFreteGratis(sim);
 
     return Material(
       color: AppColors.superficie,
@@ -79,15 +80,20 @@ class BarraSacola extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: sim == null
-                          ? Text(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (sim == null)
+                            Text(
                               itensLabel,
                               style: AppTypography.subheadline.copyWith(
                                 color: AppColors.tinta,
                                 fontWeight: FontWeight.w600,
                               ),
                             )
-                          : Text.rich(
+                          else
+                            Text.rich(
                               TextSpan(
                                 style: AppTypography.subheadline.copyWith(color: AppColors.tinta),
                                 children: [
@@ -100,6 +106,15 @@ class BarraSacola extends StatelessWidget {
                                 ],
                               ),
                             ),
+                          // P1.4: falta para frete grátis (valor da simulação, RN18).
+                          if (freteHint != null && !abaixo)
+                            Text(
+                              freteHint,
+                              key: const ValueKey('barra-sacola-frete'),
+                              style: AppTypography.footnote.copyWith(color: AppColors.textoSuave),
+                            ),
+                        ],
+                      ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     BotaoPrincipal(

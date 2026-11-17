@@ -2,12 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // SystemChrome não sai de material.dart neste SDK.
+import 'package:provider/provider.dart';
 
+import '../../../core/dependencias.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../data/onboarding_prefs.dart';
 
-/// Abertura: água em tela cheia que vira a garrafa e segue para boas-vindas.
+/// Abertura: água em tela cheia que vira a garrafa → onboarding (1ª vez) ou shell.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -58,7 +60,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     await Future<void>.delayed(const Duration(milliseconds: 700));
     if (!mounted) return;
 
-    final destino = await OnboardingPrefs.visto() ? AppRoutes.shell : AppRoutes.onboarding;
+    // P4.3: sessão válida (token) → shell, sem forçar onboarding.
+    final token = await context.read<Dependencias>().api?.tokens.lerAcesso();
+    final logado = token != null && token.isNotEmpty;
+    final visto = await OnboardingPrefs.visto();
+    final destino = (logado || visto) ? AppRoutes.shell : AppRoutes.onboarding;
     if (!mounted) return;
     Navigator.of(context).pushReplacementNamed(destino);
   }

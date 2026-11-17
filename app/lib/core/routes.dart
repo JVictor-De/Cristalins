@@ -50,7 +50,7 @@ abstract final class AppRoutes {
         categoriaInicial: args.categoriaInicial,
       ),
       shell => ShellScreen(abaInicial: args is int ? args : 0),
-      boasVindas => const BoasVindasScreen(),
+      boasVindas => const BoasVindasScreen(), // alias → OnboardingScreen
       cadastroLogin => const CadastroLoginScreen(),
       esqueciSenha => const EsqueciSenhaScreen(),
       redefinirSenha when args is String => RedefinirSenhaScreen(email: args),

@@ -157,7 +157,7 @@ void main() {
   Future<void> montarApp(
     WidgetTester tester, {
     required ArmazenamentoEmMemoria tokens,
-    String rotaInicial = AppRoutes.boasVindas,
+    String rotaInicial = AppRoutes.cadastroLogin,
   }) async {
     // Limpa árvore anterior (evita stack/Navigator residual entre cenários).
     await tester.pumpWidget(const SizedBox.shrink());
@@ -177,9 +177,7 @@ void main() {
   }
 
   Future<String> cadastrarAtePlano(WidgetTester tester) async {
-    await esperar(tester, find.textContaining('Como funciona'));
-    await principal(tester);
-    await bombear(tester);
+    await esperar(tester, find.byKey(const Key('campo-email')));
 
     final carimbo = DateTime.now().millisecondsSinceEpoch;
     final email = 'qa.cristalins.$carimbo@example.com';
@@ -327,9 +325,7 @@ void main() {
     );
 
     final tokens = ArmazenamentoEmMemoria();
-    await montarApp(tester, tokens: tokens);
-    await esperar(tester, find.textContaining('Como funciona'));
-    await principal(tester);
+    await montarApp(tester, tokens: tokens, rotaInicial: AppRoutes.cadastroLogin);
     await esperar(tester, find.byKey(const Key('campo-email')));
     await tester.tap(find.text('Já tenho conta'));
     await bombear(tester, const Duration(milliseconds: 800));
@@ -370,9 +366,7 @@ void main() {
 
     // Esqueci senha em app limpo
     final tokens2 = ArmazenamentoEmMemoria();
-    await montarApp(tester, tokens: tokens2);
-    await esperar(tester, find.textContaining('Como funciona'));
-    await principal(tester);
+    await montarApp(tester, tokens: tokens2, rotaInicial: AppRoutes.cadastroLogin);
     await esperar(tester, find.byKey(const Key('campo-email')));
     await tester.tap(find.text('Já tenho conta'));
     await bombear(tester, const Duration(milliseconds: 800));
@@ -384,18 +378,18 @@ void main() {
     expect(find.text('Código'), findsWidgets);
   });
 
-  testWidgets('HML: boas-vindas link + validações cadastro', (tester) async {
+  testWidgets('HML: onboarding site + validações cadastro', (tester) async {
     final tokens = ArmazenamentoEmMemoria();
-    await montarApp(tester, tokens: tokens);
-    await esperar(tester, find.textContaining('Como funciona'));
-    expect(find.textContaining('cristalins'), findsWidgets);
+    await montarApp(tester, tokens: tokens, rotaInicial: AppRoutes.boasVindas);
+    await esperar(tester, find.text('Assinar Water Protein'));
+    expect(find.textContaining('Cristalins'), findsWidgets);
 
     await tocar(tester, find.textContaining('Conhecer o site da Cristalins'));
     await bombear(tester, const Duration(seconds: 1));
     // Abre externo ou snackbar — app não pode crashar
-    expect(find.textContaining('Como funciona'), findsOneWidget);
+    expect(find.text('Assinar Water Protein'), findsOneWidget);
 
-    await principal(tester); // Começar
+    await montarApp(tester, tokens: tokens, rotaInicial: AppRoutes.cadastroLogin);
     await esperar(tester, find.byKey(const Key('campo-email')));
     expect(find.text('Criar conta'), findsWidgets);
 
@@ -417,15 +411,13 @@ void main() {
       findsOneWidget,
       reason: 'Sem aceite de termos deve mostrar erro inline',
     );
-    // Alternância Criar conta ↔ Já tenho conta (já coberta no teste de login)
     expect(find.widgetWithText(BotaoPrincipal, 'Criar conta'), findsOneWidget);
   });
 
   testWidgets('HML: CEP fora cobertura (01310-100)', (tester) async {
     final tokens = ArmazenamentoEmMemoria();
-    await montarApp(tester, tokens: tokens);
-    await esperar(tester, find.textContaining('Como funciona'));
-    await principal(tester);
+    await montarApp(tester, tokens: tokens, rotaInicial: AppRoutes.cadastroLogin);
+    await esperar(tester, find.byKey(const Key('campo-email')));
     await bombear(tester);
 
     final email = 'qa.cep.${DateTime.now().millisecondsSinceEpoch}@example.com';

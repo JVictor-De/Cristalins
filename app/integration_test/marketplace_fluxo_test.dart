@@ -138,7 +138,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('Adicionar Água mineral'), findsOneWidget);
+    // P5.2: copy visível usa nome curto; Semantics guarda o nome API completo.
+    expect(find.textContaining('Adicionar Sem gás'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp(r'Adicionar Água mineral')),
+      findsOneWidget,
+    );
 
     // Fecha o mínimo: 12 un. → falta 0
     mocks.simularDevolve(

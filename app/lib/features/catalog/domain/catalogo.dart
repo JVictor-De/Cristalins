@@ -15,6 +15,21 @@ class ItemCesta {
   int get hashCode => Object.hash(produto, quantidade);
 }
 
+/// Linha da tabela nutricional, como a API manda (texto pronto, sem conta no app).
+class LinhaNutricional {
+  const LinhaNutricional({required this.nutriente, required this.valor});
+
+  final String nutriente;
+  final String valor;
+}
+
+class TabelaNutricional {
+  const TabelaNutricional({required this.porcao, required this.linhas});
+
+  final String porcao;
+  final List<LinhaNutricional> linhas;
+}
+
 class Produto {
   const Produto({
     required this.codigo,
@@ -24,6 +39,10 @@ class Produto {
     required this.embalagemQtd,
     required this.precoBase,
     this.descricao,
+    this.estoque,
+    this.precoAvulso,
+    this.claims = const [],
+    this.tabelaNutricional,
   });
 
   final String codigo;
@@ -38,6 +57,19 @@ class Produto {
   /// Texto do catálogo (API); sem promessa de saúde.
   final String? descricao;
 
+  /// Unidades em estoque; nulo = sem controle (sempre disponível).
+  final int? estoque;
+
+  /// Preço unitário fora da assinatura (API). Nulo = sem canal avulso.
+  final Dinheiro? precoAvulso;
+
+  /// Destaques do rótulo vindos da API (chips da PDP).
+  final List<String> claims;
+
+  final TabelaNutricional? tabelaNutricional;
+
+  bool get esgotado => estoque == 0;
+
   /// Volume legível: 500 ml, 1,5 L.
   String get volume {
     if (volumeMl < 1000) return '$volumeMl ml';
@@ -46,6 +78,9 @@ class Produto {
   }
 
   String get embalagem => embalagemQtd == 1 ? 'Unidade' : '$embalagemQtd por embalagem';
+
+  /// Pack real do seed para cards/listas: `12 × 500 ml`; unitário (galão) = só `5 L`.
+  String get pack => embalagemQtd <= 1 ? volume : '$embalagemQtd × $volume';
 
   String get rotuloTipo => switch (tipo) {
     'PRINCIPAL' => codigo == 'FF500' ? 'Flow Fiber' : 'Water Protein',
@@ -69,6 +104,17 @@ class Kit {
   final Dinheiro subtotalBase;
 }
 
+/// Ordem da grade Produtos (P1.4): Water Protein antes de Flow Fiber; demais SKUs
+/// mantêm a ordem da API (a API ordena por tipo + código → FF500 antes de WP500).
+List<Produto> ordenarGradeProdutos(Iterable<Produto> origem) {
+  final lista = origem.toList();
+  return [
+    ...lista.where((p) => p.codigo == 'WP500'),
+    ...lista.where((p) => p.codigo == 'FF500'),
+    ...lista.where((p) => p.codigo != 'WP500' && p.codigo != 'FF500'),
+  ];
+}
+
 /// Acima deste tamanho: busca + chips por linha (WP / Fiber / Águas / Kits).
 const kLimiteCatalogoCurto = 12;
 
@@ -77,7 +123,7 @@ enum Categoria {
   todos('Todos'),
   waterProtein('Water Protein'),
   flowFiber('Flow Fiber'),
-  funcionais('Funcionais'),
+  funcionais('Proteína e fibras'),
   aguas('Águas'),
   kits('Kits');
 
@@ -94,18 +140,10 @@ enum Categoria {
   };
 
   /// Chips conforme tamanho do catálogo (vazio → nenhum; curto → consolidados).
-  static List<Categoria> chipsPara({
-    required int totalProdutos,
-    required bool temKits,
-  }) {
+  static List<Categoria> chipsPara({required int totalProdutos, required bool temKits}) {
     if (totalProdutos == 0) return const [];
     if (totalProdutos <= kLimiteCatalogoCurto) {
-      return [
-        Categoria.todos,
-        Categoria.aguas,
-        Categoria.funcionais,
-        if (temKits) Categoria.kits,
-      ];
+      return [Categoria.todos, Categoria.aguas, Categoria.funcionais, if (temKits) Categoria.kits];
     }
     return [
       Categoria.todos,
@@ -157,6 +195,10 @@ class ItemSimulado {
   final Dinheiro precoUnitario;
 }
 
+/// RN18: frete grátis acima de R$ 250 por entrega (= `FRETE_GRATIS_ACIMA` da API).
+/// Só fallback de exibição antes da 1ª simulação; o valor vigente vem de [Simulacao].
+const kFreteGratisAcimaPadrao = 250;
+
 /// Resultado de `POST /precos/simular` (tudo calculado pela API).
 class Simulacao {
   const Simulacao({
@@ -170,7 +212,7 @@ class Simulacao {
     this.ueMinima = 12,
     this.ueMaxima = 120,
     this.faltaUeParaMinimo = 0,
-    this.freteGratisAcima = 250,
+    this.freteGratisAcima = kFreteGratisAcimaPadrao,
     this.faltaParaFreteGratis = 0,
     this.economiaPlano = 0,
   });

@@ -45,21 +45,78 @@ Color corDoProduto(String codigo) {
   }
 }
 
-/// Nome curto no card / a11y (WP/FF sem volume longo da API).
-String nomeCardProduto(Produto produto) {
-  switch (produto.codigo) {
+/// Recorte rente ao alpha (~600 px de altura = 3× do bloco 200) só para o card
+/// foto-âncora: base alinhada sem margem transparente. Hero/PDP seguem com
+/// [assetDoProduto] (composição própria).
+const _codigosComRecorteCard = {
+  'AMS500',
+  'AMC510',
+  'AMN1500',
+  'AMN5000',
+  'WP500',
+  'FF500',
+  'AMC200',
+  'GUA2000',
+};
+
+String? assetCardProduto(String codigo) => _codigosComRecorteCard.contains(codigo)
+    ? 'assets/images/produtos/card/${codigo.toLowerCase()}.png'
+    : assetDoProduto(codigo);
+
+/// Fundo soft do bloco foto-âncora do card (P0): águas / WP / FF.
+Color fundoBlocoProduto(String codigo) {
+  switch (codigo) {
+    case 'WP500':
+      return AppColors.blocoWaterProtein;
+    case 'FF500':
+      return AppColors.blocoFlowFiber;
+    default:
+      return AppColors.blocoAgua;
+  }
+}
+
+/// Escala da garrafa dentro do bloco (fração da altura/largura úteis).
+/// 1,5 L ~90% altura; 500 ml ~75%; galão ~90% largura; demais ~85%.
+({double altura, double largura}) escalaGarrafaCard(Produto produto) {
+  if (produto.codigo == 'AMN5000' || produto.volumeMl >= 5000) {
+    return (altura: 0.85, largura: 0.90);
+  }
+  if (produto.volumeMl >= 1500) return (altura: 0.90, largura: 0.80);
+  if (produto.volumeMl >= 500 && produto.volumeMl <= 510) return (altura: 0.75, largura: 0.70);
+  return (altura: 0.85, largura: 0.80);
+}
+
+/// Nome curto por código (P0.5 / P5.2) — listas: sacola, assinatura, recibo, quiz.
+/// Desconhecido: [fallback] ou o próprio código.
+String nomeCurtoPorCodigo(String codigo, {String? fallback}) {
+  switch (codigo) {
     case 'WP500':
       return 'Water Protein';
     case 'FF500':
       return 'Flow Fiber';
+    case 'AMS500':
+    case 'AMN1500':
+      return 'Sem gás';
+    case 'AMC510':
+      return 'Com gás';
+    case 'AMN5000':
+      return 'Galão';
+    // Fora da tabela P0: preferir nome API ([fallback]); senão rótulo curto de recibo.
+    case 'AMC200':
+      return fallback ?? 'Água no copo';
+    case 'GUA2000':
+      return fallback ?? 'Guaraná Cristalins';
     default:
-      return produto.nome;
+      return fallback ?? codigo;
   }
 }
+
+/// Nome curto no card (P0.5). Leitor de tela usa o nome completo da API.
+String nomeCardProduto(Produto produto) =>
+    nomeCurtoPorCodigo(produto.codigo, fallback: produto.nome);
 
 /// Foto de rótulo WP (opcional; preferir em login/onboarding).
 const assetProteinDetalhe = 'assets/images/produtos/protein.png';
 
 /// Garrafa da cena de impacto na PDP: muda por SKU; fundo/respingo ficam fixos.
-String garrafaDaCenaImpacto(String codigo) =>
-    assetDoProduto(codigo) ?? assetProteinDetalhe;
+String garrafaDaCenaImpacto(String codigo) => assetDoProduto(codigo) ?? assetProteinDetalhe;

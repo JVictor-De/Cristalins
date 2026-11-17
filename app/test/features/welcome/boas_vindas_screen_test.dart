@@ -1,13 +1,26 @@
 import 'package:cristalins_assinatura/app.dart';
 import 'package:cristalins_assinatura/core/config/app_config.dart';
-import 'package:cristalins_assinatura/core/intents/abridor_links.dart';
+import 'package:cristalins_assinatura/core/formatacao.dart';
+import 'package:cristalins_assinatura/core/marca_assets.dart';
 import 'package:cristalins_assinatura/core/routes.dart';
 import 'package:cristalins_assinatura/core/theme/app_colors.dart';
+import 'package:cristalins_assinatura/core/theme/app_theme.dart';
+import 'package:cristalins_assinatura/core/widgets/botao_principal.dart';
+import 'package:cristalins_assinatura/features/auth/presentation/cadastro_login_screen.dart';
+import 'package:cristalins_assinatura/features/catalog/domain/catalogo.dart';
+import 'package:cristalins_assinatura/features/catalog/presentation/sacola_controller.dart';
+import 'package:cristalins_assinatura/features/shell/presentation/shell_screen.dart';
+import 'package:cristalins_assinatura/features/welcome/data/onboarding_prefs.dart';
+import 'package:cristalins_assinatura/features/welcome/presentation/onboarding_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:provider/provider.dart';
 
-class _AbridorLinksMock extends Mock implements AbridorLinks {}
+import '../../support/mocks.dart';
+
+class _MockStorage extends Mock implements FlutterSecureStorage {}
 
 const _config = AppConfig(
   ambiente: Ambiente.dev,
@@ -15,53 +28,116 @@ const _config = AppConfig(
   suporteWhatsapp: '',
 );
 
-/// Tela 1 — não shell/home (marketplace). `exibirSplash: false` sozinho abre o shell.
-Widget _app(AbridorLinks abridor) => CristalinsApp(
+const _wp = Produto(
+  codigo: 'WP500',
+  nome: 'Water Protein (água com colágeno)',
+  tipo: 'PRINCIPAL',
+  volumeMl: 500,
+  embalagemQtd: 6,
+  precoBase: Dinheiro(990),
+);
+
+/// `/boas-vindas` = onboarding (entry canônico marketplace).
+Widget _app(Mocks mocks) => CristalinsApp(
       config: _config,
-      abridorLinks: abridor,
+      dependencias: mocks.dependencias,
       exibirSplash: false,
       rotaInicial: AppRoutes.boasVindas,
     );
 
-final _linkDoSite = find.text('Conhecer o site da Cristalins');
-
-/// `scrollUntilVisible` para quando o item existe na árvore (mesmo fora da tela, no cache);
-/// `ensureVisible` então traz o item para a área visível, acima do botão do rodapé.
-Future<void> _mostrarLinkDoSite(WidgetTester tester) async {
-  await tester.scrollUntilVisible(_linkDoSite, 100, scrollable: find.byType(Scrollable).first);
-  await tester.ensureVisible(_linkDoSite);
-  await tester.pumpAndSettle();
+SacolaController _sacolaComWp() {
+  final mocks = Mocks();
+  when(() => mocks.catalogo.produtos()).thenAnswer((_) async => const [_wp]);
+  when(() => mocks.catalogo.kits()).thenAnswer((_) async => const []);
+  final storage = _MockStorage();
+  when(() => storage.read(key: any(named: 'key'))).thenAnswer((_) async => null);
+  when(() => storage.write(key: any(named: 'key'), value: any(named: 'value'))).thenAnswer((_) async {});
+  final s = SacolaController(mocks.catalogo, storage: storage, atraso: Duration.zero);
+  s.produtos = const [_wp];
+  s.carregandoCatalogo = false;
+  return s;
 }
 
 void main() {
-  late _AbridorLinksMock abridor;
+  late Mocks mocks;
 
   setUp(() {
-    // Celular típico: 360 x 780 dp.
     final view = TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
     view.physicalSize = const Size(1080, 2340);
     view.devicePixelRatio = 3;
     addTearDown(view.reset);
-    abridor = _AbridorLinksMock();
-    when(() => abridor.abrir(any())).thenAnswer((_) async => true);
+    OnboardingPrefs.resetParaTeste();
+    OnboardingPrefs.overrideVistoParaTeste = false;
+    mocks = Mocks();
+    when(() => mocks.catalogo.produtos()).thenAnswer((_) async => const [_wp]);
+    when(() => mocks.catalogo.kits()).thenAnswer((_) async => const []);
+    when(() => mocks.assinaturas.listar()).thenAnswer((_) async => const []);
+    when(() => mocks.links.abrir(any())).thenAnswer((_) async => true);
   });
 
-  testWidgets('mostra a proposta, os passos e a ação principal', (tester) async {
-    await tester.pumpWidget(_app(abridor));
+  tearDown(OnboardingPrefs.resetParaTeste);
+
+  testWidgets('boas-vindas renderiza onboarding P4 (WP + CTA + Entrar)', (tester) async {
+    await tester.pumpWidget(_app(mocks));
     await tester.pumpAndSettle();
 
+    expect(find.byType(OnboardingScreen), findsOneWidget);
     expect(find.bySemanticsLabel('Cristalins'), findsWidgets);
-    expect(find.image(const AssetImage('assets/images/brand/logo.png')), findsWidgets);
-    expect(find.text('Responda 5 perguntas'), findsOneWidget);
+    expect(find.byKey(const ValueKey('onboarding-titulo')), findsOneWidget);
+    expect(find.text('Water Protein no Rio'), findsOneWidget);
+    expect(find.widgetWithText(BotaoPrincipal, 'Montar minha assinatura'), findsOneWidget);
+    expect(find.text('Ver todos os produtos'), findsOneWidget);
+    expect(find.text('Já sou assinante? Entrar'), findsOneWidget);
+    expect(find.text('Descobrir meu kit'), findsNothing);
+    expect(find.text('Pular'), findsNothing);
+    expect(find.textContaining('água mineral'), findsNothing);
+  });
 
-    expect(find.text('Pague com Pix'), findsOneWidget);
-    expect(find.text('Começar'), findsOneWidget);
+  testWidgets('P4.2: preço a partir de precoBase do WP', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildAppTheme(),
+        home: ChangeNotifierProvider<SacolaController>.value(
+          value: _sacolaComWp(),
+          child: const OnboardingScreen(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('onboarding-preco')), findsOneWidget);
+    expect(find.text('A partir de ${const Dinheiro(990).formatado}/garrafa'), findsOneWidget);
+    final cta = tester.widget<BotaoPrincipal>(find.byKey(const ValueKey('onboarding-cta')));
+    expect(cta.variante, VarianteBotaoPrincipal.cta);
+  });
+
+  testWidgets('fundo do onboarding usa agua-bokeh limpa (png), sem tipografia de print', (
+    tester,
+  ) async {
+    expect(assetHeroAguaBokeh, 'assets/images/hero/agua-bokeh-limpa.png');
+    expect(assetHeroAguaBokeh.endsWith('.webp'), isFalse);
+
+    await tester.pumpWidget(_app(mocks));
+    await tester.pumpAndSettle();
+
+    final foto = find.byWidgetPredicate((w) {
+      if (w is! Image) return false;
+      final provider = w.image;
+      final path = switch (provider) {
+        AssetImage(:final assetName) => assetName,
+        ExactAssetImage(:final assetName) => assetName,
+        _ => null,
+      };
+      return path == assetHeroAguaBokeh;
+    });
+    expect(foto, findsOneWidget);
+    expect(find.byKey(const ValueKey('onboarding-garrafa-wp')), findsOneWidget);
   });
 
   testWidgets('tema usa Inter, plataforma iOS e azulMarca como primária', (tester) async {
-    await tester.pumpWidget(_app(abridor));
+    await tester.pumpWidget(_app(mocks));
     await tester.pumpAndSettle();
-    final tema = Theme.of(tester.element(find.text('Começar')));
+    final tema = Theme.of(tester.element(find.text('Montar minha assinatura')));
 
     expect(tema.platform, TargetPlatform.iOS);
     expect(tema.textTheme.bodyMedium?.fontFamily, 'Inter');
@@ -69,59 +145,40 @@ void main() {
     expect(tema.cupertinoOverrideTheme?.primaryColor, AppColors.azulMarca);
   });
 
-  testWidgets('Começar abre a rota da Tela 2 e o voltar retorna', (tester) async {
-    await tester.pumpWidget(_app(abridor));
+  testWidgets('Ver todos os produtos abre o shell marketplace', (tester) async {
+    await tester.pumpWidget(_app(mocks));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Começar'));
+    await tester.tap(find.text('Ver todos os produtos'));
     await tester.pumpAndSettle();
 
-    // Tela 2 (cr-2-telas): cadastro e login.
-    expect(find.text('Criar conta'), findsWidgets);
-    expect(find.text('Já tenho conta'), findsOneWidget);
-
-    // Botão/gesto de voltar do Android
-    await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
-    expect(find.text('Começar'), findsOneWidget);
+    expect(find.byType(ShellScreen), findsOneWidget);
+    expect(find.byType(OnboardingScreen), findsNothing);
   });
 
-  testWidgets('link abre o site da marca', (tester) async {
-    await tester.pumpWidget(_app(abridor));
-    await _mostrarLinkDoSite(tester);
-    await tester.tap(_linkDoSite);
-    await tester.pump();
-
-    verify(() => abridor.abrir('https://www.cristalins.com.br/')).called(1);
-  });
-
-  testWidgets('avisa quando o site não abre', (tester) async {
-    when(() => abridor.abrir(any())).thenAnswer((_) async => false);
-    await tester.pumpWidget(_app(abridor));
-    await _mostrarLinkDoSite(tester);
-    await tester.tap(_linkDoSite);
+  testWidgets('Entrar abre cadastro/login', (tester) async {
+    await tester.pumpWidget(_app(mocks));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Já sou assinante? Entrar'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Não conseguimos abrir o site agora. Tente de novo.'), findsOneWidget);
+    expect(find.byType(CadastroLoginScreen), findsOneWidget);
+    expect(find.byType(OnboardingScreen), findsNothing);
   });
 
   testWidgets('fonte a 130% sem estouro de layout', (tester) async {
-    // MaterialApp lê a escala da view; um MediaQuery por fora seria ignorado.
     tester.platformDispatcher.textScaleFactorTestValue = 1.3;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-    await tester.pumpWidget(_app(abridor));
+    await tester.pumpWidget(_app(mocks));
     await tester.pumpAndSettle();
 
-    final contexto = tester.element(find.text('Começar'));
+    final contexto = tester.element(find.text('Montar minha assinatura'));
     expect(MediaQuery.textScalerOf(contexto).scale(10), closeTo(13, 0.01));
     expect(tester.takeException(), isNull);
-    await _mostrarLinkDoSite(tester);
-    expect(tester.takeException(), isNull);
-    expect(find.text('Começar'), findsOneWidget);
   });
 
   testWidgets('acessibilidade: toque ≥ 48 dp, rótulos e contraste', (tester) async {
     final semantica = tester.ensureSemantics();
-    await tester.pumpWidget(_app(abridor));
+    await tester.pumpWidget(_app(mocks));
     await tester.pumpAndSettle();
 
     await expectLater(tester, meetsGuideline(androidTapTargetGuideline));

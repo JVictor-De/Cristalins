@@ -12,7 +12,9 @@ const assetHeroFlowProtein = 'assets/images/produtos/protein.png';
 
 const assetHeroFlowFiber = 'assets/images/produtos/flow_fiber-fast.png';
 const assetHeroTodosProdutos = 'assets/images/hero/todos_produtos-fast.webp';
-const assetHeroAguaBokeh = 'assets/images/hero/agua-bokeh.webp';
+
+/// Fundo do onboarding sem tipografia de print (substitui `agua-bokeh.webp`).
+const assetHeroAguaBokeh = 'assets/images/hero/agua-bokeh-limpa.png';
 const assetHeroRespingo = 'assets/images/hero/impacto-respingo.webp';
 
 /// Foto limpa de produto (substitui print `colocar_site-fast.webp`).

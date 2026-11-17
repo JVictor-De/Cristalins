@@ -19,22 +19,33 @@ Não há botão “Confirmar pagamento” no app — lacuna documentada em `docs
 ### 0:00–0:40 — Abertura e proposta
 
 - Uma frase: “App Flutter + API NestJS; regra de negócio só no servidor; Pix do ciclo via Asaas.”
-- Mostrar Swagger (`/docs`) e health (`/api/v1/health`) no projetor ou no notebook.
+- Mostrar Swagger e health no projetor — preferir **URLs públicas** (bônus nuvem):  
+  `https://apicristalins.peladeiro.cloud/api/v1/health` e `https://apicristalins.peladeiro.cloud/docs`  
+  (checklist: `docs/AP2_BONUS_CHECKLIST.md`).
 - Citar pendência em uma linha: preços do seed são de estudo, não catálogo oficial Cristalins.
 
-### 0:40–1:30 — Quiz e compartilhar (telas 3–4)
+### 0:40–1:10 — Activities + Intents (30–60 s) **[rubrica]**
 
-1. Login rápido (seed `ana.teste@cristalins.local` / `cristalins-dev-123`) ou cadastro curto.
-2. Percorrer o quiz → resultado com kit/itens/frequência/preço estimado.
-3. Tocar em compartilhar (`share_plus`) — Intent implícita.
+Roteiro curto (detalhe em `docs/AP2_ACTIVITIES_INTENTS.md`):
 
-### 1:30–2:20 — Cesta (tela 5)
+1. **Activity nativa:** no onboarding, “Descobrir meu kit” → sobe `QuizActivity` (casca `FlutterActivity`). Opcional no notebook: `adb shell dumpsys activity activities | findstr cristalins`.
+2. **Intent explícita:** concluir o quiz → `ResultadoActivity` via MethodChannel `br.com.cristalins.assinatura/navegacao` (`abrirActivity` + `Intent(this, ResultadoActivity::class.java)`).
+3. **Intent implícita:** no resultado, **Compartilhar resultado** (`share_plus` / `Compartilhador`) **ou**, depois, no endereço abrir mapa (`geo:`).
+
+Manifest: 9 Activities (`MainActivity` + 8 AP2). Matriz: `docs/AP2_MATRIZ_RUBRICA.md`.
+
+### 1:10–1:50 — Quiz e resultado (resto das telas 3–4)
+
+1. Login rápido (seed `ana.teste@cristalins.local` / `cristalins-dev-123`) ou cadastro curto, se ainda não logado.
+2. Mostrar kit/itens/frequência/preço estimado no resultado.
+
+### 1:50–2:30 — Cesta (tela 5)
 
 1. Abrir catálogo; ajustar quantidades (−/+).
 2. Mostrar que o total vem de `POST /precos/simular` (não é conta local).
 3. Opcional: mencionar CT01 (R$ 219,09) como prova na API/testes, sem recalcular na mão no celular.
 
-### 2:20–3:00 — CEP e mapa (tela 6)
+### 2:30–3:00 — CEP e mapa (tela 6)
 
 1. Informar CEP atendido (ex.: Copacabana / Zona Sul do seed).
 2. Salvar endereço; abrir “no mapa” (`geo:`) se o aparelho permitir.
@@ -72,12 +83,13 @@ curl -X POST http://localhost:3000/api/v1/webhooks/asaas \
 
 ## Checklist rápido (antes de entrar na sala)
 
-- [ ] `GET /api/v1/health` → 200  
-- [ ] Swagger `/docs` abre  
+- [ ] `GET /api/v1/health` → 200 (local **ou** `https://apicristalins.peladeiro.cloud/api/v1/health`)  
+- [ ] Swagger `/docs` abre (local **ou** público — ver `docs/AP2_BONUS_CHECKLIST.md`)  
 - [ ] Seed com Ana/Bruno/admin  
 - [ ] App conecta na API certa (`API_URL`)  
 - [ ] Plano A: webhook Asaas cadastrado **ou** Plano B: `ASAAS_MODE=fake` + `curl` testado uma vez  
-- [ ] Prints em `docs/prints/` (PNGs ou lembrete `.md` para o João)
+- [ ] Prints em `docs/prints/` (PNGs — ainda bloqueados sem emulador; ver `COMO_CAPTURAR.md`)  
+- [ ] Opcional bônus físico: APK `hml` instalado (`docs/DEPLOY.md` §8)
 
 ## O que não fazer na fala
 

@@ -85,7 +85,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('Ver de novo'), findsNothing);
+    expect(find.text('Repetir animação'), findsNothing);
     expect(_imagemComAsset(garrafaDaCenaImpacto('AMC510')), isNotNull);
   });
 }

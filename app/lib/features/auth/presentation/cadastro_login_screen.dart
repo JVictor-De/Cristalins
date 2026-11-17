@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/dependencias.dart';
+import '../../../core/intents/navegacao_nativa.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -136,7 +137,12 @@ class _ConteudoState extends State<_Conteudo> {
     if (!mounted) return;
     switch (destino) {
       case DestinoAposAcesso.minhaAssinatura:
-        Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.minhaAssinatura, (_) => false);
+        await NavegacaoNativa.instancia.abrir(
+          context,
+          activity: NavegacaoNativa.minhaAssinatura,
+          rota: AppRoutes.minhaAssinatura,
+          limparPilha: true,
+        );
       case DestinoAposAcesso.checkout:
         mostrarAviso(
           context,
@@ -150,7 +156,12 @@ class _ConteudoState extends State<_Conteudo> {
           context,
           cadastro ? 'Conta criada. Vamos ao quiz.' : 'Que bom te ver de novo.',
         );
-        Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.quiz, (r) => r.isFirst);
+        await NavegacaoNativa.instancia.abrir(
+          context,
+          activity: NavegacaoNativa.quiz,
+          rota: AppRoutes.quiz,
+          finish: true,
+        );
     }
   }
 

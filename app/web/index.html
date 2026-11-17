@@ -22,8 +22,131 @@
 
   <title>Cristalins Assinatura</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    #cristalins-apk-banner {
+      display: none;
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      /* Acima do canvas Flutter Web (flt-glass-pane). */
+      z-index: 2147483647;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: #073B53;
+      color: #fff;
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 28px rgba(7, 59, 83, 0.35);
+      gap: 12px;
+      align-items: flex-start;
+    }
+    #cristalins-apk-banner.is-visible { display: flex; }
+    #cristalins-apk-banner .txt { flex: 1; min-width: 0; }
+    #cristalins-apk-banner .titulo { font-weight: 700; font-size: 15px; margin: 0 0 4px; }
+    #cristalins-apk-banner .sub { font-size: 13px; opacity: 0.9; margin: 0; line-height: 1.35; }
+    #cristalins-apk-banner .acoes { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+    #cristalins-apk-banner button,
+    #cristalins-apk-banner a.btn {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      white-space: nowrap;
+    }
+    #cristalins-apk-banner a.btn-baixar { background: #fff; color: #073B53; }
+    #cristalins-apk-banner button.btn-fechar { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.35); }
+  </style>
 </head>
 <body>
+  <div id="cristalins-apk-banner" role="dialog" aria-live="polite" aria-label="Baixar aplicativo Android">
+    <div class="txt">
+      <p class="titulo">Baixe o app Cristalins</p>
+      <p class="sub">Melhor no Android: Activities nativas, Pix e assinatura. Toque para instalar o APK.</p>
+    </div>
+    <div class="acoes">
+      <a class="btn btn-baixar" id="cristalins-apk-baixar" href="downloads/cristalins-hml.apk" download="cristalins-hml.apk">Baixar APK</a>
+      <button type="button" class="btn-fechar" id="cristalins-apk-fechar">Agora não</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var KEY = 'cristalins_apk_banner_dismissed_until';
+      var APK = 'downloads/cristalins-hml.apk';
+      var ua = navigator.userAgent || '';
+      var isAndroid = /Android/i.test(ua);
+      // Desktop Chrome com DevTools “mobile” ainda pode ser útil; prioriza Android real.
+      var wantsPrompt = isAndroid;
+
+      function dismissed() {
+        try {
+          var until = parseInt(localStorage.getItem(KEY) || '0', 10);
+          return until && Date.now() < until;
+        } catch (e) { return false; }
+      }
+
+      function dismiss(days) {
+        try {
+          localStorage.setItem(KEY, String(Date.now() + days * 864e5));
+        } catch (e) {}
+        var el = document.getElementById('cristalins-apk-banner');
+        if (el) el.classList.remove('is-visible');
+      }
+
+      function showBanner() {
+        var el = document.getElementById('cristalins-apk-banner');
+        if (!el) return;
+        // Reparent no fim do body: o Flutter injeta view fullscreen e pode cobrir irmãos anteriores.
+        if (el.parentNode !== document.body || el.nextSibling) {
+          document.body.appendChild(el);
+        }
+        el.classList.add('is-visible');
+        document.getElementById('cristalins-apk-fechar').onclick = function () { dismiss(7); };
+        var baixar = document.getElementById('cristalins-apk-baixar');
+        baixar.onclick = function () {
+          tryNotify();
+          dismiss(1);
+        };
+      }
+
+      function tryNotify() {
+        if (!('Notification' in window)) return;
+        var title = 'Cristalins';
+        var opts = { body: 'Download do APK iniciado. Permita a instalação se o Android pedir.', icon: 'icons/Icon-192.png' };
+        function fire() {
+          try { new Notification(title, opts); } catch (e) {}
+        }
+        if (Notification.permission === 'granted') {
+          fire();
+        } else if (Notification.permission !== 'denied') {
+          Notification.requestPermission().then(function (p) {
+            if (p === 'granted') fire();
+          }).catch(function () {});
+        }
+      }
+
+      if (!wantsPrompt || dismissed()) return;
+
+      function tentarMostrar() {
+        // Confirma que o APK está publicado (evita banner quebrado após deploy sem arquivo).
+        fetch(APK, { method: 'HEAD', cache: 'no-store' }).then(function (res) {
+          if (res.ok) showBanner();
+        }).catch(function () {
+          // Fallback: alguns proxies bloqueiam HEAD — tenta GET parcial via range não; só some se 404.
+        });
+      }
+
+      // Após 1º frame do Flutter (se existir) ou timeout curto.
+      window.addEventListener('flutter-first-frame', tentarMostrar, { once: true });
+      setTimeout(tentarMostrar, 1200);
+    })();
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

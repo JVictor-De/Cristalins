@@ -302,6 +302,23 @@ describe('PrecoService', () => {
       expect(validar({ WP500: 7, FF500: 6 })).toBe('EMBALAGEM_INVALIDA');
     });
 
+    it('mensagem da caixa mista não cita produto ausente e diz quanto falta', () => {
+      const mensagem = (q: Record<string, number>) => {
+        try {
+          service.validarCesta(cesta(q), Plano.FLEX);
+          return '';
+        } catch (e) {
+          return (e as RegraNegocioException).mensagem;
+        }
+      };
+      const soWp = mensagem({ WP500: 15, AMS500: 12 });
+      expect(soWp).toBe('Water Protein vem em caixas de 6: faltam 3 garrafas para completar a caixa.');
+      expect(soWp).not.toContain('Flow Fiber');
+      expect(mensagem({ WP500: 6, FF500: 3, AMS500: 12 })).toBe(
+        'Water Protein e Flow Fiber dividem caixas de 6: faltam 3 garrafas para completar a caixa.',
+      );
+    });
+
     it('demais produtos em múltiplos da própria embalagem', () => {
       expect(validar({ WP500: 12, AMS500: 6 })).toBe('EMBALAGEM_INVALIDA');
       expect(() => service.validarCesta(cesta({ WP500: 12, AMS500: 24, AMN5000: 1 }), Plano.FLEX)).not.toThrow();
