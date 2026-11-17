@@ -159,16 +159,25 @@ void main() {
   });
 
   testWidgets('golden HeroWaterProtein', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(400, 420));
+    await tester.binding.setSurfaceSize(const Size(400, 520));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
-      envelopar(
-        HeroWaterProtein(
-          onAssinar: () {},
-          onVerAguas: () {},
-          precoAPartirDe: const Dinheiro(990),
+      MaterialApp(
+        theme: buildAppTheme(),
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(400, 900), disableAnimations: true),
+          child: Scaffold(
+            backgroundColor: AppColors.gelo,
+            body: Padding(
+              padding: const EdgeInsets.all(16),
+              child: HeroWaterProtein(
+                onAssinar: () {},
+                onAbrirProduto: () {},
+                precoAPartirDe: const Dinheiro(990),
+              ),
+            ),
+          ),
         ),
-        size: const Size(400, 900),
       ),
     );
     await tester.pump();

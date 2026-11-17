@@ -66,8 +66,18 @@ class _ConteudoState extends State<_Conteudo> {
 
   Future<void> _copiar(String codigo) async {
     HapticFeedback.selectionClick();
-    await Clipboard.setData(ClipboardData(text: codigo));
-    if (mounted) mostrarAviso(context, 'Código Pix copiado. Cole no app do seu banco.');
+    try {
+      await Clipboard.setData(ClipboardData(text: codigo));
+      if (mounted) mostrarAviso(context, 'Código Pix copiado. Cole no app do seu banco.');
+    } catch (_) {
+      if (mounted) {
+        mostrarAviso(
+          context,
+          'Não foi possível copiar. Selecione o código Pix e copie manualmente.',
+          erro: true,
+        );
+      }
+    }
   }
 
   @override

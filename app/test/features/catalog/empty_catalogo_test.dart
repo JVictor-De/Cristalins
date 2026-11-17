@@ -205,7 +205,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Ver todas as águas'), findsNothing);
-    expect(find.text('Assinar Water Protein'), findsOneWidget);
+    expect(find.text('Assinar agora'), findsOneWidget);
   });
 
   testWidgets('sacola vazia sem WP: Assinar vai ao shell Produtos', (tester) async {

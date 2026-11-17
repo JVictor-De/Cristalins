@@ -154,11 +154,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.margem),
                   child: sacola.carregandoCatalogo
-                      ? const SkeletonCard(altura: 220)
+                      ? const SkeletonCard(altura: 316)
                       : HeroWaterProtein(
                           onAssinar: () => _assinarWp(sacola),
-                          onVerAguas: () => widget.onAbrirProdutos(categoria: Categoria.aguas),
-                          mostrarVerAguas: sacola.produtos.any(Categoria.aguas.inclui),
+                          onAbrirProduto: () {
+                            if (wp == null) {
+                              widget.onAbrirProdutos();
+                              return;
+                            }
+                            Navigator.of(context).pushNamed(
+                              AppRoutes.produto,
+                              arguments: wp.codigo,
+                            );
+                          },
                           precoAPartirDe: wp?.precoBase,
                         ),
                 ),

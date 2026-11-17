@@ -128,6 +128,9 @@ class _ConteudoState extends State<_Conteudo> {
       mostrarAviso(context, c.erro!, erro: true);
       return;
     }
+    // Sem destino = bloqueio local (ex.: termos sem aceite) — não registra push nem navega.
+    if (destino == null) return;
+
     final dep = context.read<Dependencias>();
     await dep.push.registrarSePossivel(dep.api);
     if (!mounted) return;
@@ -148,8 +151,6 @@ class _ConteudoState extends State<_Conteudo> {
           cadastro ? 'Conta criada. Vamos ao quiz.' : 'Que bom te ver de novo.',
         );
         Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.quiz, (r) => r.isFirst);
-      case null:
-        break;
     }
   }
 

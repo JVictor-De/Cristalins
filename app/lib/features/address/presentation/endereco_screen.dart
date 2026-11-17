@@ -168,9 +168,11 @@ class _ConteudoState extends State<_Conteudo> {
       TextEditingController ctrl,
       String rotulo,
       String placeholder, {
+      Key? key,
       FormFieldValidator<String>? validar,
       TextInputType? teclado,
     }) => CupertinoTextFormFieldRow(
+      key: key,
       controller: ctrl,
       prefix: SizedBox(
         width: AppSpacing.larguraRotuloCampo,
@@ -242,7 +244,13 @@ class _ConteudoState extends State<_Conteudo> {
                     rodape: c.erroCep ?? 'Entregamos no município do Rio de Janeiro.',
                     rodapeErro: c.erroCep != null,
                     children: [
-                      campo(_cep, 'CEP', '00000-000', teclado: TextInputType.number),
+                      campo(
+                        _cep,
+                        'CEP',
+                        '00000-000',
+                        key: const Key('campo-cep'),
+                        teclado: TextInputType.number,
+                      ),
                       LinhaLista(
                         titulo: c.consultando ? 'Buscando…' : 'Buscar CEP',
                         corTitulo: AppColors.linkSobreSuperficie,
@@ -286,6 +294,7 @@ class _ConteudoState extends State<_Conteudo> {
                           _numero,
                           'Número',
                           '100',
+                          key: const Key('campo-numero'),
                           validar: (v) => (v ?? '').trim().isEmpty ? 'Informe o número.' : null,
                         ),
                         campo(_complemento, 'Compl.', 'Apto, bloco (opcional)'),

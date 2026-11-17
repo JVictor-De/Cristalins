@@ -26,23 +26,26 @@ void main() {
       MaterialApp(
         theme: buildAppTheme(),
         home: MediaQuery(
-          data: const MediaQueryData(size: Size(390, 844)),
+          data: const MediaQueryData(size: Size(390, 844), disableAnimations: true),
           child: Scaffold(
             backgroundColor: AppColors.fundo,
             body: HeroWaterProtein(
               onAssinar: () {},
-              onVerAguas: () {},
+              onAbrirProduto: () {},
               precoAPartirDe: const Dinheiro(990),
             ),
           ),
         ),
       ),
     );
+    await tester.pump();
     expect(find.text('Mais vendido'), findsOneWidget);
     expect(find.text('Carro-chefe'), findsNothing);
-    expect(find.textContaining('5 g de proteína por garrafa'), findsOneWidget);
-    expect(find.textContaining('a partir de'), findsOneWidget);
-    expect(find.textContaining('/un.'), findsOneWidget);
+    expect(find.text('Assinar agora'), findsOneWidget);
+    expect(find.text('Ver todas as águas'), findsNothing);
+    expect(find.textContaining('5 g de proteína'), findsOneWidget);
+    expect(find.textContaining('Na assinatura, a partir de'), findsOneWidget);
+    expect(find.textContaining('/garrafa'), findsOneWidget);
   });
 
   testWidgets('BarraSacola: copy N itens · total por entrega + botão preenchido', (tester) async {

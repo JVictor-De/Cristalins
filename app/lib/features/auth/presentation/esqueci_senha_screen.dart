@@ -75,6 +75,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                   cabecalho: 'E-mail',
                   children: [
                     CupertinoTextFormFieldRow(
+                      key: const Key('campo-email-esqueci'),
                       controller: _email,
                       prefix: SizedBox(
                         width: AppSpacing.larguraRotuloCampo,

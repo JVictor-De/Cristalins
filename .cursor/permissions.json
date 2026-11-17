@@ -115,6 +115,12 @@
   "mcpAllowlist": [
     "user-github:*",
     "github:*",
+    "cursor-ide-browser:*",
+    "cursor-computer-use:*",
+    "cursor-ide-browser",
+    "cursor-computer-use",
+    "browser_*",
+    "computer_*",
     "user-coolify:list_*",
     "user-coolify:get_*",
     "user-coolify:search_*",
@@ -136,7 +142,8 @@
       "Permitir buscar e ler documentação pública na web quando necessário para implementar features deste projeto.",
       "Permitir usar MCP do GitHub somente para leitura (issues, PRs, status) e operações pedidas explicitamente pelo usuário.",
       "Permitir tools MCP do Coolify de leitura (list_*, get_*, search_*, coolify_help, overview) quando o usuário pedir diagnóstico.",
-      "Permitir rodar Claude Code CLI (claude / claude:*) e wrappers scripts/*_run_auto.ps1 da fila redesign_ios e demais filas locais, incluindo python doc/prompts/run_fila_prompts_cursor.py."
+      "Permitir rodar Claude Code CLI (claude / claude:*) e wrappers scripts/*_run_auto.ps1 da fila redesign_ios e demais filas locais, incluindo python doc/prompts/run_fila_prompts_cursor.py.",
+      "Permitir MCP cursor-ide-browser e cursor-computer-use (browser_*, computer_*) para QA E2E no Simple Browser / desktop sem card de Approve a cada ação."
     ],
     "block_instructions": [
       "Pedir aprovação (card/hook) para qualquer comando que leia, imprima, copie ou edite arquivos .env, credentials, tokens, chaves privadas, secrets ou pastas .ssh.",
