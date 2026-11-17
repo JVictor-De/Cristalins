@@ -452,7 +452,10 @@ class CompartilhadorFalso extends Compartilhador {
   final textos = <String>[];
 
   @override
-  Future<void> compartilhar(String texto, {String? assunto}) async => textos.add(texto);
+  Future<bool> compartilhar(String texto, {String? assunto}) async {
+    textos.add(texto);
+    return true;
+  }
 }
 
 class Falsos {

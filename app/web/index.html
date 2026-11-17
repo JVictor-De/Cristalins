@@ -23,6 +23,19 @@
   <title>Cristalins Assinatura</title>
   <link rel="manifest" href="manifest.json">
   <style>
+    /* Safari iOS: reduz delay de toque e zoom acidental no canvas Flutter. */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-text-size-adjust: 100%;
+    }
+    flt-glass-pane, flt-scene-host {
+      touch-action: manipulation;
+    }
     #cristalins-apk-banner {
       display: none;
       position: fixed;
@@ -147,6 +160,11 @@
     })();
   </script>
 
+  <script>
+    // Safari iOS: sem um listener de touch, gestos no canvas Flutter às vezes
+    // não disparam toques (segmentos, botões). Passiveivo; só registra o evento.
+    document.addEventListener('touchstart', function () {}, { passive: true });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

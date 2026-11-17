@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
@@ -65,27 +66,39 @@ class LinhaLista extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Título, subtítulo, valor e controle da linha são anunciados juntos (ex.: "Plano, Trimestral").
+    final tile = CupertinoListTile(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem, vertical: AppSpacing.sm),
+      backgroundColor: destaque ? AppColors.azul100 : null,
+      leading: icone == null
+          ? null
+          : Icon(icone, color: AppColors.azul800, size: AppSpacing.icone),
+      title: Text(
+        titulo,
+        maxLines: 3,
+        style: AppTypography.body.copyWith(color: corTitulo ?? AppColors.texto),
+      ),
+      subtitle: subtitulo == null
+          ? null
+          : Text(
+              subtitulo!,
+              maxLines: 4,
+              style: AppTypography.subheadline.copyWith(color: AppColors.textoSecundario),
+            ),
+      trailing: trailing,
+      // No web (Safari iOS) o onTap do CupertinoListTile falha com frequência
+      // dentro do CustomScrollView — o GestureDetector abaixo cobre o toque.
+      onTap: kIsWeb ? null : onTap,
+    );
+
+    if (!kIsWeb || onTap == null) {
+      return MergeSemantics(child: tile);
+    }
+
     return MergeSemantics(
-      child: CupertinoListTile(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem, vertical: AppSpacing.sm),
-        backgroundColor: destaque ? AppColors.azul100 : null,
-        leading: icone == null
-            ? null
-            : Icon(icone, color: AppColors.azul800, size: AppSpacing.icone),
-        title: Text(
-          titulo,
-          maxLines: 3,
-          style: AppTypography.body.copyWith(color: corTitulo ?? AppColors.texto),
-        ),
-        subtitle: subtitulo == null
-            ? null
-            : Text(
-                subtitulo!,
-                maxLines: 4,
-                style: AppTypography.subheadline.copyWith(color: AppColors.textoSecundario),
-              ),
-        trailing: trailing,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onTap,
+        child: tile,
       ),
     );
   }

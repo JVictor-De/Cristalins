@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -246,10 +247,14 @@ class _Interruptor extends StatelessWidget {
                 onAlterar(v);
               },
             ),
-            onTap: () {
-              HapticFeedback.selectionClick();
-              onAlterar(!valor);
-            },
+            // Na web o GestureDetector da LinhaLista + switch disparam juntos
+            // (liga e desliga na mesma tacada). Só o switch altera o valor.
+            onTap: kIsWeb
+                ? null
+                : () {
+                    HapticFeedback.selectionClick();
+                    onAlterar(!valor);
+                  },
           ),
         ),
       ],

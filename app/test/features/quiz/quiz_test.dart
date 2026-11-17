@@ -206,7 +206,7 @@ void main() {
       when(() => m.recomendacoes.buscar(any())).thenAnswer((_) async => recomendacaoCasoA);
       when(
         () => m.compartilhador.compartilhar(any(), assunto: any(named: 'assunto')),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async => true);
       await abrir(tester, AppRoutes.resultado, argumentos: 'rec-1');
       await tester.tap(find.text('Compartilhar resultado'));
       await tester.pump();

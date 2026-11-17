@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
@@ -27,26 +28,48 @@ class BotaoSecundario extends StatelessWidget {
     final cor = destrutivo
         ? AppColors.erro
         : (sobreFundoAgrupado ? AppColors.linkSobreFundoAgrupado : AppColors.linkSobreSuperficie);
+    final label = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(
+            rotulo,
+            textAlign: TextAlign.center,
+            style: AppTypography.headline.copyWith(color: cor),
+          ),
+        ),
+        if (icone != null) ...[
+          const SizedBox(width: AppSpacing.xxs),
+          Icon(icone, size: AppSpacing.icone, color: cor),
+        ],
+      ],
+    );
+    if (kIsWeb) {
+      return Semantics(
+        button: true,
+        enabled: onPressed != null,
+        label: rotulo,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.margem,
+              vertical: AppSpacing.xs,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: AppSpacing.toqueMinimo),
+              child: Center(child: label),
+            ),
+          ),
+        ),
+      );
+    }
     return CupertinoButton(
       minimumSize: const Size(AppSpacing.toqueMinimo, AppSpacing.toqueMinimo),
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem, vertical: AppSpacing.xs),
       onPressed: onPressed,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: Text(
-              rotulo,
-              textAlign: TextAlign.center,
-              style: AppTypography.headline.copyWith(color: cor),
-            ),
-          ),
-          if (icone != null) ...[
-            const SizedBox(width: AppSpacing.xxs),
-            Icon(icone, size: AppSpacing.icone, color: cor),
-          ],
-        ],
-      ),
+      child: label,
     );
   }
 }
@@ -68,27 +91,49 @@ class SeletorQuantidade extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget botao(IconData icone, String dica, int? novo) => Semantics(
-      button: true,
-      label: '$dica $rotulo',
-      excludeSemantics: true,
-      child: CupertinoButton(
-        minimumSize: const Size(AppSpacing.toqueMinimo, AppSpacing.toqueMinimo),
-        padding: EdgeInsets.zero,
-        onPressed: novo == null
-            ? null
-            : () {
-                HapticFeedback.selectionClick();
-                onAlterar(novo);
-              },
-        child: Container(
-          width: AppSpacing.botaoCircular,
-          height: AppSpacing.botaoCircular,
-          decoration: const BoxDecoration(color: AppColors.azul100, shape: BoxShape.circle),
-          child: Icon(icone, size: AppSpacing.iconePequeno, color: AppColors.azul800),
+    Widget botao(IconData icone, String dica, int? novo) {
+      final VoidCallback? acao = novo == null
+          ? null
+          : () {
+              HapticFeedback.selectionClick();
+              onAlterar(novo);
+            };
+      final visual = Container(
+        width: AppSpacing.botaoCircular,
+        height: AppSpacing.botaoCircular,
+        decoration: const BoxDecoration(color: AppColors.azul100, shape: BoxShape.circle),
+        child: Icon(icone, size: AppSpacing.iconePequeno, color: AppColors.azul800),
+      );
+      // Web/Safari: CupertinoButton dentro de scroll às vezes engole o toque.
+      if (kIsWeb) {
+        return Semantics(
+          button: true,
+          enabled: acao != null,
+          label: '$dica $rotulo',
+          excludeSemantics: true,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: acao,
+            child: SizedBox(
+              width: AppSpacing.toqueMinimo,
+              height: AppSpacing.toqueMinimo,
+              child: Center(child: visual),
+            ),
+          ),
+        );
+      }
+      return Semantics(
+        button: true,
+        label: '$dica $rotulo',
+        excludeSemantics: true,
+        child: CupertinoButton(
+          minimumSize: const Size(AppSpacing.toqueMinimo, AppSpacing.toqueMinimo),
+          padding: EdgeInsets.zero,
+          onPressed: acao,
+          child: visual,
         ),
-      ),
-    );
+      );
+    }
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -146,13 +191,41 @@ class Selo extends StatelessWidget {
   }
 }
 
-/// Folha inferior com `CupertinoPicker` e "Concluir" no topo.
+/// Folha inferior para escolher um índice.
+///
+/// No app nativo: `CupertinoPicker`. No Flutter Web (Safari iOS): ActionSheet —
+/// a roda do picker perde gestos para o scroll e costuma ficar inutilizável.
 Future<int?> escolherNaFolha(
   BuildContext context, {
   required String titulo,
   required List<String> opcoes,
   required int selecionado,
 }) {
+  if (kIsWeb) {
+    return showCupertinoModalPopup<int>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(titulo),
+        actions: [
+          for (var i = 0; i < opcoes.length; i++)
+            CupertinoActionSheetAction(
+              isDefaultAction: i == selecionado,
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                Navigator.of(ctx).pop(i);
+              },
+              child: Text(opcoes[i]),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: const Text('Cancelar'),
+        ),
+      ),
+    );
+  }
+
   var atual = selecionado;
   return showCupertinoModalPopup<int>(
     context: context,

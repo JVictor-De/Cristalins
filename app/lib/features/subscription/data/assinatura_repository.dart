@@ -111,8 +111,9 @@ class AssinaturaRepository {
           pix: pix == null
               ? null
               : PixCobranca(
-                  copiaECola: pix['copiaECola'] as String,
-                  qrCodeBase64: pix['qrCodeBase64'] as String,
+                  // Web/Safari: campos ausentes não podem derrubar o cast e virar erro genérico.
+                  copiaECola: pix['copiaECola'] as String? ?? '',
+                  qrCodeBase64: pix['qrCodeBase64'] as String? ?? '',
                 ),
         );
       });

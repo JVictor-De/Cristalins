@@ -181,31 +181,34 @@ class _ConteudoState extends State<_Conteudo> {
       builder: (ctx) => Container(
         height: 280,
         color: AppColors.superficie,
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CupertinoButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancelar'),
-                ),
-                CupertinoButton(
-                  onPressed: () => Navigator.pop(ctx, temp),
-                  child: const Text('Concluir'),
-                ),
-              ],
-            ),
-            Expanded(
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: temp,
-                maximumDate: max,
-                minimumDate: DateTime(1900),
-                onDateTimeChanged: (d) => temp = d,
+        child: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CupertinoButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Cancelar'),
+                  ),
+                  CupertinoButton(
+                    onPressed: () => Navigator.pop(ctx, temp),
+                    child: const Text('Concluir'),
+                  ),
+                ],
               ),
-            ),
-          ],
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: temp,
+                  maximumDate: max,
+                  minimumDate: DateTime(1900),
+                  onDateTimeChanged: (d) => temp = d,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

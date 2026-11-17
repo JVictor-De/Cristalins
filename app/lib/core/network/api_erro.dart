@@ -23,6 +23,10 @@ class ApiErro implements Exception {
           erro.type == DioExceptionType.sendTimeout) {
         return const ApiErro(codigo: 'SEM_CONEXAO', mensagem: semConexao);
       }
+      // Flutter Web (Safari): CORS/rede falha sem status — Dio manda `unknown`.
+      if (erro.response == null && erro.type == DioExceptionType.unknown) {
+        return const ApiErro(codigo: 'SEM_CONEXAO', mensagem: semConexao);
+      }
     }
     return const ApiErro(codigo: 'ERRO', mensagem: generico);
   }

@@ -43,8 +43,11 @@ class BarraSacola extends StatelessWidget {
           ],
           border: Border(top: BorderSide(color: AppColors.linha)),
         ),
+        // bottom: false — a barra fica acima da NavigationBar; o inset do
+        // home indicator já vem da tab bar (Safari iOS / notch).
         child: SafeArea(
           top: false,
+          bottom: false,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.margem,

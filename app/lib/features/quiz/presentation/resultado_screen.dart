@@ -166,12 +166,20 @@ class _Conteudo extends StatelessWidget {
               BotaoSecundario(
                 rotulo: 'Compartilhar resultado',
                 icone: CupertinoIcons.share,
-                onPressed: () {
+                onPressed: () async {
                   HapticFeedback.selectionClick();
-                  dep.compartilhador.compartilhar(
+                  final ok = await dep.compartilhador.compartilhar(
                     _textoParaCompartilhar(r),
                     assunto: 'Minha recomendação Cristalins',
                   );
+                  // Sucesso/cancelamento: a folha nativa já deu feedback. Só avisa falha.
+                  if (!ok && context.mounted) {
+                    mostrarAviso(
+                      context,
+                      'Não conseguimos compartilhar neste navegador.',
+                      erro: true,
+                    );
+                  }
                 },
               ),
               BotaoSecundario(

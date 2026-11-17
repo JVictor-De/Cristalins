@@ -236,10 +236,24 @@ class _ConteudoState extends State<_Conteudo> {
                     ),
                 ],
               ),
-              const SecaoAgrupada(
+              SecaoAgrupada(
                 cabecalho: 'Pagamento',
-                rodape: 'A cada entrega, você recebe uma cobrança por Pix.',
-                children: [LinhaLista(titulo: 'Pix', icone: CupertinoIcons.qrcode)],
+                rodape: 'Por enquanto o pagamento da assinatura é só por Pix.',
+                children: [
+                  Semantics(
+                    selected: true,
+                    inMutuallyExclusiveGroup: true,
+                    child: LinhaLista(
+                      titulo: 'Pix',
+                      icone: CupertinoIcons.qrcode,
+                      trailing: const Icon(
+                        CupertinoIcons.checkmark_alt,
+                        color: AppColors.azul800,
+                        size: AppSpacing.icone,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

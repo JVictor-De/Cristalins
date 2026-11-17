@@ -155,11 +155,47 @@ class _ConteudoState extends State<_Conteudo> {
                       : 'Abra o app do seu banco, escolha Pix copia e cola ou ler QR Code e confirme o valor.',
                   children: [
                     _QrCode(pix: pix),
-                    LinhaLista(
-                      titulo: 'Código copia e cola',
-                      subtitulo: pix.copiaECola,
-                      icone: CupertinoIcons.doc_on_clipboard,
-                      onTap: () => _copiar(pix.copiaECola),
+                    // SelectableText: no Safari o Clipboard API às vezes falha.
+                    // LinhaLista (GestureDetector web) cobriria a seleção de texto — tile local.
+                    MergeSemantics(
+                      child: CupertinoListTile(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.margem,
+                          vertical: AppSpacing.sm,
+                        ),
+                        leading: const Icon(
+                          CupertinoIcons.doc_on_clipboard,
+                          color: AppColors.azul800,
+                          size: AppSpacing.icone,
+                        ),
+                        title: Text(
+                          'Código copia e cola',
+                          style: AppTypography.body.copyWith(color: AppColors.texto),
+                        ),
+                        subtitle: SelectableText(
+                          pix.copiaECola,
+                          style: AppTypography.subheadline.copyWith(
+                            color: AppColors.textoSecundario,
+                          ),
+                        ),
+                        onTap: kIsWeb ? null : () => _copiar(pix.copiaECola),
+                        trailing: kIsWeb
+                            ? CupertinoButton(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(
+                                  AppSpacing.toqueMinimo,
+                                  AppSpacing.toqueMinimo,
+                                ),
+                                onPressed: () => _copiar(pix.copiaECola),
+                                child: Text(
+                                  'Copiar',
+                                  style: AppTypography.subheadline.copyWith(
+                                    color: AppColors.linkSobreSuperficie,
+                                  ),
+                                ),
+                              )
+                            : null,
+                      ),
                     ),
                   ],
                 ),

@@ -34,10 +34,18 @@ class OcorrenciaController extends ChangeNotifier {
 
   Future<void> escolherFoto(ImageSource origem) async {
     erro = null;
-    final x = await _picker.pickImage(source: origem, imageQuality: 85, maxWidth: 1600);
-    if (x == null) return;
-    bytesFoto = await x.readAsBytes();
-    nomeArquivo = x.name.trim().isNotEmpty ? x.name : 'foto.jpg';
+    notifyListeners();
+    try {
+      // Safari iOS: galeria via input file; câmera nativa costuma falhar na web.
+      final x = await _picker.pickImage(source: origem, imageQuality: 85, maxWidth: 1600);
+      if (x == null) return;
+      bytesFoto = await x.readAsBytes();
+      nomeArquivo = x.name.trim().isNotEmpty ? x.name : 'foto.jpg';
+    } catch (_) {
+      erro = kIsWeb
+          ? 'Não conseguimos abrir a foto neste navegador. Tente de novo ou use outro arquivo.'
+          : 'Não conseguimos abrir a câmera ou a galeria. Confira a permissão e tente de novo.';
+    }
     notifyListeners();
   }
 
