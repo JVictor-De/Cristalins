@@ -60,7 +60,7 @@ class _Conteudo extends StatelessWidget {
     final erro = await c.trocar(f);
     if (!context.mounted) return;
     if (erro != null) {
-      mostrarAviso(context, erro, erro: true);
+      mostrarAviso(context, erro, erro: true, duracao: const Duration(seconds: 12));
     } else {
       HapticFeedback.lightImpact();
       mostrarAviso(context, '${f.rotulo} vale a partir da próxima cobrança.');

@@ -85,15 +85,26 @@ export class CobrancaService {
 
   /** 1ª cobrança na criação da assinatura (Pix). Mantido para o fluxo da AP2. */
   async cobrarCicloPix(cicloId: string): Promise<PixDoCiclo> {
-    const c = await this.cobrarCiclo(cicloId, FormaPagamento.PIX);
-    return {
-      copiaECola: c.pix?.copiaECola ?? '',
-      qrCodeBase64: c.pix?.qrCodeBase64 ?? '',
-      pagamentoId: c.pagamentoId,
-      asaasPaymentId: c.asaasPaymentId ?? '',
-      vencimento: c.vencimento,
-      valor: c.valor,
-    };
+    try {
+      const c = await this.cobrarCiclo(cicloId, FormaPagamento.PIX);
+      return {
+        copiaECola: c.pix?.copiaECola ?? '',
+        qrCodeBase64: c.pix?.qrCodeBase64 ?? '',
+        pagamentoId: c.pagamentoId,
+        asaasPaymentId: c.asaasPaymentId ?? '',
+        vencimento: c.vencimento,
+        valor: c.valor,
+      };
+    } catch (e) {
+      // FakeGateway / rede ainda podem lançar Error cru → evita "Erro inesperado" no Assinar.
+      if (e instanceof RegraNegocioException) throw e;
+      this.log.warn(`cobrarCicloPix(${cicloId}): ${(e as Error).message}`);
+      throw new RegraNegocioException(
+        'PAGAMENTO_INDISPONIVEL',
+        'Não conseguimos gerar o Pix agora. Tente de novo em instantes.',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
   }
 
   /**
@@ -187,24 +198,29 @@ export class CobrancaService {
     vencimento: string,
   ): Promise<void> {
     if (!this.notificacoes) return;
-    const entrega = ciclo.dataEntrega.toISOString().slice(0, 10);
-    const dados = { cicloId: ciclo.id };
-    await this.notificacoes.notificar(ciclo.assinatura.clienteId, 'COBRANCA', MENSAGENS.cobranca(entrega, valor, vencimento), dados);
-    if (ciclo.numero <= 1) return;
-    const [atual, anterior] = await Promise.all([
-      this.prisma.calculoPreco.findUnique({ where: { cicloId: ciclo.id } }),
-      this.prisma.calculoPreco.findFirst({ where: { ciclo: { assinaturaId: ciclo.assinaturaId, numero: ciclo.numero - 1 } } }),
-    ]);
-    if (!atual || !anterior) return;
-    const bruto = (c: { valorFinal: unknown; creditos: unknown }) => dec(c.valorFinal as string).plus(dec(c.creditos as string));
-    if (bruto(atual).gt(bruto(anterior))) {
-      const corte = new Date(ciclo.dataCorte.getTime() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10); // dia civil em São Paulo
-      await this.notificacoes.notificar(
-        ciclo.assinatura.clienteId,
-        'AUMENTO_PRECO',
-        MENSAGENS.aumento(entrega, Number(bruto(atual).toFixed(2)), Number(bruto(anterior).toFixed(2)), corte),
-        dados,
-      );
+    try {
+      const entrega = ciclo.dataEntrega.toISOString().slice(0, 10);
+      const dados = { cicloId: ciclo.id };
+      await this.notificacoes.notificar(ciclo.assinatura.clienteId, 'COBRANCA', MENSAGENS.cobranca(entrega, valor, vencimento), dados);
+      if (ciclo.numero <= 1) return;
+      const [atual, anterior] = await Promise.all([
+        this.prisma.calculoPreco.findUnique({ where: { cicloId: ciclo.id } }),
+        this.prisma.calculoPreco.findFirst({ where: { ciclo: { assinaturaId: ciclo.assinaturaId, numero: ciclo.numero - 1 } } }),
+      ]);
+      if (!atual || !anterior) return;
+      const bruto = (c: { valorFinal: unknown; creditos: unknown }) => dec(c.valorFinal as string).plus(dec(c.creditos as string));
+      if (bruto(atual).gt(bruto(anterior))) {
+        const corte = new Date(ciclo.dataCorte.getTime() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10); // dia civil em São Paulo
+        await this.notificacoes.notificar(
+          ciclo.assinatura.clienteId,
+          'AUMENTO_PRECO',
+          MENSAGENS.aumento(entrega, Number(bruto(atual).toFixed(2)), Number(bruto(anterior).toFixed(2)), corte),
+          dados,
+        );
+      }
+    } catch (e) {
+      // Falha de aviso não pode derrubar a cobrança (vira "Erro inesperado" no Assinar).
+      this.log.warn(`Aviso de cobrança falhou: ${(e as Error).message}`);
     }
   }
 

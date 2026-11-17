@@ -49,9 +49,18 @@ export class FiltroExcecao implements ExceptionFilter {
     }
     const bruto = excecao instanceof Error ? (excecao.stack ?? excecao.message) : String(excecao);
     this.logger.error(mascararPii(bruto));
-    return {
-      status: HttpStatus.INTERNAL_SERVER_ERROR,
-      corpo: { codigo: 'ERRO_INTERNO', mensagem: 'Erro inesperado. Tente de novo.' },
+    const mensagemErro = excecao instanceof Error ? excecao.message : String(excecao);
+    const corpo: CorpoErro = {
+      codigo: 'ERRO_INTERNO',
+      mensagem: 'Erro inesperado. Tente de novo.',
     };
+    // HML/sandbox/fake: o app mostra `detalhe` no snackbar (Coolify HML costuma ter NODE_ENV=production).
+    const modo = (process.env.ASAAS_MODE ?? '').toLowerCase();
+    const diagnostico =
+      process.env.NODE_ENV !== 'production' || modo === 'sandbox' || modo === 'fake';
+    if (diagnostico) {
+      corpo.detalhe = mascararPii(mensagemErro).slice(0, 300);
+    }
+    return { status: HttpStatus.INTERNAL_SERVER_ERROR, corpo };
   }
 }

@@ -56,10 +56,12 @@ class _ConteudoState extends State<_Conteudo> {
     final criada = await c.assinar();
     if (!mounted) return;
     if (criada == null) {
+      // mensagemParaUsuario já traz codigo/HTTP/detalhe em web/HML.
       mostrarAviso(
         context,
         c.erro ?? 'Não conseguimos criar a assinatura. Tente de novo.',
         erro: true,
+        duracao: const Duration(seconds: 12),
       );
       return;
     }
@@ -238,13 +240,15 @@ class _ConteudoState extends State<_Conteudo> {
               ),
               SecaoAgrupada(
                 cabecalho: 'Pagamento',
-                rodape: 'Por enquanto o pagamento da assinatura é só por Pix.',
+                rodape:
+                    'Pix já está selecionado. Não há outro meio nesta etapa — '
+                    'toque em Assinar agora para gerar a cobrança.',
                 children: [
                   Semantics(
                     selected: true,
                     inMutuallyExclusiveGroup: true,
                     child: LinhaLista(
-                      titulo: 'Pix',
+                      titulo: 'Pix (selecionado)',
                       icone: CupertinoIcons.qrcode,
                       trailing: const Icon(
                         CupertinoIcons.checkmark_alt,

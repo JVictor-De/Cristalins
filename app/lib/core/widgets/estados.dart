@@ -77,12 +77,29 @@ class EstadoErro extends StatelessWidget {
   }
 }
 
-/// SnackBar flutuante (tema: cantos 14 dp, subheadline, 4 s).
-void mostrarAviso(BuildContext context, String mensagem, {bool erro = false}) {
+/// SnackBar flutuante (tema: cantos 14 dp, subheadline; 4 s ou [duracao]).
+void mostrarAviso(
+  BuildContext context,
+  String mensagem, {
+  bool erro = false,
+  Duration duracao = const Duration(seconds: 4),
+}) {
   if (erro) {
     HapticFeedback.lightImpact();
   }
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(mensagem), duration: const Duration(seconds: 4)));
+    ..showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+        duration: duracao,
+        // Erros longos (diagnóstico Assinar): dá para ler codigo/HTTP/detalhe.
+        action: erro
+            ? SnackBarAction(
+                label: 'Ok',
+                onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+              )
+            : null,
+      ),
+    );
 }

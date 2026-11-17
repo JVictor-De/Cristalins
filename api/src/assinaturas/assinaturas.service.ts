@@ -1,4 +1,4 @@
-import { forwardRef, HttpStatus, Inject, Injectable, Optional } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import {
   dataCorte,
   dataIso,
@@ -76,6 +76,7 @@ const erro = (codigo: string, mensagem: string, status: HttpStatus, campo?: stri
 
 @Injectable()
 export class AssinaturasService {
+  private readonly log = new Logger(AssinaturasService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly preco: PrecoService,
@@ -133,8 +134,19 @@ export class AssinaturasService {
     const ciclo = await this.prisma.ciclo.findUnique({ where: { id: cicloId } });
     let pix: { copiaECola: string; qrCodeBase64: string } | undefined;
     if (dto.formaPagamento === FormaPagamento.PIX && this.cobranca) {
-      const cobrado = await this.cobranca.cobrarCicloPix(cicloId);
-      pix = { copiaECola: cobrado.copiaECola, qrCodeBase64: cobrado.qrCodeBase64 };
+      try {
+        const cobrado = await this.cobranca.cobrarCicloPix(cicloId);
+        pix = { copiaECola: cobrado.copiaECola, qrCodeBase64: cobrado.qrCodeBase64 };
+      } catch (e) {
+        // A assinatura já foi gravada; não mascarar falha do Pix como ERRO_INTERNO.
+        if (e instanceof RegraNegocioException) throw e;
+        this.log.error(`Pix na criação da assinatura ${assinaturaId}: ${(e as Error).message}`);
+        throw erro(
+          'PAGAMENTO_INDISPONIVEL',
+          'Assinatura criada, mas o Pix não saiu agora. Abra Minha assinatura ou Pagamentos em instantes — não assine de novo.',
+          HttpStatus.SERVICE_UNAVAILABLE,
+        );
+      }
     }
     return {
       ...resposta,

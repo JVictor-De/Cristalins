@@ -97,6 +97,24 @@ describe('cr-3-gateway — Pix, webhook e jobs (FakeGateway)', () => {
     expect(prisma.pagamentos[0].status).toBe('PENDENTE');
   });
 
+  it('cobrarCicloPix: Error do gateway vira PAGAMENTO_INDISPONIVEL', async () => {
+    const criada = await assinaturas.criar(ANA, {
+      itens: [{ produto: 'WP500', quantidade: 24 }],
+      frequencia: 'QUINZENAL',
+      plano: 'TRIMESTRAL',
+      enderecoId: END_ANA,
+      janela: 'MANHA',
+      formaPagamento: 'PIX',
+    } as never);
+    // Força falha no re-fetch do QR (idempotente ainda chama obterPixQrCode).
+    gateway.obterPixQrCode = async () => {
+      throw new Error('rede Asaas caiu');
+    };
+    await expect(cobranca.cobrarCicloPix(criada.ciclo.id)).rejects.toMatchObject({
+      codigo: 'PAGAMENTO_INDISPONIVEL',
+    });
+  });
+
   it('CT15: token errado → 401 e nada gravado', async () => {
     expect(() => webhooks.validarToken('errado')).toThrow(UnauthorizedException);
     expect(() => webhooks.validarToken(undefined)).toThrow(UnauthorizedException);

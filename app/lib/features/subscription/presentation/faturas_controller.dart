@@ -69,5 +69,5 @@ class FaturasController extends ChangeNotifier {
     return falha;
   }
 
-  String _mensagem(Object e) => ApiErro.de(e).mensagem;
+  String _mensagem(Object e) => ApiErro.de(e).mensagemParaUsuario;
 }

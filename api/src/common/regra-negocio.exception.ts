@@ -4,6 +4,8 @@ export interface CorpoErro {
   codigo: string;
   mensagem: string;
   campo?: string;
+  /** Só em ambientes não-prod (HML/dev): causa real do 500, sem PII. */
+  detalhe?: string;
 }
 
 /**

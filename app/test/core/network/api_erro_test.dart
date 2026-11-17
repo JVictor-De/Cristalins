@@ -9,21 +9,28 @@ void main() {
       expect(ApiErro.de(original), same(original));
     });
 
-    test('lê codigo/mensagem do corpo da API', () {
+    test('lê codigo/mensagem/detalhe do corpo da API', () {
       final e = DioException(
-        requestOptions: RequestOptions(path: '/x'),
+        requestOptions: RequestOptions(path: '/assinaturas'),
         response: Response(
-          requestOptions: RequestOptions(path: '/x'),
-          statusCode: 400,
-          data: {'codigo': 'CESTA_INVALIDA', 'mensagem': 'Ajuste a cesta.', 'campo': 'itens'},
+          requestOptions: RequestOptions(path: '/assinaturas'),
+          statusCode: 500,
+          data: {
+            'codigo': 'ERRO_INTERNO',
+            'mensagem': 'Erro inesperado. Tente de novo.',
+            'detalhe': 'Asaas timeout',
+          },
         ),
         type: DioExceptionType.badResponse,
       );
       final a = ApiErro.de(e);
-      expect(a.codigo, 'CESTA_INVALIDA');
-      expect(a.mensagem, 'Ajuste a cesta.');
-      expect(a.campo, 'itens');
-      expect(a.status, 400);
+      expect(a.codigo, 'ERRO_INTERNO');
+      expect(a.mensagem, 'Erro inesperado. Tente de novo.');
+      expect(a.detalhe, 'Asaas timeout');
+      expect(a.status, 500);
+      expect(a.mensagemParaUsuario, contains('Asaas timeout'));
+      expect(a.mensagemParaUsuario, contains('[ERRO_INTERNO]'));
+      expect(a.mensagemParaUsuario, contains('HTTP 500'));
     });
 
     test('timeouts viram SEM_CONEXAO', () {
@@ -52,10 +59,10 @@ void main() {
       expect(a.mensagem, ApiErro.semConexao);
     });
 
-    test('erro genérico quando não há formato conhecido', () {
-      final a = ApiErro.de(Exception('boom'));
-      expect(a.codigo, 'ERRO');
-      expect(a.mensagem, ApiErro.generico);
+    test('TypeError de parse vira RESPOSTA_INVALIDA com detalhe', () {
+      final a = ApiErro.de(TypeError());
+      expect(a.codigo, 'RESPOSTA_INVALIDA');
+      expect(a.detalhe, isNotNull);
     });
   });
 }

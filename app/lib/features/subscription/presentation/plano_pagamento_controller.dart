@@ -59,7 +59,12 @@ class PlanoPagamentoController extends ChangeNotifier {
     } on ApiErro catch (e) {
       if (versao == _versao) {
         simulacao = null;
-        erro = e.mensagem;
+        erro = e.mensagemParaUsuario;
+      }
+    } catch (e) {
+      if (versao == _versao) {
+        simulacao = null;
+        erro = ApiErro.de(e).mensagemParaUsuario;
       }
     } finally {
       if (versao == _versao) {
@@ -74,9 +79,16 @@ class PlanoPagamentoController extends ChangeNotifier {
     erro = null;
     notifyListeners();
     try {
+      if (_pedido.endereco == null) {
+        erro = 'Falta o endereço da entrega. Volte e salve um CEP atendido.';
+        return null;
+      }
       return await _assinaturas.criar(_pedido, plano: plano, cupom: cupom);
     } on ApiErro catch (e) {
-      erro = e.mensagem;
+      erro = e.mensagemParaUsuario;
+      return null;
+    } catch (e) {
+      erro = ApiErro.de(e).mensagemParaUsuario;
       return null;
     } finally {
       assinando = false;

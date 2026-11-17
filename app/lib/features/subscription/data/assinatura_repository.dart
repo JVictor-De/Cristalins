@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import '../../../core/formatacao.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_erro.dart';
@@ -88,6 +90,7 @@ class AssinaturaRepository {
 
   Future<AssinaturaCriada> criar(PedidoAssinatura pedido, {required String plano, String? cupom}) =>
       _chamar(() async {
+        // Assinar chama Asaas (cliente + Pix + QR); 15s do ApiClient estoura fácil no Safari.
         final r = await _api.dio.post<Map<String, dynamic>>(
           '/assinaturas',
           data: {
@@ -100,6 +103,7 @@ class AssinaturaRepository {
             'recomendacaoId': ?pedido.recomendacaoId,
             if (cupom != null && cupom.isNotEmpty) 'cupom': cupom,
           },
+          options: Options(receiveTimeout: const Duration(seconds: 45)),
         );
         final ciclo = r.data!['ciclo'] as Map<String, dynamic>;
         final pix = ciclo['pix'] as Map<String, dynamic>?;

@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { RegraNegocioException } from '../common/regra-negocio.exception';
 import {
   CartaoParaTokenizar,
   CartaoTokenizado,
@@ -16,6 +17,7 @@ const USER_AGENT = 'CristalinsAssinatura/0.1.0';
 /**
  * HTTP real do Asaas (`ASAAS_MODE=sandbox|producao`).
  * Lê só nomes de env em runtime — nunca hardcode de chave.
+ * Falhas viram `PAGAMENTO_INDISPONIVEL` (não `ERRO_INTERNO` / "Erro inesperado").
  */
 @Injectable()
 export class AsaasGateway implements PagamentoGateway {
@@ -23,14 +25,24 @@ export class AsaasGateway implements PagamentoGateway {
 
   private baseUrl(): string {
     const url = process.env.ASAAS_API_URL?.replace(/\/$/, '');
-    if (!url) throw new Error('ASAAS_API_URL não configurada');
+    if (!url) this.falha('ASAAS_API_URL não configurada');
     return url;
   }
 
   private chave(): string {
     const key = process.env.ASAAS_API_KEY;
-    if (!key) throw new Error('ASAAS_API_KEY não configurada');
+    if (!key) this.falha('ASAAS_API_KEY não configurada');
     return key;
+  }
+
+  /** Nunca lançar `Error` cru: o filtro vira "Erro inesperado" sem código útil no app. */
+  private falha(detalhe: string): never {
+    this.log.warn(detalhe);
+    throw new RegraNegocioException(
+      'PAGAMENTO_INDISPONIVEL',
+      'Não conseguimos falar com o pagamento agora. Tente de novo em instantes.',
+      HttpStatus.SERVICE_UNAVAILABLE,
+    );
   }
 
   private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -51,8 +63,7 @@ export class AsaasGateway implements PagamentoGateway {
       json = { raw: texto };
     }
     if (!res.ok) {
-      this.log.warn(`Asaas ${method} ${path} → ${res.status}`);
-      throw new Error(`Asaas ${res.status}: ${texto.slice(0, 200)}`);
+      this.falha(`Asaas ${method} ${path} → ${res.status}: ${texto.slice(0, 200)}`);
     }
     return json as T;
   }
