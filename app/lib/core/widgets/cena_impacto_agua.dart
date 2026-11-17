@@ -8,9 +8,8 @@ import '../theme/app_typography.dart';
 
 /// Cena garrafa + respingo do site (CSS `cr-*-impact`, ~1,8 s).
 ///
-/// Uso: camada da foto na PDP. Em SKUs que não são água mineral, passe
-/// [garrafaAsset] (foto do produto) e [mostrarCopyMarca] = false para não
-/// rotular WP/Fiber como mineral. Sem autoplay em home/onboarding.
+/// Fundo e respingo são fixos; [garrafaAsset] é a foto do SKU aberto na PDP.
+/// Em WP/Fiber/guaraná use [mostrarCopyMarca] = false. Sem autoplay em home.
 class CenaImpactoAgua extends StatefulWidget {
   const CenaImpactoAgua({
     super.key,
@@ -47,17 +46,27 @@ class _CenaImpactoAguaState extends State<CenaImpactoAgua>
   void initState() {
     super.initState();
     _ctrl = AnimationController(vsync: this, duration: _duracao);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final reduzir = MediaQuery.disableAnimationsOf(context);
-      if (reduzir) {
-        _ctrl.value = 1;
-      } else if (widget.autoPlay) {
-        _ctrl.forward(from: 0);
-      } else {
-        _ctrl.value = 1;
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _aplicarEstadoAnimacao());
+  }
+
+  @override
+  void didUpdateWidget(covariant CenaImpactoAgua oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.garrafaAsset == widget.garrafaAsset &&
+        oldWidget.mostrarCopyMarca == widget.mostrarCopyMarca &&
+        oldWidget.autoPlay == widget.autoPlay) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _aplicarEstadoAnimacao());
+  }
+
+  void _aplicarEstadoAnimacao() {
+    if (!mounted) return;
+    if (MediaQuery.disableAnimationsOf(context) || !widget.autoPlay) {
+      _ctrl.value = 1;
+      return;
+    }
+    _ctrl.forward(from: 0);
   }
 
   @override
@@ -86,7 +95,7 @@ class _CenaImpactoAguaState extends State<CenaImpactoAgua>
       label: rotulo,
       image: true,
       child: ColoredBox(
-        color: const Color(0xFF43BDE6),
+        color: AppColors.impactoAgua,
         child: Stack(
           fit: StackFit.expand,
           children: [

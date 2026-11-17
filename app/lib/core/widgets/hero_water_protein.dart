@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../formatacao.dart';
 import '../marca_assets.dart';
+import '../theme/app_colors.dart';
 
 /// Hero da home visitante — Water Protein (layout em código + PNG da garrafa).
 class HeroWaterProtein extends StatefulWidget {
@@ -22,11 +23,12 @@ class HeroWaterProtein extends StatefulWidget {
   static const breakpoint = 720.0;
   static const raio = 28.0;
 
-  static const gradienteInicio = Color(0xFFEEF8E0);
-  static const gradienteFim = Color(0xFFC6E77A);
-  static const navyEscuro = Color(0xFF063A52);
-  static const ink = Color(0xFF0B2E3F);
-  static const verdeTexto = Color(0xFF34503F);
+  static const gradienteInicio = AppColors.heroGradienteInicio;
+  static const gradienteMeio = AppColors.heroGradienteMeio;
+  static const gradienteFim = AppColors.heroGradienteFim;
+  static const navyEscuro = AppColors.heroNavy;
+  static const ink = AppColors.heroInk;
+  static const verdeTexto = AppColors.heroVerdeTexto;
 
   @override
   State<HeroWaterProtein> createState() => _HeroWaterProteinState();
@@ -110,8 +112,10 @@ class _HeroWaterProteinState extends State<HeroWaterProtein>
                             end: Alignment.bottomRight,
                             colors: [
                               HeroWaterProtein.gradienteInicio,
+                              HeroWaterProtein.gradienteMeio,
                               HeroWaterProtein.gradienteFim,
                             ],
+                            stops: [0.0, 0.45, 1.0],
                           ),
                         ),
                         child: Stack(
@@ -143,24 +147,22 @@ class _HeroWaterProteinState extends State<HeroWaterProtein>
                                 ),
                               ),
                             ),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: SizedBox(
-                                width: w * textoFrac,
-                                child: Padding(
-                                  padding: padding,
-                                  child: _TextoHero(
-                                    horizontal: horizontal,
-                                    preco: widget.precoAPartirDe,
-                                    onAssinar: () {
-                                      HapticFeedback.lightImpact();
-                                      widget.onAssinar();
-                                    },
-                                    onConhecer: () {
-                                      HapticFeedback.selectionClick();
-                                      widget.onAbrirProduto();
-                                    },
-                                  ),
+                            // Sem Align expansivo: altura = conteúdo (evita garrafa “colada” embaixo).
+                            SizedBox(
+                              width: w * textoFrac,
+                              child: Padding(
+                                padding: padding,
+                                child: _TextoHero(
+                                  horizontal: horizontal,
+                                  preco: widget.precoAPartirDe,
+                                  onAssinar: () {
+                                    HapticFeedback.lightImpact();
+                                    widget.onAssinar();
+                                  },
+                                  onConhecer: () {
+                                    HapticFeedback.selectionClick();
+                                    widget.onAbrirProduto();
+                                  },
                                 ),
                               ),
                             ),
@@ -258,54 +260,76 @@ class _TextoHero extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
-          'Água com proteína e colágeno · 500 ml',
-          style: TextStyle(
-            fontSize: linhaSize,
-            height: 1.35,
-            color: HeroWaterProtein.verdeTexto,
-          ),
-        ),
-        const SizedBox(height: 14),
-        const Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          children: [
-            _ChipHero(rotulo: '5 g de proteína'),
-            _ChipHero(rotulo: '0 açúcar'),
-          ],
-        ),
-        SizedBox(height: gapAntesPreco),
-        if (preco != null) ...[
-          const Text(
-            'Na assinatura, a partir de',
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'Água com proteína e colágeno · 500 ml',
+            maxLines: 1,
+            softWrap: false,
             style: TextStyle(
-              fontSize: 13,
-              height: 1.3,
+              fontSize: linhaSize,
+              height: 1.35,
               color: HeroWaterProtein.verdeTexto,
             ),
           ),
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: preco!.formatado,
-                  style: TextStyle(
-                    fontSize: precoSize,
-                    fontWeight: FontWeight.w700,
-                    height: 1.15,
-                    color: HeroWaterProtein.ink,
+        ),
+        const SizedBox(height: 14),
+        const FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _ChipHero(rotulo: '5 g de proteína'),
+              SizedBox(width: 6),
+              _ChipHero(rotulo: '0 açúcar'),
+            ],
+          ),
+        ),
+        SizedBox(height: gapAntesPreco),
+        if (preco != null) ...[
+          const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Na assinatura, a partir de',
+              maxLines: 1,
+              softWrap: false,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.3,
+                color: HeroWaterProtein.verdeTexto,
+              ),
+            ),
+          ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: preco!.formatado,
+                    style: TextStyle(
+                      fontSize: precoSize,
+                      fontWeight: FontWeight.w700,
+                      height: 1.15,
+                      color: HeroWaterProtein.ink,
+                    ),
                   ),
-                ),
-                const TextSpan(
-                  text: ' /garrafa',
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.3,
-                    color: HeroWaterProtein.verdeTexto,
+                  const TextSpan(
+                    text: ' /garrafa',
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.3,
+                      color: HeroWaterProtein.verdeTexto,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
+              maxLines: 1,
+              softWrap: false,
             ),
           ),
         ],
@@ -375,7 +399,7 @@ class _BotaoAssinar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final botao = FilledButton(
+    return FilledButton(
       onPressed: onPressed,
       style: FilledButton.styleFrom(
         backgroundColor: HeroWaterProtein.navyEscuro,
@@ -389,7 +413,6 @@ class _BotaoAssinar extends StatelessWidget {
       ),
       child: const Text('Assinar agora'),
     );
-    return botao;
   }
 }
 
@@ -424,44 +447,52 @@ class _GarrafaHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // PNG já traz sombra suave lavanda na base; reforço só elíptico bem leve (sem cápsula opaca).
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
+        // Sombra de contato elíptica sob a base (mock: oval suave; PNG complementa).
         Positioned(
           bottom: 0,
-          child: Container(
-            width: sombraLargura,
-            height: 10,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
-              color: HeroWaterProtein.ink.withValues(alpha: 0.18),
-              boxShadow: [
-                BoxShadow(
-                  color: HeroWaterProtein.ink.withValues(alpha: 0.28),
-                  blurRadius: 12,
-                ),
-              ],
-            ),
-          ),
-        ),
-        Positioned.fill(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Image.asset(
-              assetProdutoWaterProtein,
-              fit: BoxFit.contain,
-              alignment: Alignment.bottomCenter,
-              cacheWidth: 700,
-              semanticLabel: 'Garrafa de Water Protein 500 ml',
-              errorBuilder: (_, _, _) => const Icon(
-                Icons.water_drop_outlined,
-                size: 72,
-                color: HeroWaterProtein.ink,
+          child: IgnorePointer(
+            child: Container(
+              width: sombraLargura,
+              height: 10,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                color: HeroWaterProtein.ink.withValues(alpha: 0.10),
+                boxShadow: [
+                  BoxShadow(
+                    color: HeroWaterProtein.ink.withValues(alpha: 0.28),
+                    blurRadius: 12,
+                  ),
+                ],
               ),
             ),
           ),
         ),
+        const Positioned.fill(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 5),
+            child: Image(
+              image: AssetImage(assetProdutoWaterProtein),
+              fit: BoxFit.contain,
+              alignment: Alignment.bottomCenter,
+              filterQuality: FilterQuality.high,
+              semanticLabel: 'Garrafa de Water Protein 500 ml',
+              errorBuilder: _garrafaFallback,
+            ),
+          ),
+        ),
       ],
+    );
+  }
+
+  static Widget _garrafaFallback(BuildContext context, Object error, StackTrace? stackTrace) {
+    return const Icon(
+      Icons.water_drop_outlined,
+      size: 72,
+      color: HeroWaterProtein.ink,
     );
   }
 }

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/dependencias.dart';
-import '../../../core/marca_assets.dart';
 import '../../../core/network/api_erro.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
@@ -211,8 +210,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-              const SliverToBoxAdapter(child: _BannerMarca()),
-              const SliverToBoxAdapter(child: _SelosHonestos()),
               SliverToBoxAdapter(
                 child: _FaqESuporte(
                   suporteWhatsapp: config.suporteWhatsapp,
@@ -759,83 +756,6 @@ class _ComoFunciona extends StatelessWidget {
           style: AppTypography.footnote.copyWith(color: AppColors.textoSuave),
         ),
       ],
-    );
-  }
-}
-
-class _BannerMarca extends StatelessWidget {
-  const _BannerMarca();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.margem, AppSpacing.secao, AppSpacing.margem, 0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSpacing.raioCard),
-        child: SizedBox(
-          height: 120,
-          width: double.infinity,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.asset(
-                assetHeroAguaBokeh,
-                fit: BoxFit.cover,
-                semanticLabel: 'Água Cristalins',
-                errorBuilder: (_, _, _) => const ColoredBox(color: AppColors.aqua),
-              ),
-              ColoredBox(color: AppColors.navy.withValues(alpha: 0.35)),
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  child: Text(
-                    'Da fonte ao Rio',
-                    style: AppTypography.title3.copyWith(color: AppColors.sobrePrimaria),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SelosHonestos extends StatelessWidget {
-  const _SelosHonestos();
-
-  @override
-  Widget build(BuildContext context) {
-    const selos = [
-      'Água mineral natural',
-      'Entrega no município do Rio',
-      'Pagamento com Pix',
-    ];
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.margem, AppSpacing.sm, AppSpacing.margem, 0),
-      child: Wrap(
-        spacing: AppSpacing.xs,
-        runSpacing: AppSpacing.xs,
-        children: [
-          for (final s in selos)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.menta,
-                borderRadius: BorderRadius.circular(AppSpacing.raioChip),
-              ),
-              child: Text(
-                s,
-                style: AppTypography.caption1.copyWith(
-                  color: AppColors.navy,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-        ],
-      ),
     );
   }
 }

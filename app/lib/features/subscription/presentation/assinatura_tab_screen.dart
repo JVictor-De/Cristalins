@@ -73,14 +73,14 @@ class _AssinaturaTabScreenState extends State<AssinaturaTabScreen> {
   Widget build(BuildContext context) {
     if (_carregando) {
       return const Scaffold(
-        backgroundColor: AppColors.gelo,
+        backgroundColor: AppColors.fundo,
         body: Center(child: Carregando()),
       );
     }
 
     if (_erro) {
       return Scaffold(
-        backgroundColor: AppColors.gelo,
+        backgroundColor: AppColors.fundo,
         body: EstadoVazio(
           icone: Icons.cloud_off_outlined,
           titulo: 'Falha ao carregar',
@@ -93,7 +93,7 @@ class _AssinaturaTabScreenState extends State<AssinaturaTabScreen> {
 
     if (!_temAssinatura) {
       return Scaffold(
-        backgroundColor: AppColors.gelo,
+        backgroundColor: AppColors.fundo,
         body: EmptyAssinatura(
           onMontarSacola: () => widget.onIrProdutos(),
           onVerAguas: () => widget.onIrProdutos(categoria: Categoria.aguas),

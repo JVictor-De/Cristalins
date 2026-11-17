@@ -14,7 +14,7 @@ import '../../catalog/presentation/sacola_controller.dart';
 import '../../shell/presentation/shell_screen.dart';
 import '../data/onboarding_prefs.dart';
 
-/// 1ª abertura: 1 CTA filled + links + Pular.
+/// 1ª abertura: 1 CTA filled + links terciários + Pular.
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
@@ -94,22 +94,18 @@ class OnboardingScreen extends StatelessWidget {
                     rotulo: 'Assinar Water Protein',
                     onPressed: () => _assinarWp(context),
                   ),
-                  if (temAguas) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white70),
-                        minimumSize: const Size.fromHeight(AppSpacing.alturaBotao),
-                      ),
+                  if (temAguas)
+                    TextButton(
                       onPressed: () => _marcarEIr(
                         context,
                         AppRoutes.shell,
                         args: const ShellArgs(abaInicial: 1, categoriaInicial: Categoria.aguas),
                       ),
-                      child: const Text('Ver todas as águas'),
+                      child: Text(
+                        'Ver todas as águas',
+                        style: AppTypography.subheadline.copyWith(color: Colors.white),
+                      ),
                     ),
-                  ],
                   TextButton(
                     onPressed: () => _marcarEIr(context, AppRoutes.quiz),
                     child: Text(

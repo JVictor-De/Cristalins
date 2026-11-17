@@ -113,6 +113,9 @@ void main() {
   testWidgets('home vazia sem Ver todos', (tester) async {
     final mocks = Mocks();
     when(() => mocks.assinaturas.listar()).thenAnswer((_) async => <Assinatura>[]);
+    await tester.binding.setSurfaceSize(const Size(390, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final sacola = controller();
     await tester.pumpWidget(
       MaterialApp(
         theme: buildAppTheme(),
@@ -122,7 +125,7 @@ void main() {
               value: const AppConfig(ambiente: Ambiente.dev, apiUrl: '', suporteWhatsapp: ''),
             ),
             Provider.value(value: mocks.dependencias),
-            ChangeNotifierProvider<SacolaController>.value(value: controller()),
+            ChangeNotifierProvider<SacolaController>.value(value: sacola),
           ],
           child: Scaffold(
             body: HomeScreen(
@@ -133,8 +136,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Ver todos'), findsNothing);
     expect(find.text('Catálogo indisponível'), findsOneWidget);
@@ -155,6 +157,25 @@ void main() {
 
     expect(find.byType(BotaoPrincipal), findsOneWidget);
     expect(find.text('Ver todas as águas'), findsNothing);
+  });
+
+  testWidgets('onboarding com águas: link terciário, sem OutlinedButton', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildAppTheme(),
+        home: ChangeNotifierProvider<SacolaController>.value(
+          value: controller(produtos: [agua, wp]),
+          child: const OnboardingScreen(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(BotaoPrincipal), findsOneWidget);
+    expect(find.text('Ver todas as águas'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, 'Ver todas as águas'), findsOneWidget);
+    expect(find.byType(OutlinedButton), findsNothing);
+    expect(find.text('Descobrir meu kit'), findsOneWidget);
   });
 
   testWidgets('catálogo longo (>12) mostra busca e chips WP/Fiber', (tester) async {

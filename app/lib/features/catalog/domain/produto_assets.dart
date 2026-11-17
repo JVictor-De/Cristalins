@@ -59,3 +59,7 @@ String nomeCardProduto(Produto produto) {
 
 /// Foto de rótulo WP (opcional; preferir em login/onboarding).
 const assetProteinDetalhe = 'assets/images/produtos/protein.png';
+
+/// Garrafa da cena de impacto na PDP: muda por SKU; fundo/respingo ficam fixos.
+String garrafaDaCenaImpacto(String codigo) =>
+    assetDoProduto(codigo) ?? assetProteinDetalhe;

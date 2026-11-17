@@ -45,7 +45,7 @@ class CardKit extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSpacing.raioCard),
-            boxShadow: AppSombras.card,
+            boxShadow: AppSombras.cardGrade,
             color: AppColors.superficie,
             border: Border.all(color: AppColors.linha),
           ),

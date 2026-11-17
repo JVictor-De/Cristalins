@@ -28,14 +28,24 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final s = context.read<SacolaController>();
-      final p = s.produtoDe(widget.codigo);
-      if (p != null) {
-        setState(() => _qtd = s.quantidadeDe(p.codigo).clamp(s.passo(p), 9999));
-        if (_qtd == 0) setState(() => _qtd = s.passo(p));
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _sincronizarQuantidade());
+  }
+
+  @override
+  void didUpdateWidget(covariant ProdutoScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.codigo != widget.codigo) {
+      _sincronizarQuantidade();
+    }
+  }
+
+  void _sincronizarQuantidade() {
+    if (!mounted) return;
+    final s = context.read<SacolaController>();
+    final p = s.produtoDe(widget.codigo);
+    if (p == null) return;
+    // `clamp(passo, …)` já cobre qtd 0 → mínimo = passo da embalagem.
+    setState(() => _qtd = s.quantidadeDe(p.codigo).clamp(s.passo(p), 9999));
   }
 
   @override
@@ -44,9 +54,9 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
     final p = sacola.produtoDe(widget.codigo);
     if (p == null) {
       return Scaffold(
-        backgroundColor: AppColors.gelo,
+        backgroundColor: AppColors.fundo,
         appBar: AppBar(
-          backgroundColor: AppColors.gelo,
+          backgroundColor: AppColors.fundo,
           title: const Text('Produto'),
         ),
         body: sacola.carregandoCatalogo
@@ -88,16 +98,17 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
 
     final passo = sacola.passo(p);
     final caixas = (_qtd / passo).round();
-    final asset = assetDoProduto(p.codigo) ?? assetProdutoWaterProtein;
+    final asset = garrafaDaCenaImpacto(p.codigo);
     final fundo = switch (p.codigo) {
       'WP500' => AppColors.lima,
       'FF500' => AppColors.amareloFlow.withValues(alpha: 0.35),
       _ => AppColors.aqua,
     };
     final totalTxt = sacola.simulacao?.total.formatado;
+    final usaImpacto = usaCenaImpactoAgua(p.codigo);
 
     return Scaffold(
-      backgroundColor: AppColors.gelo,
+      backgroundColor: AppColors.fundo,
       body: Column(
         children: [
           Expanded(
@@ -105,23 +116,20 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
               slivers: [
                 SliverAppBar(
                   expandedHeight: MediaQuery.sizeOf(context).height *
-                      (usaCenaImpactoAgua(p.codigo)
+                      (usaImpacto
                           ? (sacola.temItens ? 0.40 : 0.46)
                           : (sacola.temItens ? 0.36 : 0.42)),
                   pinned: true,
-                  backgroundColor:
-                      usaCenaImpactoAgua(p.codigo) ? const Color(0xFF43BDE6) : fundo,
+                  backgroundColor: usaImpacto ? AppColors.impactoAgua : fundo,
                   flexibleSpace: FlexibleSpaceBar(
-                    background: usaCenaImpactoAgua(p.codigo)
+                    background: usaImpacto
                         ? CenaImpactoAgua(
-                            garrafaAsset: usaCopyImpactoMineral(p.codigo)
-                                ? null
-                                : (p.codigo == 'WP500'
-                                    ? assetProdutoWaterProtein
-                                    : asset),
+                            // Fundo + respingo iguais; só a garrafa muda por SKU.
+                            key: ValueKey('impacto-${p.codigo}'),
+                            garrafaAsset: asset,
                             mostrarCopyMarca: usaCopyImpactoMineral(p.codigo),
                             rotuloSemantico: usaCopyImpactoMineral(p.codigo)
-                                ? null
+                                ? '${p.nome}. Garrafa toca a água com um respingo.'
                                 : '${p.nome}. Cena Cristalins com respingo.',
                           )
                         : Padding(

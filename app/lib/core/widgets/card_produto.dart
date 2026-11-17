@@ -54,7 +54,7 @@ class CardProduto extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.superficie,
             borderRadius: raio,
-            boxShadow: AppSombras.card,
+            boxShadow: AppSombras.cardGrade,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

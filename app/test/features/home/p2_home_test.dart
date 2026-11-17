@@ -110,6 +110,8 @@ void main() {
     expect(find.textContaining('%'), findsNothing);
     expect(find.text('Sem gás'), findsOneWidget);
     expect(find.text('Galão'), findsOneWidget);
+    // Banner/selo promocionais removidos na crítica de hierarquia.
+    expect(find.text('Da fonte ao Rio'), findsNothing);
 
     await tester.scrollUntilVisible(
       find.text('Como funciona'),
@@ -117,6 +119,8 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Como funciona'), findsOneWidget);
+    // Copy leve permanece em "Como funciona"; não é o banner full-bleed.
+    expect(find.textContaining('Da fonte ao Rio'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Perguntas frequentes'),

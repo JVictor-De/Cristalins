@@ -32,6 +32,19 @@ abstract final class AppColors {
   /// Família Water Protein (hero / chip / PDP) — não parede de card na grade.
   static const lima = Color(0xFFDCF078);
 
+  /// Gradiente do hero WP (amostrado do mock: TL `#ECF7DB`, TR `#DAF0AC`, BR `#D1E99C`).
+  static const heroGradienteInicio = Color(0xFFECF7DB);
+  static const heroGradienteMeio = Color(0xFFE0F2B8);
+  static const heroGradienteFim = Color(0xFFD1E99C);
+
+  /// Tipografia / CTA no hero WP (sobre lima).
+  static const heroNavy = Color(0xFF063A52);
+  static const heroInk = Color(0xFF0B2E3F);
+  static const heroVerdeTexto = Color(0xFF34503F);
+
+  /// Fundo da cena de impacto (PDP águas minerais).
+  static const impactoAgua = Color(0xFF43BDE6);
+
   /// Rótulo WP — média da tampa em `protein.webp` (rótulo iluminado ~`#9DE365`).
   static const verdeProtein = Color(0xFF95CC3C);
 
