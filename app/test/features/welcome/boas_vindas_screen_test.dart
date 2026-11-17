@@ -134,6 +134,92 @@ void main() {
     expect(find.byKey(const ValueKey('onboarding-garrafa-wp')), findsOneWidget);
   });
 
+  testWidgets('onboarding usa garrafa transparente + respingo + marca e scrim meio-termo', (
+    tester,
+  ) async {
+    expect(
+      assetOnboardingGarrafaWp,
+      'assets/images/produtos/cristalins-garrafa-transparente.png',
+    );
+    expect(assetImpactoRespingo, 'assets/images/brand/impacto/impacto-respingo.webp');
+    expect(assetImpactoMarca, 'assets/images/brand/impacto/impacto-marca.webp');
+
+    await tester.pumpWidget(_app(mocks));
+    await tester.pumpAndSettle();
+
+    String? pathOf(Image image) {
+      final provider = image.image;
+      return switch (provider) {
+        AssetImage(:final assetName) => assetName,
+        ExactAssetImage(:final assetName) => assetName,
+        _ => null,
+      };
+    }
+
+    final garrafa = tester.widget<Image>(find.byKey(const ValueKey('onboarding-garrafa-wp')));
+    expect(pathOf(garrafa), assetOnboardingGarrafaWp);
+
+    final respingo = tester.widget<Image>(find.byKey(const ValueKey('onboarding-respingo')));
+    expect(pathOf(respingo), assetImpactoRespingo);
+
+    final marca = tester.widget<Image>(find.byKey(const ValueKey('onboarding-marca')));
+    expect(pathOf(marca), assetImpactoMarca);
+
+    // Marca e respingo escalam a partir da mesma caixa da garrafa (proporção relativa).
+    final garrafaBox = tester.getSize(find.byKey(const ValueKey('onboarding-garrafa-wp')));
+    final marcaBox = tester.getSize(find.byKey(const ValueKey('onboarding-marca')));
+    expect(marcaBox.width, greaterThan(garrafaBox.width));
+    expect(marcaBox.width, lessThan(garrafaBox.width * 1.6));
+
+    final scrim = find.byWidgetPredicate(
+      (w) => w is ColoredBox && w.color == Colors.black.withValues(alpha: 0.40),
+    );
+    expect(scrim, findsOneWidget);
+  });
+
+  testWidgets('onboarding com reduzir animações: marca já revelada', (tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: Size(390, 844),
+          disableAnimations: true,
+        ),
+        child: _app(mocks),
+      ),
+    );
+    await tester.pump(); // post-frame aplica t=1
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.byKey(const ValueKey('onboarding-marca')), findsOneWidget);
+    expect(find.byKey(const ValueKey('onboarding-garrafa-wp')), findsOneWidget);
+    expect(find.byKey(const ValueKey('onboarding-respingo')), findsOneWidget);
+
+    final marcaBox = tester.getSize(find.byKey(const ValueKey('onboarding-marca')));
+    final garrafaBox = tester.getSize(find.byKey(const ValueKey('onboarding-garrafa-wp')));
+    expect(marcaBox.width, greaterThan(garrafaBox.width));
+  });
+
+  testWidgets('onboarding anima impacto PDP: respingo some no início e aparece no fim', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(mocks));
+    await tester.pump(); // inicia o controller
+    await tester.pump(const Duration(milliseconds: 200)); // t≈0.11 — splash ainda 0
+
+    Opacity? opacityDoRespingo() {
+      final img = find.byKey(const ValueKey('onboarding-respingo'));
+      final opacities = find.ancestor(of: img, matching: find.byType(Opacity));
+      if (opacities.evaluate().isEmpty) return null;
+      return tester.widget<Opacity>(opacities.first);
+    }
+
+    expect(opacityDoRespingo()?.opacity, 0);
+
+    await tester.pumpAndSettle();
+    expect(opacityDoRespingo()?.opacity, 1);
+    expect(find.byKey(const ValueKey('onboarding-marca')), findsOneWidget);
+  });
+
   testWidgets('tema usa Inter, plataforma iOS e azulMarca como primária', (tester) async {
     await tester.pumpWidget(_app(mocks));
     await tester.pumpAndSettle();

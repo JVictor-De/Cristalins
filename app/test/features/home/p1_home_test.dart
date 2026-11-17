@@ -171,8 +171,8 @@ void main() {
     );
     expect(SacolaCopy.faltaFreteGratis(gratis), isNull);
     expect(
-      SacolaCopy.freteGratisAcima(250),
-      'Frete grátis acima de ${const Dinheiro(25000).formatado} por entrega',
+      SacolaCopy.freteGratisAcima(50),
+      'Frete grátis acima de ${const Dinheiro(5000).formatado} por entrega',
     );
   });
 

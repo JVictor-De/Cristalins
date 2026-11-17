@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
@@ -81,9 +82,18 @@ ThemeData buildAppTheme() {
   );
 }
 
-/// Rolagem elástica também no Android, sem brilho de overscroll.
+/// Rolagem elástica no Android + arraste com mouse/trackpad na web (carrosséis).
 class AppScrollBehavior extends MaterialScrollBehavior {
   const AppScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => const {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.unknown,
+      };
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) =>

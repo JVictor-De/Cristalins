@@ -28,8 +28,8 @@ export const UE_MINIMA = 12;
 export const UE_MINIMA_EMPRESA = 48;
 export const UE_MAXIMA = 120;
 export const PESO_MAXIMO_KG = 60;
-/** RN18: frete grátis quando o subtotal passa deste valor. */
-export const FRETE_GRATIS_ACIMA = 250;
+/** RN18: frete grátis quando o subtotal passa deste valor (assinatura). */
+export const FRETE_GRATIS_ACIMA = 50;
 /** RN04: produtos que podem dividir a mesma caixa de 6. */
 export const CAIXA_MISTA = { codigos: ['WP500', 'FF500'], tamanho: 6 };
 /** Trava entre ciclos: ±10% do unitário anterior. */

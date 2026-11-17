@@ -90,7 +90,7 @@ describe('cr-3-gateway — Pix, webhook e jobs (FakeGateway)', () => {
       janela: 'MANHA',
       formaPagamento: 'PIX',
     } as never);
-    expect(r.ciclo.valor).toBe(213.19);
+    expect(r.ciclo.valor).toBe(203.29);
     expect(r.ciclo.pix?.copiaECola).toMatch(/^00020126FAKE-PIX-/);
     expect(r.ciclo.pix?.qrCodeBase64).toBeTruthy();
     expect(prisma.pagamentos).toHaveLength(1);

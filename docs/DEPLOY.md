@@ -71,7 +71,9 @@ Homologação vive no projeto Coolify **InfraestruturaCompartilhada** (mesmo ser
 | Arg | Uso |
 | --- | --- |
 | `API_URL` | Base da API **sem** `/api/v1`. Demo: `https://apicristalins.peladeiro.cloud` |
-| `SUPORTE_WHATSAPP` | Opcional; vazio até haver número |
+| `SUPORTE_WHATSAPP` | Opcional; default fictício `5521999999999` no app/Dockerfile; override com o número real |
+| `URL_TERMOS` | Default `https://cristalins.peladeiro.cloud/termos.html` (`app/web/termos.html`) |
+| `URL_PRIVACIDADE` | Default `https://cristalins.peladeiro.cloud/privacidade.html` |
 
 ### Variáveis da API no painel (só os **nomes** — sem valores neste doc)
 
@@ -208,7 +210,7 @@ APK típico:
 3. Ou copie o APK e abra no aparelho.
 4. `applicationId`: `br.com.cristalins.assinatura.hml` (instala ao lado de `dev` / `prod`).
 
-Opcional: `--dart-define=SUPORTE_WHATSAPP=` (vazio até haver número; não inventar).
+Opcional: `--dart-define=SUPORTE_WHATSAPP=5521…` (default fictício no código; trocar pelo real).
 
 ### Publicar no site (banner “Baixar app”)
 

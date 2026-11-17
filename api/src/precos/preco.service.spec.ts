@@ -47,17 +47,17 @@ describe('PrecoService', () => {
   const total = (e: EntradaCalculo) => service.calcular(e).total.toFixed(2);
 
   describe('casos do Anexo', () => {
-    it('CT01: 24 WP500, Trimestral, 2 ciclos pagos, verão, Zona Sul → 219,09', () => {
+    it('CT01: 24 WP500, Trimestral, 2 ciclos pagos, verão, Zona Sul → 209,19 (frete grátis)', () => {
       const e = entrada(cesta({ WP500: 24 }), {
         data: VERAO,
         plano: Plano.TRIMESTRAL,
         ciclosPagosEmDia: 2,
         taxaZona: ZONA_SUL,
       });
-      expect(total(e)).toBe('219.09');
+      expect(total(e)).toBe('209.19');
     });
 
-    it('CT01 com o ciclo anterior dentro da trava continua 219,09', () => {
+    it('CT01 com o ciclo anterior dentro da trava continua 209,19 (frete grátis acima de R$ 50)', () => {
       const e = entrada(cesta({ WP500: 24 }), {
         data: VERAO,
         plano: Plano.TRIMESTRAL,
@@ -65,12 +65,12 @@ describe('PrecoService', () => {
         taxaZona: ZONA_SUL,
         precosAnteriores: new Map([[P.WP500.id, dec('8.39')]]),
       });
-      expect(total(e)).toBe('219.09');
+      expect(total(e)).toBe('209.19');
     });
 
-    it('CT02: mesma cesta, 1º ciclo, entrega em novembro → 213,19', () => {
+    it('CT02: mesma cesta, 1º ciclo, entrega em novembro → 203,29 (frete grátis)', () => {
       const e = entrada(cesta({ WP500: 24 }), { plano: Plano.TRIMESTRAL, taxaZona: ZONA_SUL });
-      expect(total(e)).toBe('213.19');
+      expect(total(e)).toBe('203.29');
     });
 
     it('caso A (preço do quiz): 12 WP500, Flex, sem frete → 118,80', () => {
@@ -226,7 +226,7 @@ describe('PrecoService', () => {
   });
 
   describe('frete, créditos e arredondamento', () => {
-    it('CT13: subtotal acima de R$ 250 após descontos → frete zero', () => {
+    it('CT13: subtotal acima de R$ 50 após descontos → frete zero', () => {
       // 24 WP500 + 6 FF500 (30 UE, −8%): 218,592 + 49,128 = 267,72
       const r = service.calcular(entrada(cesta({ WP500: 24, FF500: 6 }), { taxaZona: dec('19.90') }));
       expect(r.subtotal.toFixed(2)).toBe('267.72');
@@ -234,11 +234,11 @@ describe('PrecoService', () => {
       expect(r.total.toFixed(2)).toBe('267.72');
     });
 
-    it('subtotal de exatamente R$ 250 ainda paga frete (só acima de 250 é grátis)', () => {
-      // 10 × 25,00 (10 UE: sem desconto de volume) = 250,00
-      const exato = { ...P.WP500, id: 'x', precoBase: dec('25'), precoPiso: dec(1) };
+    it('subtotal de exatamente R$ 50 ainda paga frete (só acima de 50 é grátis)', () => {
+      // 10 × 5,00 (10 UE: sem desconto de volume) = 50,00
+      const exato = { ...P.WP500, id: 'x', precoBase: dec('5'), precoPiso: dec(1) };
       const r = service.calcular(entrada([{ produto: exato, quantidade: 10 }], { taxaZona: ZONA_SUL }));
-      expect(r.subtotal.equals(dec(250))).toBe(true);
+      expect(r.subtotal.equals(dec(50))).toBe(true);
       expect(r.frete.toFixed(2)).toBe('9.90');
     });
 

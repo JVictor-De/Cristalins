@@ -26,6 +26,10 @@ const assetHeroSustentabilidade = 'assets/images/hero/sustentabilidade-v2-fast.w
 const assetProdutoWaterProtein = 'assets/images/produtos/protein.png';
 const assetProdutoAguaMineral = 'assets/images/produtos/ams500.png';
 
+/// Garrafa WP transparente do onboarding/boas-vindas (PNG anexado).
+const assetOnboardingGarrafaWp =
+    'assets/images/produtos/cristalins-garrafa-transparente.png';
+
 /// Cena de impacto (site `#inicio` → PDP água mineral).
 const assetImpactoFundo = 'assets/images/brand/impacto/impacto-fundo.webp';
 const assetImpactoGarrafa = 'assets/images/brand/impacto/impacto-garrafa.webp';

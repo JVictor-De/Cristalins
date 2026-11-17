@@ -8,7 +8,9 @@ FROM ghcr.io/cirruslabs/flutter:stable AS build
 WORKDIR /app
 
 ARG API_URL=https://apicristalins.peladeiro.cloud
-ARG SUPORTE_WHATSAPP=
+ARG SUPORTE_WHATSAPP=5521999999999
+ARG URL_TERMOS=https://cristalins.peladeiro.cloud/termos.html
+ARG URL_PRIVACIDADE=https://cristalins.peladeiro.cloud/privacidade.html
 
 COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
@@ -20,7 +22,9 @@ RUN flutter build web \
     --base-href=/ \
     --no-wasm-dry-run \
     --dart-define=API_URL=${API_URL} \
-    --dart-define=SUPORTE_WHATSAPP=${SUPORTE_WHATSAPP}
+    --dart-define=SUPORTE_WHATSAPP=${SUPORTE_WHATSAPP} \
+    --dart-define=URL_TERMOS=${URL_TERMOS} \
+    --dart-define=URL_PRIVACIDADE=${URL_PRIVACIDADE}
 
 # ---------- runtime ----------
 FROM nginx:1.27-alpine AS runtime

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cristalins_assinatura/core/config/app_config.dart';
 import 'package:cristalins_assinatura/core/network/api_erro.dart';
 import 'package:cristalins_assinatura/core/routes.dart';
 import 'package:cristalins_assinatura/core/widgets/botao_principal.dart';
@@ -116,6 +117,16 @@ void main() {
         findsOneWidget,
       );
       verifyNever(() => m.auth.cadastrar(any()));
+    });
+
+    testWidgets('termos e privacidade são links (sem “em breve”) com URLs default', (tester) async {
+      await abrir(tester);
+      await tester.pump(const Duration(seconds: 2)); // splash timer residual
+      expect(find.textContaining('(links em breve)'), findsNothing);
+      expect(find.textContaining('termos de uso'), findsOneWidget);
+      expect(find.textContaining('política de privacidade'), findsOneWidget);
+      expect(AppConfig.urlTermos, isNotEmpty);
+      expect(AppConfig.urlPrivacidade, isNotEmpty);
     });
 
     testWidgets('mostra carregando no botão, envia e segue para o quiz', (tester) async {

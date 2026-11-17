@@ -195,9 +195,9 @@ class ItemSimulado {
   final Dinheiro precoUnitario;
 }
 
-/// RN18: frete grátis acima de R$ 250 por entrega (= `FRETE_GRATIS_ACIMA` da API).
+/// RN18: frete grátis acima de R$ 50 por entrega (= `FRETE_GRATIS_ACIMA` da API).
 /// Só fallback de exibição antes da 1ª simulação; o valor vigente vem de [Simulacao].
-const kFreteGratisAcimaPadrao = 250;
+const kFreteGratisAcimaPadrao = 50;
 
 /// Resultado de `POST /precos/simular` (tudo calculado pela API).
 class Simulacao {

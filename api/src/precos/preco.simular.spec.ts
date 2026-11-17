@@ -44,23 +44,23 @@ describe('PrecoService.simular', () => {
     expect(r).toMatchObject({
       dataEntrega: '2026-11-16',
       subtotal: 203.29,
-      frete: 9.9,
+      frete: 0,
       creditos: 0,
-      total: 213.19,
+      total: 203.29,
       ue: 24,
       fatores: { volume: 8, compromisso: 7, fidelidade: 0, demanda: 0, cupom: 0 },
       zona: { id: ZONA_SUL, nome: 'Zona Sul' },
       ueMinima: 12,
       ueMaxima: 120,
       faltaUeParaMinimo: 0,
-      freteGratisAcima: 250,
-      faltaParaFreteGratis: 46.71,
+      freteGratisAcima: 50,
+      faltaParaFreteGratis: 0,
       economiaPlano: 15.3,
     });
     expect(r.detalhePreco).toEqual([
       { fator: 'VOLUME', percentual: -8 },
       { fator: 'COMPROMISSO', percentual: -7 },
-      { fator: 'FRETE', valor: 9.9 },
+      { fator: 'FRETE', valor: 0 },
     ]);
     expect(r.itens).toEqual([
       { produto: 'WP500', quantidade: 24, precoBase: 9.9, precoUnitario: 8.47, regra: null },
@@ -89,15 +89,15 @@ describe('PrecoService.simular', () => {
       enderecoId: 'e-qualquer',
     }));
     expect(r).toMatchObject({
-      total: 213.19,
+      total: 203.29,
       fatores: { fidelidade: 0 },
       zona: { id: ZONA_SUL, nome: 'Zona Sul' },
       economiaPlano: 15.3,
-      faltaParaFreteGratis: 46.71,
+      faltaParaFreteGratis: 0,
     });
   });
 
-  it('plano Flex: economiaPlano 0; freteGratisAcima 250', async () => {
+  it('plano Flex: economiaPlano 0; freteGratisAcima 50', async () => {
     const r = await service.simular(CLIENTE, dto({
       plano: 'FLEX',
       zonaId: ZONA_SUL,
@@ -105,14 +105,15 @@ describe('PrecoService.simular', () => {
     }));
     expect(r).toMatchObject({
       subtotal: 118.8,
+      frete: 0,
       economiaPlano: 0,
       ueMinima: 12,
-      freteGratisAcima: 250,
-      faltaParaFreteGratis: 131.2,
+      freteGratisAcima: 50,
+      faltaParaFreteGratis: 0,
     });
   });
 
-  it('CT01 pela API: ciclo anterior com 2 ciclos pagos em dia, verão, Zona Sul → 219,09', async () => {
+  it('CT01 pela API: ciclo anterior com 2 ciclos pagos em dia, verão, Zona Sul → 209,19 (frete grátis)', async () => {
     prisma.ciclos.push(
       { id: 'c1', assinaturaId: 'a1', numero: 1, assinatura: { clienteId: CLIENTE }, itens: [] },
       {
@@ -132,7 +133,7 @@ describe('PrecoService.simular', () => {
       dto({ zonaId: ZONA_SUL, dataEntrega: '2027-01-15', cicloAnteriorId: 'c2' }),
     );
     expect(r.fatores).toEqual({ volume: 8, compromisso: 7, fidelidade: 2, demanda: 5, cupom: 0 });
-    expect(r.total).toBe(219.09);
+    expect(r.total).toBe(209.19);
   });
 
   it('fidelidade só conta ciclo pago até o vencimento (data de São Paulo)', async () => {
@@ -178,7 +179,7 @@ describe('PrecoService.simular', () => {
   it('frete pela zona do endereço do próprio cliente', async () => {
     prisma.enderecos.push({ id: 'e1', clienteId: CLIENTE, zonaId: 'zona-Zona-Oeste' });
     const r = await service.simular(CLIENTE, dto({ enderecoId: 'e1', plano: 'FLEX', itens: [{ produto: 'WP500', quantidade: 12 }] }));
-    expect(r).toMatchObject({ frete: 19.9, total: 138.7, zona: { nome: 'Zona Oeste' } });
+    expect(r).toMatchObject({ frete: 0, total: 118.8, zona: { nome: 'Zona Oeste' } });
   });
 
   it('endereço de outro cliente → SEM_PERMISSAO; zona inexistente → NAO_ENCONTRADO', async () => {
@@ -195,7 +196,7 @@ describe('PrecoService.simular', () => {
     expect(r.detalhePreco.find((x) => x.fator === 'FRETE')).toBeUndefined();
   });
 
-  it('CT13 pela API: subtotal acima de R$ 250 → frete zero mesmo com zona', async () => {
+  it('CT13 pela API: subtotal acima de R$ 50 → frete zero mesmo com zona', async () => {
     const r = await service.simular(
       CLIENTE,
       dto({ plano: 'FLEX', zonaId: ZONA_SUL, itens: [{ produto: 'WP500', quantidade: 24 }, { produto: 'FF500', quantidade: 6 }] }),

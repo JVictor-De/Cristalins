@@ -588,6 +588,11 @@ class _TermosLinha extends StatelessWidget {
   final bool erro;
   final VoidCallback onToggle;
 
+  Future<void> _abrirUrlLegal(BuildContext context, String url, String falha) async {
+    final abriu = await context.read<Dependencias>().links.abrir(url);
+    if (!abriu && context.mounted) mostrarAviso(context, falha, erro: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     final termosUrl = AppConfig.urlTermos;
@@ -625,7 +630,11 @@ class _TermosLinha extends StatelessWidget {
                         recognizer: termosUrl.isEmpty
                             ? null
                             : (TapGestureRecognizer()
-                              ..onTap = () => context.read<Dependencias>().links.abrir(termosUrl)),
+                              ..onTap = () => _abrirUrlLegal(
+                                    context,
+                                    termosUrl,
+                                    'Não foi possível abrir os termos de uso.',
+                                  )),
                       ),
                       const TextSpan(text: ' e a '),
                       TextSpan(
@@ -637,7 +646,11 @@ class _TermosLinha extends StatelessWidget {
                         recognizer: privUrl.isEmpty
                             ? null
                             : (TapGestureRecognizer()
-                              ..onTap = () => context.read<Dependencias>().links.abrir(privUrl)),
+                              ..onTap = () => _abrirUrlLegal(
+                                    context,
+                                    privUrl,
+                                    'Não foi possível abrir a política de privacidade.',
+                                  )),
                       ),
                       if (termosUrl.isEmpty || privUrl.isEmpty)
                         TextSpan(

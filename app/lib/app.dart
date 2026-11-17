@@ -89,10 +89,7 @@ class _CristalinsAppState extends State<CristalinsApp> {
                 final rota = AppRoutes.gerar(settings);
                 return [
                   rota ??
-                      MaterialPageRoute<void>(
-                        settings: settings,
-                        builder: (_) => const SizedBox.shrink(),
-                      ),
+                      AppRoutes.gerar(const RouteSettings(name: AppRoutes.shell))!,
                 ];
               },
         onGenerateRoute: AppRoutes.gerar,

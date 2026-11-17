@@ -100,7 +100,7 @@ export class SimulacaoResponse {
   @ApiProperty({ example: 0, description: 'UE que faltam para atingir o mínimo (0 se a cesta já passa)' })
   faltaUeParaMinimo: number;
 
-  @ApiProperty({ example: 250, description: 'Subtotal acima do qual o frete é grátis (RN18)' })
+  @ApiProperty({ example: 50, description: 'Subtotal acima do qual o frete é grátis (RN18)' })
   freteGratisAcima: number;
 
   @ApiProperty({ example: 46.71, description: 'Quanto falta no subtotal para frete grátis (0 se já passou)' })

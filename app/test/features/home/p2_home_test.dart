@@ -119,7 +119,7 @@ void main() {
     expect(find.text('Da fonte ao Rio'), findsNothing);
     // P1.2: hint de frete grátis above-the-fold (RN18).
     expect(
-      find.text('Frete grátis acima de ${const Dinheiro(25000).formatado} por entrega'),
+      find.text('Frete grátis acima de ${const Dinheiro(5000).formatado} por entrega'),
       findsOneWidget,
     );
     // P1.1: “Alterar” não duplicado no chip CEP; logo no eixo da tela.

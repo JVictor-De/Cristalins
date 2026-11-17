@@ -68,18 +68,18 @@ describe('AssinaturasService', () => {
   });
 
   describe('criar', () => {
-    it('CT02: grava AGUARDANDO_PAGAMENTO, o 1º ciclo de R$ 213,19, CalculoPreco e ItemCiclo (sem Pix)', async () => {
+    it('CT02: grava AGUARDANDO_PAGAMENTO, o 1º ciclo de R$ 203,29, CalculoPreco e ItemCiclo (sem Pix)', async () => {
       const r = await service.criar(ANA, dto());
       expect(r).toMatchObject({
         status: 'AGUARDANDO_PAGAMENTO',
         proximaEntrega: '2026-11-16',
         plano: 'TRIMESTRAL',
         fimCompromisso: '2027-02-16',
-        ciclo: { numero: 1, valor: 213.19, vencimento: '2026-11-14', dataEntrega: '2026-11-16' },
+        ciclo: { numero: 1, valor: 203.29, vencimento: '2026-11-14', dataEntrega: '2026-11-16' },
         detalhePreco: [
           { fator: 'VOLUME', percentual: -8 },
           { fator: 'COMPROMISSO', percentual: -7 },
-          { fator: 'FRETE', valor: 9.9 },
+          { fator: 'FRETE', valor: 0 },
         ],
       });
       expect(r.ciclo).not.toHaveProperty('pix');
@@ -87,7 +87,7 @@ describe('AssinaturasService', () => {
 
       const calculo = prisma.calculos[0];
       expect(calculo.subtotal.toString()).toBe('203.29');
-      expect(calculo.valorFinal.toString()).toBe('213.19');
+      expect(calculo.valorFinal.toString()).toBe('203.29');
       expect(prisma.itensCiclo).toEqual([
         expect.objectContaining({ produtoId: 'prod-WP500', quantidade: 24 }),
       ]);
@@ -104,7 +104,7 @@ describe('AssinaturasService', () => {
 
     it('cupom entra no preço e conta um uso', async () => {
       const r = await service.criar(ANA, dto({ plano: 'FLEX', itens: [{ produto: 'WP500', quantidade: 12 }], cupom: 'BEMVINDO10' }));
-      expect(r.ciclo.valor).toBe(116.82); // 106,92 + 9,90
+      expect(r.ciclo.valor).toBe(106.92); // frete grátis acima de R$ 50
       expect(r.cupom).toBe('BEMVINDO10');
       expect(prisma.cupons[0].usos).toBe(1);
     });
@@ -149,7 +149,7 @@ describe('AssinaturasService', () => {
       expect((await service.listar(ANA)).map((x) => x.id)).toEqual([a.id]);
       const ciclos = await service.ciclos(ANA, a.id);
       expect(ciclos).toEqual([
-        expect.objectContaining({ numero: 1, status: 'AGENDADO', valor: 213.19, dataEntrega: '2026-11-16', itens: [{ produto: 'WP500', quantidade: 24, precoUnitario: 8.47 }] }),
+        expect.objectContaining({ numero: 1, status: 'AGENDADO', valor: 203.29, dataEntrega: '2026-11-16', itens: [{ produto: 'WP500', quantidade: 24, precoUnitario: 8.47 }] }),
       ]);
     });
   });
@@ -201,7 +201,7 @@ describe('AssinaturasService', () => {
       const r = await service.alterar(ANA, a.id, { itens: [{ produto: 'WP500', quantidade: 12 }], plano: 'FLEX' });
       expect(r.aplicadaAPartirDe).toEqual({ numero: 1, dataEntrega: '2026-11-16' });
       const [c1] = await service.ciclos(ANA, a.id);
-      expect(c1).toMatchObject({ valor: 128.7, itens: [{ produto: 'WP500', quantidade: 12, precoUnitario: 9.9 }] });
+      expect(c1).toMatchObject({ valor: 118.8, itens: [{ produto: 'WP500', quantidade: 12, precoUnitario: 9.9 }] });
       expect(r.fimCompromisso).toBeNull();
     });
 
@@ -243,7 +243,7 @@ describe('AssinaturasService', () => {
       const r = await service.alterar(ANA, a.id, { enderecoId: END_ANA_NORTE });
       expect(r.aplicadaAPartirDe).toEqual({ numero: 1, dataEntrega: '2026-11-17' });
       const [c1] = await service.ciclos(ANA, a.id);
-      expect(c1).toMatchObject({ dataEntrega: '2026-11-17', valor: 216.19 }); // 203,29 + 12,90
+      expect(c1).toMatchObject({ dataEntrega: '2026-11-17', valor: 203.29 }); // frete grátis acima de R$ 50
     });
 
     it('RN26: cobrança vencida bloqueia alterar a cesta, mas não a janela', async () => {

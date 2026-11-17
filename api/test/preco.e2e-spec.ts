@@ -172,19 +172,19 @@ describe('Catálogo, quiz e preço (e2e)', () => {
         .expect(200);
       expect(r.body).toMatchObject({
         subtotal: 203.29,
-        frete: 9.9,
-        total: 213.19,
+        frete: 0,
+        total: 203.29,
         fatores: { fidelidade: 0 },
         ueMinima: 12,
         ueMaxima: 120,
         faltaUeParaMinimo: 0,
-        freteGratisAcima: 250,
-        faltaParaFreteGratis: 46.71,
+        freteGratisAcima: 50,
+        faltaParaFreteGratis: 0,
         economiaPlano: 15.3,
       });
     });
 
-    it('CT02: 200 com total 213,19 e detalhe no formato do Anexo', async () => {
+    it('CT02: 200 com total 203,29 (frete grátis acima de R$ 50) e detalhe no formato do Anexo', async () => {
       const r = await http()
         .post('/api/v1/precos/simular')
         .set(autenticado())
@@ -192,15 +192,15 @@ describe('Catálogo, quiz e preço (e2e)', () => {
         .expect(200);
       expect(r.body).toMatchObject({
         subtotal: 203.29,
-        frete: 9.9,
-        total: 213.19,
+        frete: 0,
+        total: 203.29,
         economiaPlano: 15.3,
-        freteGratisAcima: 250,
+        freteGratisAcima: 50,
       });
       expect(r.body.detalhePreco).toEqual([
         { fator: 'VOLUME', percentual: -8 },
         { fator: 'COMPROMISSO', percentual: -7 },
-        { fator: 'FRETE', valor: 9.9 },
+        { fator: 'FRETE', valor: 0 },
       ]);
     });
 
@@ -235,7 +235,7 @@ describe('Catálogo, quiz e preço (e2e)', () => {
       expect(r.body.codigo).toBe('EMBALAGEM_INVALIDA');
     });
 
-    it('CT13: subtotal acima de R$ 250 → frete 0', async () => {
+    it('CT13: subtotal acima de R$ 50 → frete 0', async () => {
       const r = await http()
         .post('/api/v1/precos/simular')
         .set(autenticado())

@@ -23,7 +23,7 @@ API e Sentry **só** por dart-define (nunca hardcoded):
 ```text
 --dart-define=API_URL=https://<dominio-api-prod>
 --dart-define=SENTRY_DSN=<dsn>          # opcional até haver projeto Sentry
---dart-define=SUPORTE_WHATSAPP=         # vazio até haver número; não inventar
+--dart-define=SUPORTE_WHATSAPP=5521…   # default fictício no app; trocar pelo real na loja
 ```
 
 ---
@@ -84,7 +84,7 @@ API: símbolos/source maps não se aplicam da mesma forma; erros vão via `@sent
 | Passo | Ação | Status |
 | --- | --- | --- |
 | Conta | Pessoal (CPF) **ou** organização (CNPJ + D-U-N-S). **Não inventar** CNPJ/D-U-N-S neste doc | **pendente** (João / Cristalins) |
-| Ficha | Nome, descrição, ícone, prints, classificação etária (**18+**), formulário de segurança de dados, política de privacidade (URL pública) | **pendente** |
+| Ficha | Nome, descrição, ícone, prints, classificação etária (**18+**), formulário de segurança de dados, política de privacidade (URL pública) | URL hml: `https://cristalins.peladeiro.cloud/privacidade.html` — restante da ficha **pendente** |
 | Trilha **interna** | Subir o AAB; testadores do time | **pendente** |
 | Teste **fechado** | Se conta **pessoal** criada após 13/11/2023: ≥ **12 testadores inscritos** por **14 dias** seguidos antes de pedir produção ([política Google](https://support.google.com/googleplay/android-developer/answer/14151465)). Recrutar **15+** para não perder a contagem se alguém sair. Conta **organização** não tem essa exigência | **pendente** (se pessoal) |
 | Produção | Pedir acesso à produção após o fechado (se aplicável) | **pendente** |

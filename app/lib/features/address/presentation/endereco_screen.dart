@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/dependencias.dart';
+import '../../../core/formatacao.dart';
 import '../../../core/intents/navegacao_nativa.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
@@ -14,6 +15,7 @@ import '../../../core/widgets/estados.dart';
 import '../../../core/widgets/secao_agrupada.dart';
 import '../../../core/widgets/tela_titulo_grande.dart';
 import '../../auth/domain/validadores.dart';
+import '../../catalog/domain/catalogo.dart';
 import '../../subscription/domain/assinatura.dart';
 import '../data/endereco_repository.dart';
 import '../domain/endereco.dart';
@@ -288,7 +290,7 @@ class _ConteudoState extends State<_Conteudo> {
                       cabecalho: 'Endereço',
                       rodape:
                           '${c.cep!.zona.nome}: entrega ${c.cep!.zona.diasLegiveis}, taxa de ${c.cep!.zona.taxa.formatado} '
-                          '(grátis acima de R\$ 250).',
+                          '(grátis acima de ${Dinheiro.daApi(kFreteGratisAcimaPadrao).formatado}).',
                       children: [
                         LinhaLista(
                           titulo: c.cep!.logradouro,

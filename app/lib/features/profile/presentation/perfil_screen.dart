@@ -60,11 +60,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
 
   Future<void> _abrirWhatsApp(AppConfig config) async {
-    final n = config.suporteWhatsapp;
-    if (n.isEmpty) return;
+    final url = config.urlWhatsApp();
+    if (url == null) return;
     HapticFeedback.selectionClick();
-    final digitos = n.replaceAll(RegExp(r'\D'), '');
-    await context.read<Dependencias>().links.abrir('https://wa.me/$digitos');
+    final abriu = await context.read<Dependencias>().links.abrir(url);
+    if (!abriu && mounted) {
+      mostrarAviso(context, 'Não conseguimos abrir o WhatsApp agora.', erro: true);
+    }
   }
 
   Future<void> _abrirCep() async {
@@ -385,6 +387,12 @@ class _BlocoSuporteSobre extends StatelessWidget {
   final VoidCallback onCep;
   final VoidCallback onSite;
 
+  Future<void> _abrirUrlLegal(BuildContext context, String url, String falha) async {
+    HapticFeedback.selectionClick();
+    final abriu = await context.read<Dependencias>().links.abrir(url);
+    if (!abriu && context.mounted) mostrarAviso(context, falha, erro: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     final termosOk = AppConfig.urlTermos.isNotEmpty;
@@ -396,7 +404,7 @@ class _BlocoSuporteSobre extends StatelessWidget {
         Text('Suporte', style: AppTypography.headline.copyWith(color: AppColors.navy)),
         const SizedBox(height: AppSpacing.xs),
         _Linha(icone: Icons.help_outline, titulo: 'Ajuda e perguntas frequentes', onTap: onFaq),
-        if (config.suporteWhatsapp.isNotEmpty)
+        if (config.suporteWhatsappDigitos.isNotEmpty)
           _Linha(icone: Icons.chat_outlined, titulo: 'Fale conosco no WhatsApp', onTap: onWhatsApp),
         _Linha(
           icone: Icons.location_on_outlined,
@@ -413,7 +421,11 @@ class _BlocoSuporteSobre extends StatelessWidget {
           subtitulo: termosOk ? null : 'Em breve',
           habilitado: termosOk,
           onTap: termosOk
-              ? () => context.read<Dependencias>().links.abrir(AppConfig.urlTermos)
+              ? () => _abrirUrlLegal(
+                    context,
+                    AppConfig.urlTermos,
+                    'Não foi possível abrir os termos de uso.',
+                  )
               : null,
         ),
         _Linha(
@@ -422,7 +434,11 @@ class _BlocoSuporteSobre extends StatelessWidget {
           subtitulo: privOk ? null : 'Em breve',
           habilitado: privOk,
           onTap: privOk
-              ? () => context.read<Dependencias>().links.abrir(AppConfig.urlPrivacidade)
+              ? () => _abrirUrlLegal(
+                    context,
+                    AppConfig.urlPrivacidade,
+                    'Não foi possível abrir a política de privacidade.',
+                  )
               : null,
         ),
         _Linha(

@@ -148,7 +148,7 @@ fator = (1 − 0,08) × (1 − 0,07) × (1 − 0,02) × (1 + 0,05) × (1 − 0)
 - Preço base WP500 = **9,90**; piso = **7,50**  
 - Unitário = `max(9,90 × fator, piso)` ≈ **8,716…** (sem arredondar ainda)  
 - Subtotal = 24 × unitário ≈ **209,186**  
-- Frete Zona Sul = **9,90** (subtotal ≤ 250)  
+- Frete Zona Sul = **9,90** (subtotal ≤ 50)  
 - Total = `max(0, subtotal + frete − créditos)`, arredondamento meio-para-cima 2 casas → **219,09**
 
 Evidência automatizada: `api/src/precos/preco.service.spec.ts` e `preco.simular.spec.ts` (`fatores: { volume: 8, compromisso: 7, fidelidade: 2, demanda: 5, cupom: 0 }`, `total: 219.09`).

@@ -7,6 +7,7 @@ import 'package:cristalins_assinatura/core/widgets/card_produto.dart';
 import 'package:cristalins_assinatura/features/catalog/domain/catalogo.dart';
 import 'package:cristalins_assinatura/features/catalog/presentation/sacola_controller.dart';
 import 'package:cristalins_assinatura/features/home/presentation/home_screen.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -128,6 +129,7 @@ void main() {
         ],
         child: MaterialApp(
           theme: buildAppTheme(),
+          scrollBehavior: const AppScrollBehavior(),
           home: MediaQuery(
             data: const MediaQueryData(size: Size(390, 1600), disableAnimations: true),
             child: Scaffold(
@@ -159,6 +161,66 @@ void main() {
     final pontos = find.descendant(of: indicador, matching: find.byType(AnimatedContainer));
     expect(pontos.evaluate().length, inInclusiveRange(2, 4));
     expect(pontos.evaluate().length, lessThan(_seed.length));
+  });
+
+  test('AppScrollBehavior aceita mouse/trackpad (web desktop)', () {
+    const behavior = AppScrollBehavior();
+    expect(behavior.dragDevices, contains(PointerDeviceKind.mouse));
+    expect(behavior.dragDevices, contains(PointerDeviceKind.trackpad));
+    expect(behavior.dragDevices, contains(PointerDeviceKind.touch));
+  });
+
+  testWidgets('carrossel Home rola na horizontal (offset > 0 após drag)', (tester) async {
+    await montarHome(tester);
+
+    final listaHorizontal = find.descendant(
+      of: find.byKey(const ValueKey('carrossel-home')),
+      matching: find.byWidgetPredicate(
+        (w) => w is ListView && w.scrollDirection == Axis.horizontal,
+      ),
+    );
+    expect(listaHorizontal, findsOneWidget);
+
+    final scrollable = find.descendant(of: listaHorizontal, matching: find.byType(Scrollable));
+    final estado = tester.state<ScrollableState>(scrollable);
+    expect(estado.position.maxScrollExtent, greaterThan(0), reason: 'catálogo curto demais p/ rolar');
+    expect(estado.position.pixels, 0);
+
+    await tester.drag(listaHorizontal, const Offset(-240, 0));
+    await tester.pumpAndSettle();
+
+    expect(estado.position.pixels, greaterThan(0), reason: 'drag horizontal não moveu o carrossel');
+  });
+
+  testWidgets('carrossel Home rola com scroll de mouse/trackpad (web)', (tester) async {
+    await montarHome(tester);
+
+    final listaHorizontal = find.descendant(
+      of: find.byKey(const ValueKey('carrossel-home')),
+      matching: find.byWidgetPredicate(
+        (w) => w is ListView && w.scrollDirection == Axis.horizontal,
+      ),
+    );
+    final scrollable = find.descendant(of: listaHorizontal, matching: find.byType(Scrollable));
+    final estado = tester.state<ScrollableState>(scrollable);
+    expect(
+      ScrollConfiguration.of(tester.element(listaHorizontal)).dragDevices,
+      containsAll([PointerDeviceKind.mouse, PointerDeviceKind.trackpad]),
+    );
+    expect(estado.position.pixels, 0);
+
+    // Web desktop: wheel/trackpad → PointerScrollEvent (não só drag).
+    final centro = tester.getCenter(listaHorizontal);
+    await tester.sendEventToBinding(
+      PointerScrollEvent(position: centro, scrollDelta: const Offset(280, 0)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      estado.position.pixels,
+      greaterThan(0),
+      reason: 'scroll horizontal com mouse/trackpad não moveu o carrossel',
+    );
   });
 
   testWidgets('P0.4/P0.5: nomes curtos + pack do seed nos cards', (tester) async {

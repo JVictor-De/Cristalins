@@ -42,6 +42,7 @@ abstract final class AppRoutes {
 
   static Route<Object?>? gerar(RouteSettings settings) {
     final args = settings.arguments;
+    // Fallbacks sem `arguments`: cold-start de Activities AP2 / deep link incompleto.
     final Widget? tela = switch (settings.name) {
       splash => const SplashScreen(),
       onboarding => const OnboardingScreen(),
@@ -54,17 +55,24 @@ abstract final class AppRoutes {
       cadastroLogin => const CadastroLoginScreen(),
       esqueciSenha => const EsqueciSenhaScreen(),
       redefinirSenha when args is String => RedefinirSenhaScreen(email: args),
+      redefinirSenha => const EsqueciSenhaScreen(),
       quiz => const QuizScreen(),
       resultado when args is String => ResultadoScreen(recomendacaoId: args),
+      resultado => const QuizScreen(),
       catalogo when args is AlteracaoDeCesta => CatalogoScreen(alteracao: args),
       catalogo => CatalogoScreen(pedido: args is PedidoAssinatura ? args : null),
       produto when args is String => ProdutoScreen(codigo: args),
+      produto => const CatalogoScreen(),
       sacola => const SacolaScreen(),
       endereco when args is PedidoAssinatura => EnderecoScreen(pedido: args),
+      endereco => const SacolaScreen(),
       planoPagamento when args is PedidoAssinatura => PlanoPagamentoScreen(pedido: args),
+      planoPagamento => const SacolaScreen(),
       aguardandoPagamento when args is AssinaturaCriada => AguardandoPagamentoScreen(criada: args),
+      aguardandoPagamento => const MinhaAssinaturaScreen(),
       minhaAssinatura => MinhaAssinaturaScreen(assinaturaId: args is String ? args : null),
       ocorrencia when args is PedidoOcorrencia => OcorrenciaScreen(pedido: args),
+      ocorrencia => const MinhaAssinaturaScreen(),
       _ => null,
     };
     if (tela == null) return null;

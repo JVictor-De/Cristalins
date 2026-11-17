@@ -216,13 +216,18 @@ class _Conteudo extends StatelessWidget {
     if (alterou == true) await c.carregar();
   }
 
-  Future<void> _whatsapp(BuildContext context, String numero) async {
+  Future<void> _whatsapp(BuildContext context, AppConfig config) async {
     HapticFeedback.selectionClick();
-    final digitos = numero.replaceAll(RegExp(r'\D'), '');
-    final texto = Uri.encodeComponent('Olá! Preciso de ajuda com a minha assinatura Cristalins.');
-    final abriu = await context.read<Dependencias>().links.abrir(
-      'https://wa.me/$digitos?text=$texto',
+    final url = config.urlWhatsApp(
+      texto: 'Olá! Preciso de ajuda com a minha assinatura Cristalins.',
     );
+    if (url == null) {
+      if (context.mounted) {
+        mostrarAviso(context, 'O número de suporte ainda não foi configurado.');
+      }
+      return;
+    }
+    final abriu = await context.read<Dependencias>().links.abrir(url);
     if (!abriu && context.mounted) {
       mostrarAviso(context, 'Não conseguimos abrir o WhatsApp agora.', erro: true);
     }
@@ -289,7 +294,8 @@ class _Conteudo extends StatelessWidget {
 
     final selo = seloDoStatus(a.status);
     final proximo = c.proximoCiclo;
-    final numero = context.read<AppConfig>().suporteWhatsapp;
+    final config = context.read<AppConfig>();
+    final numero = config.suporteWhatsappDigitos;
     final secundario = AppTypography.body.copyWith(color: AppColors.textoSecundario);
     final podeAlterar = !a.cancelada && !c.executando;
 
@@ -440,7 +446,7 @@ class _Conteudo extends StatelessWidget {
                             context,
                             'O número de suporte ainda não foi configurado.',
                           )
-                        : () => _whatsapp(context, numero),
+                        : () => _whatsapp(context, config),
                   ),
                 ],
               ),

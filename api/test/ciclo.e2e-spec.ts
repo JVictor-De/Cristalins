@@ -96,17 +96,17 @@ describe('Endereço, assinatura e ciclos (e2e)', () => {
       formaPagamento: 'PIX',
     });
 
-    it('CT02: POST /assinaturas → 201 AGUARDANDO_PAGAMENTO com ciclo de 213,19 e Pix (cr-3)', async () => {
+    it('CT02: POST /assinaturas → 201 AGUARDANDO_PAGAMENTO com ciclo de 203,29 e Pix (cr-3)', async () => {
       const ana = await entrar('ana@exemplo.com', '52998224725');
       const r = await http().post('/api/v1/assinaturas').set(bearer(ana)).send(corpo(await enderecoEm(ana))).expect(201);
       expect(r.body).toMatchObject({
         status: 'AGUARDANDO_PAGAMENTO',
         proximaEntrega: '2026-11-16',
-        ciclo: { numero: 1, valor: 213.19, vencimento: '2026-11-14' },
+        ciclo: { numero: 1, valor: 203.29, vencimento: '2026-11-14' },
         detalhePreco: [
           { fator: 'VOLUME', percentual: -8 },
           { fator: 'COMPROMISSO', percentual: -7 },
-          { fator: 'FRETE', valor: 9.9 },
+          { fator: 'FRETE', valor: 0 },
         ],
       });
       expect(r.body.ciclo.pix).toEqual({ copiaECola: expect.any(String), qrCodeBase64: expect.any(String) });

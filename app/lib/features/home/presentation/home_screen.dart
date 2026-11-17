@@ -8,6 +8,7 @@ import '../../../core/network/api_erro.dart';
 import '../../../core/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/botao_sacola_badge.dart';
 import '../../../core/widgets/card_proxima_entrega.dart';
@@ -129,9 +130,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _abrirWhatsApp(AppConfig config) async {
-    final n = config.suporteWhatsapp;
-    if (n.isEmpty) return;
-    await context.read<Dependencias>().links.abrir('https://wa.me/$n');
+    final url = config.urlWhatsApp();
+    if (url == null) return;
+    HapticFeedback.selectionClick();
+    final abriu = await context.read<Dependencias>().links.abrir(url);
+    if (!abriu && mounted) {
+      mostrarAviso(context, 'Não conseguimos abrir o WhatsApp agora.', erro: true);
+    }
   }
 
   @override
@@ -233,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SliverToBoxAdapter(
                 child: _FaqESuporte(
-                  suporteWhatsapp: config.suporteWhatsapp,
+                  suporteWhatsapp: config.suporteWhatsappDigitos,
                   onWhatsApp: () => _abrirWhatsApp(config),
                 ),
               ),
@@ -644,25 +649,28 @@ class _CarrosselProdutosState extends State<_CarrosselProdutos> {
 
     final filtros = Padding(
       padding: const EdgeInsets.fromLTRB(AppSpacing.margem, 0, AppSpacing.margem, AppSpacing.sm),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (final f in FiltroHomeCarrossel.values) ...[
-              ChipCategoria(
-                rotulo: f.rotulo,
-                selecionado: widget.filtro == f,
-                onTap: () {
-                  widget.onFiltro(f);
-                  if (_scroll.hasClients) {
-                    _scroll.jumpTo(0);
-                  }
-                  setState(() => _pagina = 0);
-                },
-              ),
-              const SizedBox(width: AppSpacing.xs),
+      child: ScrollConfiguration(
+        behavior: const AppScrollBehavior(),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (final f in FiltroHomeCarrossel.values) ...[
+                ChipCategoria(
+                  rotulo: f.rotulo,
+                  selecionado: widget.filtro == f,
+                  onTap: () {
+                    widget.onFiltro(f);
+                    if (_scroll.hasClients) {
+                      _scroll.jumpTo(0);
+                    }
+                    setState(() => _pagina = 0);
+                  },
+                ),
+                const SizedBox(width: AppSpacing.xs),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -674,14 +682,17 @@ class _CarrosselProdutosState extends State<_CarrosselProdutos> {
           filtros,
           SizedBox(
             height: 220,
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
-              scrollDirection: Axis.horizontal,
-              itemCount: 3,
-              separatorBuilder: (_, _) => const SizedBox(width: _gap),
-              itemBuilder: (_, _) => const SkeletonCard(
-                altura: AppSpacing.alturaBlocoProduto,
-                largura: AppSpacing.larguraBlocoProduto,
+            child: ScrollConfiguration(
+              behavior: const AppScrollBehavior(),
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
+                scrollDirection: Axis.horizontal,
+                itemCount: 3,
+                separatorBuilder: (_, _) => const SizedBox(width: _gap),
+                itemBuilder: (_, _) => const SkeletonCard(
+                  altura: AppSpacing.alturaBlocoProduto,
+                  largura: AppSpacing.larguraBlocoProduto,
+                ),
               ),
             ),
           ),
@@ -739,27 +750,32 @@ class _CarrosselProdutosState extends State<_CarrosselProdutos> {
           filtros,
           SizedBox(
             height: alturaCard,
-            child: ListView.separated(
-              controller: _scroll,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
-              scrollDirection: Axis.horizontal,
-              itemCount: lista.length,
-              separatorBuilder: (_, _) => const SizedBox(width: _gap),
-              itemBuilder: (context, i) {
-                final p = lista[i];
-                return SizedBox(
-                  width: larguraCard,
-                  child: CardProduto(
-                    produto: p,
-                    quantidade: sacola.quantidadeDe(p.codigo),
-                    passo: sacola.passo(p),
-                    onAbrir: () =>
-                        Navigator.of(context).pushNamed(AppRoutes.produto, arguments: p.codigo),
-                    onAdicionar: () => sacola.adicionarPasso(p),
-                    onAlterar: (q) => sacola.alterar(p.codigo, q),
-                  ),
-                );
-              },
+            // ScrollConfiguration local: garante mouse/trackpad mesmo se o tema
+            // ancestral mudar (web desktop).
+            child: ScrollConfiguration(
+              behavior: const AppScrollBehavior(),
+              child: ListView.separated(
+                controller: _scroll,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margem),
+                scrollDirection: Axis.horizontal,
+                itemCount: lista.length,
+                separatorBuilder: (_, _) => const SizedBox(width: _gap),
+                itemBuilder: (context, i) {
+                  final p = lista[i];
+                  return SizedBox(
+                    width: larguraCard,
+                    child: CardProduto(
+                      produto: p,
+                      quantidade: sacola.quantidadeDe(p.codigo),
+                      passo: sacola.passo(p),
+                      onAbrir: () =>
+                          Navigator.of(context).pushNamed(AppRoutes.produto, arguments: p.codigo),
+                      onAdicionar: () => sacola.adicionarPasso(p),
+                      onAlterar: (q) => sacola.alterar(p.codigo, q),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           if (_paginas > 1) ...[

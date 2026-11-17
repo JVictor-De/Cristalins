@@ -13,6 +13,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/botao_principal.dart';
 import '../../../core/widgets/detalhe_preco_expansivel.dart';
+import '../../../core/widgets/estados.dart';
 import '../../../core/widgets/stepper_quantidade.dart';
 import '../../../core/widgets/sugestao_minimo_cesta.dart';
 import '../../shell/presentation/shell_screen.dart';
@@ -624,22 +625,33 @@ class _ResumoEstimado extends StatelessWidget {
   }
 }
 
-/// P3.3: Termos / Privacidade quando configurados (`--dart-define`); sem URL, nada.
+/// P3.3: Termos / Privacidade (URLs default em `AppConfig`; override via dart-define).
 class _LinksLegais extends StatelessWidget {
   const _LinksLegais();
+
+  Future<void> _abrir(BuildContext context, String url, String falha) async {
+    final abriu = await context.read<Dependencias>().links.abrir(url);
+    if (!abriu && context.mounted) mostrarAviso(context, falha, erro: true);
+  }
 
   @override
   Widget build(BuildContext context) {
     const termos = AppConfig.urlTermos;
     const privacidade = AppConfig.urlPrivacidade;
     if (termos.isEmpty && privacidade.isEmpty) return const SizedBox.shrink();
-    final links = context.read<Dependencias>().links;
     return Wrap(
       children: [
         if (termos.isNotEmpty)
-          TextButton(onPressed: () => links.abrir(termos), child: const Text('Termos de uso')),
+          TextButton(
+            onPressed: () => _abrir(context, termos, 'Não foi possível abrir os termos de uso.'),
+            child: const Text('Termos de uso'),
+          ),
         if (privacidade.isNotEmpty)
-          TextButton(onPressed: () => links.abrir(privacidade), child: const Text('Privacidade')),
+          TextButton(
+            onPressed: () =>
+                _abrir(context, privacidade, 'Não foi possível abrir a política de privacidade.'),
+            child: const Text('Privacidade'),
+          ),
       ],
     );
   }

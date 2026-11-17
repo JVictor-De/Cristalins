@@ -80,7 +80,7 @@ Cada item: **feito** (já coberto no repo / processo) ou **pendente** (depende d
 | 1 | Preços, pesos e validades **reais** da Cristalins no seed de produção | **pendente** | Pedir à Cristalins: `contato@cristalins.com.br` · `(14) 3523-1001`. Seed atual = valores didáticos do Anexo |
 | 2 | Conta Asaas de **produção** aprovada; chave e webhook configurados | **pendente** | João no painel Asaas + Coolify; não colar chave no repo |
 | 3 | Emissão de **NF-e de produto** definida | **pendente** | Asaas emite NFS-e; emissor de NF-e (ERP/contador) a confirmar com a Cristalins (`contato@cristalins.com.br`) |
-| 4 | Termos de uso e política de privacidade em **URL pública** | **pendente** | Domínio/páginas a definir com a Cristalins; RF04 exige aceite no cadastro |
+| 4 | Termos de uso e política de privacidade em **URL pública** | **feito** no repo | HTML em `app/web/`; URLs default no `AppConfig`. Publicar: deploy web hml. Revisão jurídica Cristalins + domínio prod **pendente** |
 | 5 | CT01–CT25 passando | **feito** (código/CI local) | Suites API/app cobrem os CTs; **reexecutar** em hml/prod antes do go-live (**pendente** operacional) |
 | 6 | Roteiro de aceite aprovado em **celular físico** | **pendente** | TalkBack + fluxo quiz → Pix → Minha assinatura no aparelho |
 | 7 | Backup e restauração **testados** | **pendente** | Seção 2 |

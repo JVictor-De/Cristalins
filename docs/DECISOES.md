@@ -7,7 +7,7 @@
 | Rubrica pede Activities e Intents nativos | Seguir Flutter: rotas nomeadas = passagem explícita; `url_launcher` / `share_plus` = Intents implícitas. Não reescrever em Kotlin. | Stack fechada no contexto; risco a confirmar com o professor |
 | Como serializar dinheiro no JSON | Número com 2 casas (ex.: `118.80`, `219.09`) no contrato Swagger; cálculo interno com `decimal.js` / `Decimal(10,2)` | Exemplos do Anexo são o contrato |
 | `applicationId` Android | `br.com.cristalins.assinatura`, `br.com.cristalins.assinatura.dev`, `br.com.cristalins.assinatura.hml` | Monólito não fixa; fila fecha assim |
-| Número do WhatsApp de suporte | `--dart-define=SUPORTE_WHATSAPP=` vazio até configuração; não inventar número | Contato comercial da marca não é o WhatsApp do app |
+| Número do WhatsApp de suporte | Default fictício `5521999999999` (HML/dev); override via `--dart-define=SUPORTE_WHATSAPP=` | Botão de suporte precisa funcionar em demo; número real da marca ainda não definido |
 | Download de `docs/flutter-rules.md` | URL `rules_10k.md` retornou 404; arquivo placeholder com o link | Não inventar regras oficiais; baixar de novo quando a URL existir |
 
 ## 2026-11-14 — Schema Prisma (`cr-0-prisma`)
@@ -96,7 +96,7 @@
 | Cabeçalho | AppBar + `LogoMarca`; sem `largeTitle` “Criar conta” | Título só na aba/CTA |
 | Explorar | Link discreto **abaixo** do CTA | Fora do miolo do form |
 | Destino pós-sucesso | `arguments: 'checkout'` → `pop` (sacola); senão quiz / minha assinatura | P5.7 |
-| Termos URL | Links só se `URL_TERMOS`/`URL_PRIVACIDADE`; senão “(links em breve)” | Não inventar URL |
+| Termos URL | Default `https://cristalins.peladeiro.cloud/termos.html` e `…/privacidade.html` (`AppConfig`); override via dart-define; vazio desliga links | Páginas em `app/web/*.html`; domínio do projeto (não inventar path em cristalins.com.br) |
 | Gates | OAuth/OTP/captcha/HIBP/analytics/IE/biometria | Documentados; não inventar |
 
 ## 2026-11-16 — Polimento UX pós-smoke P4 (`ux_polimento_pos_smoke`)
@@ -105,7 +105,7 @@
 | --- | --- | --- |
 | Título Perfil (aba shell) | `AppTypography.title3` (não `largeTitle`) | P4.1; alinha Sacola/shell |
 | CTA guest | “Entrar ou criar conta” navy + “Com e-mail e senha” | P4.2; sem Google/Apple/telefone |
-| Termos / privacidade | `URL_TERMOS` / `URL_PRIVACIDADE` dart-define; vazio = “Em breve” | Não inventar URL LGPD |
+| Termos / privacidade | HTML em `app/web/termos.html` e `privacidade.html`; URLs default no `AppConfig` + Dockerfile | URL pública no domínio hml; Play Store / LGPD |
 | Versão app | `AppConfig.versaoApp` default `0.1.0+1` (= pubspec) | Sem `package_info_plus` |
 | CEP no Perfil | Mesma sheet/`consultarCep` da Home | API já existe |
 | Logado: nome/foto/status | Planejado; copy honest até ligar `/clientes/me` na tela | P4.5 parcial |
@@ -219,7 +219,7 @@
 | Hero tipografia | `AppTypography.title1` (28) mobile / `largeTitle` (34) largo; linha `subheadline`/`body`; preço `title1`; apoio/chips `footnote` | P1.2: escala do DS (fim de 44/30/26/12,5 avulsos) |
 | “Mais vendido” | **Removido** (sem dado/footnote que sustente) | P1.2 + skill: claim sem fonte não entra |
 | Claims hero | “5 g de proteína” + “Com colágeno” (lote PDP). “0 açúcar” **removido** até rótulo confirmar “Zero açúcar” | Gate de rótulo do CONTEXTO |
-| Hint frete grátis | Abaixo do hero: “Frete grátis acima de R$ 250,00 por entrega” — limite = `simulacao.freteGratisAcima` ou `kFreteGratisAcimaPadrao` (RN18, = `FRETE_GRATIS_ACIMA` da API) | P1.2 above-the-fold; regra RN18 da spec, não frete inventado |
+| Hint frete grátis | Abaixo do hero: “Frete grátis acima de R$ 50,00 por entrega” — limite = `simulacao.freteGratisAcima` ou `kFreteGratisAcimaPadrao` (RN18, = `FRETE_GRATIS_ACIMA` da API) | P1.2 above-the-fold; regra RN18 da spec, não frete inventado |
 | Como funciona | Lista numerada vertical (círculo `heroNavy` 32 + título `headline` + apoio `subheadline`), sobre `AppColors.fundo` (faixa branca removida); copy “Flow Fiber” | P1.3 |
 | Rodapé “Da fonte ao Rio — água mineral natural” | **Removido** da seção | Seção cobre WP/FF; não misturar denominação “água mineral” com WP |
 | Chip “Funcionais” | Rótulo “Proteína e fibras” em `Categoria.funcionais` **e** `FiltroHomeCarrossel.funcionais` | P1.4; mesmo termo nas duas telas |
@@ -252,7 +252,7 @@
 | Descrição | Mantida a da API (`descricao`) — já honesta (“Cristalins com colágeno em garrafa de 500 ml.”); copy sugerida do rascunho trazia “Sem gás” não verificado | Não inventar claim |
 | Mistura WP+FF | Texto “Você pode montar a caixa de 6 com Water Protein e Flow Fiber — por isso a quantidade anda de 3 em 3.” **Sem** botão “Montar caixa” (não há ação dedicada) | P2.3: CTA só se a ação existir |
 | Tabela nutricional | **Gate**: sem asset/API → “Tabela nutricional, ingredientes e alergênicos: consulte o rótulo da embalagem.” (WP/FF). Nada de tabela inventada | P2.3 + “não inventar tabela fake” |
-| Frequência / frete | Linha “Frequência e plano você escolhe na sacola. Frete grátis acima de R$ 250,00 por entrega.” (RN18 via simulação ou `kFreteGratisAcimaPadrao`) | P2.4 “no próximo passo” |
+| Frequência / frete | Linha “Frequência e plano você escolhe na sacola. Frete grátis acima de R$ 50,00 por entrega.” (RN18 via simulação ou `kFreteGratisAcimaPadrao`) | P2.4 “no próximo passo” |
 | Snackbar | “Adicionado à sacola” / “Quantidade atualizada” + ação “Ver sacola” | Nomenclatura alinhada ao card |
 
 ## 2026-11-17 — P3 Sacola erro acionável + resumo (`dux-4-p3-sacola`)

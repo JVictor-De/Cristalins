@@ -212,7 +212,7 @@ void main() {
       );
       expect(f.links.abertos, isEmpty);
 
-      f = await abrir(tester, whatsapp: '5521999999999');
+      f = await abrir(tester, whatsapp: '+55 (21) 99999-9999');
       await tocar(tester, find.text('Falar com o suporte no WhatsApp'));
       expect(f.links.abertos.single, startsWith('https://wa.me/5521999999999'));
     });
